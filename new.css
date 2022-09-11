@@ -1,0 +1,9 @@
+.mkdf-tour-main-info-attr:before {
+    position: relative;
+    top: 2px;
+    content: "\4e";
+    font-family: ElegantIcons;
+    color: #2d1aff;
+    margin-right: 5px;
+    font-size: 14px;
+}

@@ -1,0 +1,13 @@
+.tp-loader.spinner1 {
+    width: 46px !important;
+    height: 50px !important;
+    margin-top: -23px !important;
+    margin-left: -25px !Important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    -webkit-animation: tp-rotateplane 1.2s infinite .2s cubic-bezier(0.215, 0.61, 0.355, 1) !important;
+    animation: tp-rotateplane 1.2s infinite .2s cubic-bezier(0.215, 0.61, 0.355, 1) !important;
+}
+
+
+/*styles*/
