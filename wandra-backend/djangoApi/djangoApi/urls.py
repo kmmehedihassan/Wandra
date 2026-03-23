@@ -19,7 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from django.conf.urls import url,include
+from django.urls import re_path as url, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^',include('EmployeeApp.urls')),

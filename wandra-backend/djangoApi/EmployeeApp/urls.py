@@ -1,5 +1,5 @@
-from django.conf.urls import url,include
-from django.conf.urls import url
+from django.urls import re_path as url, include
+from django.urls import re_path as url
 from EmployeeApp import views
 # from EmployeeApp.views import StudentsViewSet,ModulesViewSet
 from django.urls import path

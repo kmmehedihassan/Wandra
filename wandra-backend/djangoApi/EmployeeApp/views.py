@@ -1,4 +1,4 @@
-from turtle import title
+
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
@@ -119,7 +119,7 @@ class StudentsViewSet(APIView):
 
     def get(self,request,Id=0):
         print(Id)
-        if(Id is not None and Id is not 0):
+        if(Id is not None and Id != 0):
             student=Students.objects.filter(id=Id)
         else:    
             student = Students.objects.all()

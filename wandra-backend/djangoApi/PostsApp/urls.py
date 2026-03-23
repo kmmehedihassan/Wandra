@@ -1,5 +1,5 @@
-from django.conf.urls import url,include
-from django.conf.urls import url
+from django.urls import re_path as url, include
+from django.urls import re_path as url
 from PostsApp import views
 from django.conf.urls.static import static
 from django.conf import settings
