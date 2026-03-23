@@ -1,0 +1,40 @@
+*{
+	box-sizing: border-box;
+}
+.image{
+    width:100%;
+    filter: brightness(90%);
+    height: 635px;
+    margin-bottom: 30px;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 60%;
+    
+  }
+
+.centered h1{
+    color:white;
+    font-size:125px;
+    font-weight:bold;
+}
+
+.image_text{
+    font-size: 40px;
+    font-weight: bold;
+  
+    color: white;
+    position: absolute;
+    z-index: 999;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 40%;   
+    text-align: center;
+    width: 80%; 
+  }

@@ -1,0 +1,179 @@
+.search-tour-container {
+    background-color: #edeeed;
+    max-width: 250px;
+    min-height: 500px;
+    height: fit-content;
+    display: flex;
+    flex: 3;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+    padding: 20px;
+    top:15%;
+    position: sticky;
+}
+
+
+.search-tour-title {
+    font-size: 30px;
+    font-weight: 500;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-tour-items {
+    width: 200px;
+    padding: 5px;
+    padding-left: 10px;
+    background-color: white;
+    margin-top: 10px;
+    border: 2px solid lightgrey;
+    max-height: 52px;
+}
+
+.search-tour-item {
+    border: none;
+    width: 160px;
+    cursor: pointer;
+}
+
+.input-search-tour {
+    border: none;
+    width: 160px;
+    cursor: pointer;
+}
+
+.input-tour-destination {
+    border: none;
+    width: 160px;
+    cursor: pointer;
+}
+
+.tour-month-label {
+    width: 160px;
+    padding: 7px;
+    color: grey;
+}
+
+.search-tour-rating {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    color: gray;
+}
+
+.search-tour-rating-label {
+    margin-left: 10px;
+}
+
+
+.tour-dropdown {
+    user-select: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 200px;
+    padding: 5px;
+    padding-left: 10px;
+    background-color: white;
+    margin-top: 10px;
+    border: 2px solid lightgrey;
+    max-height: 52px;
+
+}
+
+.tour-dropdown .tour-dropdown-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    width: 160px;
+    padding: 7px;
+    color: grey;
+}
+
+.tour-dropdown .tour-dropdown-content {
+    position: absolute;
+    top: 110%;
+    left: 15% !important;
+    background: #fff;
+    box-shadow: 3px 3px 10px 6px rgba(0, 0, 0, 0.06);
+    color: #333;
+    width: 70%;
+    left: 0;
+    border-radius: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    z-index: 2;
+}
+
+.tour-dropdown .tour-dropdown-content .tour-dropdown-item {
+    padding: 1px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tour-dropdown .tour-dropdown-content .tour-dropdown-item:hover {
+    background: #e4e4e4;
+}
+
+.tour-dropdown-highlighted-item {
+    color: #ff681a;
+    font-weight: 500;
+}
+
+.tour-price-range {
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    width: 200px;
+    z-index: 1;
+}
+
+.tour-search-btn {
+    background-color: #ff681a;
+    color: white;
+    height: 52px;
+    width: 200px;
+    border: none;
+    border-radius: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-top: 20px;
+}
+
+.txt-link-to-hotel{
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: coral;
+    cursor: pointer;
+}
+
+.txt-link-to-hotel:hover{
+    opacity: 100%;
+    color: #ff681a;
+    transition: 0.3s;
+}
+
+.hotel-popover-msg{
+    position: absolute;
+    top: 44%;
+    right: 0;
+    min-width: 100%;
+    background-color: white;
+    color: #333;
+    font-size: 0.9rem;
+    padding: 15px;
+    border-radius: 5px;
+    width: 180px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    border: 2px solid coral;
+}
+

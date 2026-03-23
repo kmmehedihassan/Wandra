@@ -1,0 +1,25 @@
+/* @import url('https://fonts.googleapis.com/css?family=Allura'); */
+
+.image{
+    width: 100%;
+    filter:brightness(90%);
+    height: 635px;
+    margin-bottom: 30px;
+ }
+ 
+ .centered {
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     text-align: center;
+     width: 60%;
+     
+   }
+
+/* .text{
+    color: white;
+    font-family: Allura;
+    font-size: 125px;
+    font-weight: bold;
+} */

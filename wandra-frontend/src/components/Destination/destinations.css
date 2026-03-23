@@ -1,0 +1,218 @@
+*{
+	box-sizing: border-box;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 60%;
+}
+
+ .new_row{
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.image_container{
+  float: left;
+  position: relative;
+  height: 33rem;
+  width: 27%;
+  overflow: hidden;
+  border-radius: 2rem;
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-bottom: 16px; 
+}
+.image_container img{
+  width: 100%;
+  height: 600px;
+  display: flex;
+  filter: brightness(80%);
+  transition: transform .8s;
+}
+.image_container:hover img{
+  transform: scale(1.05);
+  filter: brightness(60%);
+}
+
+.image_text{
+  font-size: 40px;
+  font-weight: bold;
+
+  color: white;
+  position: absolute;
+  z-index: 999;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  top: 40%;   
+  text-align: center;
+  width: 80%; 
+}
+
+ .font {
+    font-family: 'Roboto';
+    font-style: italic;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.text_box{
+     /* background-color: darkmagenta; */
+  /* display: flex; */
+  float: left;
+  height: 600px;
+  width: 70%;
+  font-size: 20px;
+  justify-content: left;
+  font-weight: bolder;
+  padding-left: 30px;
+}
+.gallery{
+  height: 250px;
+  width: 250px;
+  float: left;
+  justify-content: center;
+  margin: 20px;
+}
+
+.side_container{
+    height: 600px;
+    width: 500px;
+    justify-content: right;
+}
+
+
+
+      /* Comment */
+
+
+
+button {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    font-size: 14px;
+    color: red; /* #DC582A; */
+    font-weight:bold;
+    padding: 4px 8px;
+    color: rgba(0, 0, 0, 0.85);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+button:hover,
+button:focus,
+button:active {
+    cursor: pointer;
+}
+.comment-thread {
+    width: 700px;
+    max-width: 100%;
+    margin: auto;
+    margin-left: 10px;
+    padding: 0 30px;
+    background-color: #fff;
+    border: 1px solid transparent; /* Removes margin collapse */
+}
+.m-0 {
+    margin: 0;
+}
+.sr-only {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Comment */
+
+.comment {
+    position: relative;
+    margin: 20px auto;
+}
+.comment-heading {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    font-size: 14px;
+}
+.comment-voting {
+    width: 20px;
+    height: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+.comment-voting button {
+    display: block;
+    width: 100%;
+    height: 50%;
+    padding: 0;
+    border: 0;
+    font-size: 10px;
+}
+.comment-info {
+    color: rgba(0, 0, 0, 0.5);
+    margin-left: 10px;
+}
+.comment-author {
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: bold;
+    text-decoration: none;
+}
+.comment-author:hover {
+    text-decoration: underline;
+}
+.replies {
+    margin-left: 20px;
+}
+
+/* Adjustments for the comment border links */
+
+.comment-border-link {
+    display: block;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 12px;
+    height: calc(100% - 50px);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    background-color: rgba(0, 0, 0, 0.1);
+    background-clip: padding-box;
+}
+.comment-border-link:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.comment-body {
+    padding: 0 20px;
+    padding-left: 28px;
+}
+.replies {
+    margin-left: 28px;
+}
+
+
+
+ /* Responsive layout - makes a two column-layout instead of four columns */
+@media screen and (max-width: 1180px) {
+  .column {
+    flex: 60%;
+    max-width: 40%;
+  }
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 640px) {
+  .column {
+    flex: 100%;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Akaya+Telivigala&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.side_container{
+    /* background-image: url(".\bg.jpg"); */
+    background-color: green;
+    /* background-image: url("\images\saintmartin.jpg");       green container */
+    height: 800px;
+    width: 30%;
+    float: right;
+    position: relative;
+    padding-left: 5%;
+   
+}
+
+ .main_bg{
+    /* background-color: black; */
+    max-width: 1280px;
+    height: 800px;
+    display: flex;
+    /* justify-content: right; */
+    /* align-items: center; */
+    margin: 0 auto;
+}
+
+
+.form{                                                 /*   black form */
+    width: 316px;
+    height: 600px;
+    background-color: black;
+    /* background-image: url("./sundarban.jpg"); */
+    z-index: -1;
+
+}
+
+.form-text{
+    text-align: center;
+    margin: 0 0 40px 0;
+}
+.form-text h1 span img{
+    margin: 0 10px;
+
+}
+.form-text h1{
+    /*color: #fff;*/
+    /* font-family: 'Akaya Telivigala', cursive; */
+    font-size: 40px;
+    margin-top: 20px;
+    font-weight: bolder;
+    text-align: right;
+    color: blue;
+}
+.form-text p{
+    /*color: #fff;*/
+    /* font-family: 'Akaya Telivigala', cursive; */
+    font-weight: bolder;
+    font-size: large;
+    color: yellow;
+}
+
+.main-form div{
+    margin-left: 48px;
+    width: 220px;
+    background-color: red;
+    align-self: center;
+    align-content: center;
+    ;
+    
+}
+.main-form div input {
+    width: 100%;
+    /* font-family: 'Akaya Telivigala', cursive; */
+    background: none;
+    border: 2px solid  #DC582A;
+    font-size: 20px;
+    /*color: #fff;*/
+    outline: none;
+    padding: 3px 0 3px 10px;
+    margin-top: 10px;
+}
+.main-form div select{
+    width: 104%;
+    /* font-family: 'Akaya Telivigala', cursive; */
+    background: none;
+    border: 2px solid  #DC582A;
+    font-size: 20px;
+    /*color: #fff;*/
+    outline: none;
+    padding: 3px 0 3px 10px;
+    margin-top: 10px;
+}
+.main-form div span{
+    width: 100%;
+    /* font-family: 'Akaya Telivigala', cursive; */
+    /*color: #fff;*/
+    font-size: 25px;
+}
+
+#submit{
+    width: 220px;
+    text-align: center;
+    justify-content: center;
+    color: white;
+}
+#submit input{
+    /* font-family: 'Akaya Telivigala', cursive; */
+    width: 120px;
+    background-color: white !important;
+    color: black !important;
+    transition: all .3s;
+}
+#submit input:hover{
+    /* font-family: 'Akaya Telivigala', cursive; */
+    width: 200px;
+    background-color: #DC582A !important;
+    color: #fff !important;
+}
+#submit input:active{
+    font-size: 19px;
+    background-color: rgb(46, 20, 5) !important;
+    color: #fff !important;
+}
+
+
+@media screen and (max-width:710px) {
+    .main-form{
+        text-align: center;
+    }
+}

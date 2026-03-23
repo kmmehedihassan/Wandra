@@ -1,0 +1,29 @@
+.edit-profile-container{
+    background-color: white;
+    width: 40%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    height: 80vh;
+}
+
+.info-row input{
+    width: 400px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+    padding: 5px;
+}
+.save-changes-section{
+    margin-bottom: 100px;
+}
+.save-changes-btn{
+    margin-top: 20px;
+    margin-bottom: 100px;
+    color: #444444;
+    float: right;
+}
+
+.save-changes-btn:hover{
+    color: teal;
+}

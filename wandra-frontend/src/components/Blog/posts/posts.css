@@ -1,0 +1,9 @@
+.posts {
+    flex: 9;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    align-content: space-between;
+    flex-wrap: nowrap;
+    margin: 20px;
+}

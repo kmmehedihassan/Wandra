@@ -1,0 +1,64 @@
+.book-tour-position{
+    position: absolute;
+    top: 125%;
+    right: 0%;
+}
+
+.main-container-tour{
+    width: 70vw;
+    padding-left: 82px;
+    margin-top: 65.4px;
+    text-align: left;
+    font-family: sans-serif;
+    font: Montserrat;
+}
+.title{
+   
+    font-size: 37px;
+    text-align: left;
+
+}
+.para{
+    font-size: 20px;
+    /* font-style: italic; */
+    color: #FF681A;
+}
+
+.desc_box{
+    font-size: 15px;
+    font-family: sans-serif;
+    font: Montserrat;
+}
+
+.subs{
+    height: 72px;
+    padding: 23px 0px;
+    border-bottom: black;
+    border-width: 5px;
+}
+.point{
+width: 281px;
+height: 25px;
+font-size: 17px;
+margin-left: 20px;
+text-align: left;
+float: left;
+font-weight: bold;
+
+margin: 0px !important;
+
+}
+.detail-tour-desc{
+height: 25px;
+width: 500px;
+text-align: left;
+float: right;
+}
+
+html{
+    margin: 0px !important;
+}
+
+.each-row{
+    display: flex;
+}

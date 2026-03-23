@@ -1,0 +1,75 @@
+.credit-card-container {
+  /* margin-top: 10%; */
+  margin-top: 0;
+  /* width: 30%; */
+  display: flex;
+  /* flex-direction: column; */
+  align-items: center;
+  justify-content: right;
+  /* position: sticky; */
+}
+
+.formDiv {
+  width: 400px;
+  padding: 20px;
+  /* border-radius: 10px; */
+  border: 2px solid #ddd;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* margin: 0 25px; */
+
+  /* -webkit-box-shadow: -1px 8px 15px 0px rgba(0, 0, 0, 0.44);
+  -moz-box-shadow: -1px 8px 15px 0px rgba(0, 0, 0, 0.44);
+  box-shadow: -1px 8px 15px 0px rgba(0, 0, 0, 0.44); */
+}
+
+.alert {
+  text-align: center;
+  /* margin-top: 10px; */
+  margin-bottom: 5px;
+  /* width: 80%; */
+  background-color: transparent;
+  color: #FF5722;
+  border: none;
+  padding: 0;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.creditCard {
+  margin-bottom: 7%;
+}
+
+/* .credit-card-form{
+  width: 80%;
+} */
+
+.credit-card-input-row input{
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    /* padding: 5px; */
+	cursor: pointer;
+  width: 100%;
+}
+
+#validateButton{
+  background: #1E88E5;
+  color: white;
+  border: none;
+  width: 100%;
+  height: 45px;
+}
+
+#validateButton:hover{
+  background: #1976D2;
+  color: white;
+  border: none;
+  width: 100%;
+  height: 45px;
+}

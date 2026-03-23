@@ -1,0 +1,605 @@
+import { useState, useEffect } from 'react';
+export const HotelRoomData=[
+  {
+      id:1,
+      type:"NORMAL",
+      price:8000,
+      children:0,
+      Adult:2
+  },
+  {
+      id:2,
+      type:"SINGLE DELUX",
+      price:9000,
+      children:1,
+      Adult:2
+  },
+  {
+      id:3,
+      type:"DOUBLE DELUX",
+      price:11000,
+      children:2,
+      Adult:2
+  },
+  {
+    id:21,
+    type:"NORMAL",
+    price:7500,
+    children:0,
+    Adult:2
+},
+{
+    id:22,
+    type:"SINGLE DELUX",
+    price:8000,
+    children:1,
+    Adult:2
+},
+{
+    id:23,
+    type:"DOUBLE DELUX",
+    price:9000,
+    children:2,
+    Adult:2
+},
+{
+  id:31,
+  type:"NORMAL",
+  price:9000,
+  children:0,
+  Adult:2
+},
+{
+  id:32,
+  type:"SINGLE DELUX",
+  price:10000,
+  children:1,
+  Adult:2
+},
+{
+  id:33,
+  type:"DOUBLE DELUX",
+  price:12000,
+  children:2,
+  Adult:2
+},
+{
+id:41,
+type:"NORMAL",
+price:5000,
+children:0,
+Adult:2
+},
+{
+id:42,
+type:"SINGLE DELUX",
+price:5500,
+children:1,
+Adult:2
+},
+{
+id:43,
+type:"DOUBLE DELUX",
+price:6500,
+children:2,
+Adult:2
+},
+{
+id:51,
+type:"NORMAL",
+price:9000,
+children:0,
+Adult:2
+},
+{
+id:52,
+type:"SINGLE DELUX",
+price:10000,
+children:1,
+Adult:2
+},
+{
+id:53,
+type:"DOUBLE DELUX",
+price:12000,
+children:2,
+Adult:2
+},
+{
+id:61,
+type:"NORMAL",
+price:9000,
+children:0,
+Adult:2
+},
+{
+id:62,
+type:"SINGLE DELUX",
+price:10000,
+children:1,
+Adult:2
+},
+{
+id:63,
+type:"DOUBLE DELUX",
+price:12000,
+children:2,
+Adult:2
+},
+{
+id:71,
+type:"NORMAL",
+price:12000,
+children:0,
+Adult:2
+},
+{
+id:72,
+type:"SINGLE DELUX",
+price:13000,
+children:1,
+Adult:2
+},
+{
+id:73,
+type:"DOUBLE DELUX",
+price:15000,
+children:2,
+Adult:2
+},
+{
+id:81,
+type:"NORMAL",
+price:15000,
+children:0,
+Adult:2
+},
+{
+id:82,
+type:"SINGLE DELUX",
+price:17000,
+children:1,
+Adult:2
+},
+{
+id:83,
+type:"DOUBLE DELUX",
+price:19000,
+children:2,
+Adult:2
+},
+{
+id:91,
+type:"NORMAL",
+price:12000,
+children:0,
+Adult:2
+},
+{
+id:92,
+type:"SINGLE DELUX",
+price:12500,
+children:1,
+Adult:2
+},
+{
+id:93,
+type:"DOUBLE DELUX",
+price:14000,
+children:2,
+Adult:2
+},
+{
+id:101,
+type:"NORMAL",
+price:6000,
+children:0,
+Adult:2
+},
+{
+id:102,
+type:"SINGLE DELUX",
+price:7000,
+children:1,
+Adult:2
+},
+{
+id:103,
+type:"DOUBLE DELUX",
+price:8000,
+children:2,
+Adult:2
+},
+{
+id:111,
+type:"NORMAL",
+price:6500,
+children:0,
+Adult:2
+},
+{
+id:112,
+type:"SINGLE DELUX",
+price:7000,
+children:1,
+Adult:2
+},
+{
+id:113,
+type:"DOUBLE DELUX",
+price:8000,
+children:2,
+Adult:2
+},
+{
+id:121,
+type:"NORMAL",
+price:9000,
+children:0,
+Adult:2
+},
+{
+id:122,
+type:"SINGLE DELUX",
+price:10000,
+children:1,
+Adult:2
+},
+{
+id:123,
+type:"DOUBLE DELUX",
+price:11000,
+children:2,
+Adult:2
+},
+{
+id:131,
+type:"NORMAL",
+price:8500,
+children:0,
+Adult:2
+},
+{
+id:132,
+type:"SINGLE DELUX",
+price:9000,
+children:1,
+Adult:2
+},
+{
+id:133,
+type:"DOUBLE DELUX",
+price:10000,
+children:2,
+Adult:2
+},
+{
+id:141,
+type:"NORMAL",
+price:7500,
+children:0,
+Adult:2
+},
+{
+id:142,
+type:"SINGLE DELUX",
+price:8500,
+children:1,
+Adult:2
+},
+{
+id:143,
+type:"DOUBLE DELUX",
+price:9500,
+children:2,
+Adult:2
+},
+{
+id:151,
+type:"NORMAL",
+price:7000,
+children:0,
+Adult:2
+},
+{
+id:152,
+type:"SINGLE DELUX",
+price:8000,
+children:1,
+Adult:2
+},
+{
+id:153,
+type:"DOUBLE DELUX",
+price:9000,
+children:2,
+Adult:2
+},
+
+
+]
+
+export function HotelRoomState() {
+
+  const [hotels,setHotels]=useState([
+      {
+        roomid:1,
+        hotelid:1,
+        roomquantity:20,
+        remaining:3  
+      },
+      {
+        roomid:2,
+        hotelid:1,
+        roomquantity:20,
+        remaining:20  
+      },
+      {
+        roomid:3,
+        hotelid:1,
+        roomquantity:20,
+        remaining:20  
+      },
+      {
+        roomid:21,
+        hotelid:2,
+        roomquantity:15,
+        remaining:20  
+      },
+      {
+        roomid:22,
+        hotelid:2,
+        roomquantity:15,
+        remaining:20  
+      },
+      {
+        roomid:23,
+        hotelid:2,
+        roomquantity:15,
+        remaining:20  
+      },
+      {
+        roomid:31,
+        hotelid:3,
+        roomquantity:10,
+        remaining:20  
+      },
+      {
+        roomid:32,
+        hotelid:3,
+        roomquantity:10,
+        remaining:20  
+      },
+      {
+        roomid:33,
+        hotelid:3,
+        roomquantity:10,
+        remaining:20  
+      },
+      {
+        roomid:41,
+        hotelid:4,
+        roomquantity:5,
+        remaining:20  
+      },
+      {
+        roomid:42,
+        hotelid:4,
+        roomquantity:5,
+        remaining:20  
+      },
+      {
+        roomid:43,
+        hotelid:4,
+        roomquantity:5,
+        remaining:20  
+      },
+      {
+        roomid:51,
+        hotelid:5,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:52,
+        hotelid:5,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:53,
+        hotelid:5,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:61,
+        hotelid:6,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:62,
+        hotelid:6,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:63,
+        hotelid:6,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:71,
+        hotelid:7,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:72,
+        hotelid:7,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:73,
+        hotelid:7,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:81,
+        hotelid:8,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:82,
+        hotelid:8,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:83,
+        hotelid:8,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:91,
+        hotelid:9,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:92,
+        hotelid:9,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:93,
+        hotelid:9,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:101,
+        hotelid:10,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:102,
+        hotelid:10,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:103,
+        hotelid:10,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:111,
+        hotelid:11,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:112,
+        hotelid:11,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:113,
+        hotelid:11,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:121,
+        hotelid:12,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:122,
+        hotelid:12,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:123,
+        hotelid:12,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:131,
+        hotelid:13,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:132,
+        hotelid:13,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:133,
+        hotelid:13,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:141,
+        hotelid:14,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:142,
+        hotelid:14,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:143,
+        hotelid:14,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:151,
+        hotelid:15,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:152,
+        hotelid:15,
+        roomquantity:8,
+        remaining:20  
+      },
+      {
+        roomid:153,
+        hotelid:15,
+        roomquantity:8,
+        remaining:20  
+      },
+     
+      
+  ])
+  return {hotels,setHotels};
+}
+export function BookingRoomState() {
+
+    const [booking,setBooking]=useState([
+    ])
+
+}

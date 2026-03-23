@@ -1,0 +1,138 @@
+.cart-main-cont{
+    /* width: 100%; */
+    display: flex;
+    justify-content: center;
+    margin: 100px 0px;
+}
+
+.cart-left-section{
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-heading{
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.cart-info-title{
+    font-size: 0.9rem;
+    color: grey;
+    font-weight: 500;
+    margin: 25px 10px 10px 0;
+}
+
+.card-info-value{
+    font-size: 0.9rem;
+    color: #444444;
+    font-weight: 500;
+}
+
+.cart-item-summary{
+
+}
+
+.cart-order-summary{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.cart-total{
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #888;
+    margin-right: 15px;
+}
+
+.cart-total-price{
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #444444;
+}
+
+.hotel-cart-item-con{
+    /* background: coral; */
+    display: flex;
+    height: 120px;
+    border: 2px solid #dedede;
+    border-right: 0;
+    border-left: 0;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.cart-identifier{
+    /* background:#dedede; */
+    border-right: 2px solid #dedede;
+    color: #E65100;
+    font-weight: 600;
+    font-size: 1.2rem;
+    width: 13%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tour-cart-identifier{
+    /* background:#dedede; */
+    border-right: 2px solid #dedede;
+    color: #AB47BC;
+    font-weight: 600;
+    font-size: 1.2rem;
+    width: 13%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-section{
+    background:#fff;
+    color: #444444;
+    width: 62%;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: left;
+    padding: 15px;
+}
+
+
+
+.cart-section-2{
+    background:#fff;
+    color: #444444;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 15px;
+}
+
+.cart-name{
+    font-size: 1.2rem;
+    font-weight: 500; 
+    color: #444;  
+}
+
+.cart-attribute{
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.cart-price{
+    font-size: 1.1rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.cart-remove{
+    font-size: 0.8rem;
+    color: #F44336;
+    text-decoration: underline;
+    cursor: pointer;
+}

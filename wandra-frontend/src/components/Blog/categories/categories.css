@@ -1,0 +1,9 @@
+.link{
+  color: darkslategray;
+  font-size: 17px;
+  text-decoration: none;
+}
+
+.link:hover{
+    color:#ff681a;
+}

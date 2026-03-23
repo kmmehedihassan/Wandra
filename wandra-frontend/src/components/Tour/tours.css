@@ -1,0 +1,24 @@
+.tour-top-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+}
+
+.tour-top-items{
+    margin: 0 10px;
+}
+
+.tour-option {
+    display: flex;
+}
+
+.tour-cards {
+    display: flex;
+    flex-flow: column;
+
+}
+
+.tour-sort-text{
+    user-select: none !important;
+}
