@@ -1,0 +1,11 @@
+cd wandra/wandra-frontend
+```
+
+Create a `.gitignore` file with this content:
+```
+node_modules/
+.env
+.env.local
+build/
+dist/
+.DS_Store
