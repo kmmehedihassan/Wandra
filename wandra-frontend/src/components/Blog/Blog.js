@@ -7,21 +7,8 @@ import { PageHero, EmptyState } from "../Layout/Shared";
 import { CATEGORIES } from "../../usePosts";
 import "./blog.css";
 
-export function toggleLike(setPosts) {
-  return (id, username) =>
-    setPosts((posts) =>
-      posts.map((p) => {
-        if (p.id !== id) return p;
-        const likedBy = p.likedBy || [];
-        return {
-          ...p,
-          likedBy: likedBy.includes(username) ? likedBy.filter((u) => u !== username) : [...likedBy, username],
-        };
-      })
-    );
-}
-
-const Blog = ({ posts, setPosts }) => {
+const Blog = ({ blog }) => {
+  const { posts, loading, error, reload, toggleLike } = blog;
   const location = useLocation();
   const history = useHistory();
   const params = new URLSearchParams(location.search);
@@ -40,9 +27,8 @@ const Blog = ({ posts, setPosts }) => {
   const term = q.trim().toLowerCase();
   const results = posts
     .filter((p) => !cat || p.categories.includes(cat))
-    .filter((p) => !author || p.Author === author)
-    .filter((p) => !term || `${p.title} ${p.body} ${p.Author}`.toLowerCase().includes(term))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .filter((p) => !author || p.author === author)
+    .filter((p) => !term || `${p.title} ${p.body} ${p.author}`.toLowerCase().includes(term));
 
   return (
     <>
@@ -82,12 +68,20 @@ const Blog = ({ posts, setPosts }) => {
             </button>
           </p>
         )}
-        {results.length === 0 ? (
+        {loading ? (
+          <div className="grid-cards blog-grid">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="skeleton" style={{ height: 360, marginTop: 0 }} />
+            ))}
+          </div>
+        ) : error && posts.length === 0 ? (
+          <EmptyState title="We couldn't load the blog" text={error} onAction={reload} actionLabel="Try again" />
+        ) : results.length === 0 ? (
           <EmptyState title="No posts found" text="Try another search or category." actionTo="/blog" actionLabel="See all posts" />
         ) : (
           <div className="grid-cards blog-grid">
             {results.map((post) => (
-              <Post key={post.id} post={post} onToggleLike={toggleLike(setPosts)} />
+              <Post key={post.id} post={post} onToggleLike={toggleLike} />
             ))}
           </div>
         )}

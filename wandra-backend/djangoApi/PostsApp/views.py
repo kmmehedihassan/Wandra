@@ -1,115 +1,84 @@
-from django.http.response import JsonResponse
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from PostsApp.models import Categories,AllPost,UploadPostFile
-from PostsApp.serializers import CategoriesSerializer,AllPostSerializer,UploadPostFileSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.db.models import Count, Exists, OuterRef, Q
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
-from djangoApi.permissions import IsAdminOrReadOnly
-
-
-class AllPostViewSet(APIView):
-    
-    
-    serializer_class = AllPostSerializer
-    parser_classes = (JSONParser, MultiPartParser, FormParser)
-    # Default permission: anyone can read, logged-in users can write.
-
-    def get(self,request,Id=0):
-        print(Id)
-        Title=request.query_params.get('username',None)
-        if(Id != None and Id != 0):
-            post=AllPost.objects.filter(id=Id)
-        elif(Title!=None):
-            post=AllPost.objects.filter(Author=Title)
-        else:    
-            post = AllPost.objects.all()
-            
-        # student = Students.objects.all()
-
-        allpost_serializer=AllPostSerializer(post,many=True)
-                
-        return JsonResponse(allpost_serializer.data,safe=False)
-
-    def post(self, request):
-        post_data = request.data
-        new_post = AllPost.objects.create(
-             Author=request.user.username, title=post_data['title'],
-            datetime=post_data["datetime"], date=post_data['date'], month=post_data["month"],
-            likes=post_data["likes"], imgLink=post_data['imgLink'], imgOrVideoLink=post_data["imgOrVideoLink"],
-            comments=post_data["comments"], body=post_data['body']
-
-            )
-
-        new_post.save()
-
-        for cat in post_data["catagory"]:
-            print(cat)
-            cat_obj = Categories.objects.get(categoryName=cat["categoryName"])
-            new_post.catagory.add(cat_obj)
-
-        serializer = AllPostSerializer(new_post)
-
-        return Response(serializer.data)
-
-    def delete(self,request,ID):
-        post_data=AllPost.objects.filter(id=ID).first()
-        if post_data is None:
-            return JsonResponse({'detail': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
-        if post_data.Author != request.user.username and not request.user.is_staff:
-            return JsonResponse({'detail': 'You can only delete your own posts.'},
-                                status=status.HTTP_403_FORBIDDEN)
-        post_data.delete()
-        return JsonResponse("Deleted Succeffully!!", safe=False)
+from PostsApp.models import CATEGORIES, Post, PostLike
+from PostsApp.serializers import PostSerializer
 
 
-class CategoriesViewSet(APIView):
-    serializer_class = CategoriesSerializer
-    parser_classes = (JSONParser, MultiPartParser, FormParser)
-    permission_classes = [IsAdminOrReadOnly]
-
-    def get(self,request):
-        categories= Categories.objects.all()
-        categories_serializer=CategoriesSerializer(categories,many=True)
-        return Response(categories_serializer.data)
-
-    def post(self, request):
-        categories_data = request.data
-        new_category = Categories.objects.create(categoryName=categories_data["categoryName"])
-        new_category.save()
-        categories_serializer=CategoriesSerializer(categories_data)
-        
-        return Response(categories_serializer.data)
+def _posts(request):
+    qs = Post.objects.select_related('author', 'image').annotate(like_count=Count('likes', distinct=True))
+    if request.user.is_authenticated:
+        qs = qs.annotate(liked_by_me=Exists(PostLike.objects.filter(post=OuterRef('pk'), user=request.user)))
+    return qs
 
 
-class PostsFileView(APIView):
-  parser_classes = (MultiPartParser, FormParser)
-  def get(self,request):
-    Title=request.query_params.get('title',None)
-    print(Title)
-    if(Title == None):
-        imgobj = UploadPostFile.objects.all()
+def _can_edit(user, post):
+    return user.is_staff or post.author_id == user.id
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def categories(request):
+    return Response(CATEGORIES)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def post_list(request):
+    """GET posts (optional ?q=, ?cat=, ?author=); POST a new post as the signed-in user."""
+    if request.method == 'POST':
+        serializer = PostSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        post = serializer.save(author=request.user)
+        return Response(PostSerializer(_posts(request).get(pk=post.pk), context={'request': request}).data,
+                        status=status.HTTP_201_CREATED)
+
+    qs = _posts(request)
+    q = request.query_params.get('q', '').strip()
+    if q:
+        qs = qs.filter(Q(title__icontains=q) | Q(body__icontains=q) | Q(author__username__icontains=q)
+                       | Q(author_name__icontains=q))
+    cat = request.query_params.get('cat')
+    posts = list(qs)
+    if cat:  # JSON list contains-lookups aren't portable to SQLite, so filter in Python.
+        posts = [p for p in posts if cat in p.categories]
+    author = request.query_params.get('author')
+    if author:
+        posts = [p for p in posts if p.display_author == author]
+    return Response(PostSerializer(posts, many=True, context={'request': request}).data)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def post_detail(request, pk):
+    post = _posts(request).filter(pk=pk).first()
+    if post is None:
+        return Response({'detail': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response(PostSerializer(post, context={'request': request}).data)
+    if not _can_edit(request.user, post):
+        return Response({'detail': 'You can only change your own posts.'}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == 'DELETE':
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    serializer = PostSerializer(post, data=request.data, partial=True, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(PostSerializer(_posts(request).get(pk=pk), context={'request': request}).data)
+
+
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def post_like(request, pk):
+    """POST to like, DELETE to unlike. Returns the new like count."""
+    post = Post.objects.filter(pk=pk).first()
+    if post is None:
+        return Response({'detail': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'POST':
+        PostLike.objects.get_or_create(post=post, user=request.user)
     else:
-        imgobj = UploadPostFile.objects.filter(title__in=(Title,"test") )     
-    
-    serializer = UploadPostFileSerializer(imgobj, many=True, context= 
-        {'request': request})
-
-    return JsonResponse(serializer.data ,safe=False)
-
-    # return Response({
-    #         'status' : True,
-    #         'message' : 'Image List',
-    #         'images' : serializer.data})
-
-  def post(self, request, *args, **kwargs):
-    # dataF=FormParser(request.data)
-    # print(request.data['Author'])
-    
-    file_serializer = UploadPostFileSerializer(data=request.data, context={'request': request})
-    if file_serializer.is_valid():
-      file_serializer.save(Author=request.user.username)
-      return Response(file_serializer.data, status=status.HTTP_201_CREATED)
-    else:
-      return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        PostLike.objects.filter(post=post, user=request.user).delete()
+    return Response({'likes': post.likes.count(), 'liked': request.method == 'POST'})

@@ -2,17 +2,15 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
-from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import SimpleRateThrottle
-from rest_framework.views import APIView
 
-from AuthenApp.models import UploadProfileFile
+from AuthenApp.models import Profile
 from AuthenApp.serializers import (
     LoginSerializer,
     RegisterSerializer,
-    UploadProfileFileSerializer,
+    ProfileSerializer,
     UserSerializer,
 )
 
@@ -70,38 +68,14 @@ def me(request):
     return Response(UserSerializer(request.user).data)
 
 
-class ProfileFileView(APIView):
-    """The authenticated user's own profile. Users can't read or change anyone else's."""
-
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    permission_classes = [IsAuthenticated]
-
-    def _own_profiles(self, request):
-        return UploadProfileFile.objects.filter(UserName=request.user.username)
-
-    def get(self, request):
-        serializer = UploadProfileFileSerializer(
-            self._own_profiles(request), many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-        serializer = UploadProfileFileSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save(UserName=request.user.username)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def patch(self, request, *args, **kwargs):
-        profile = self._own_profiles(request).first()
-        if profile is None:
-            return Response({'detail': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = UploadProfileFileSerializer(
-            profile, data=request.data, partial=True, context={'request': request})
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    """The signed-in user's own profile. Users can't read or change anyone else's."""
+    obj, _ = Profile.objects.select_related('user', 'avatar').get_or_create(user=request.user)
+    if request.method == 'PATCH':
+        serializer = ProfileSerializer(obj, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
-
-    def delete(self, request, *args, **kwargs):
-        deleted, _ = self._own_profiles(request).delete()
-        if not deleted:
-            return Response({'detail': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        obj.refresh_from_db()
+    return Response(ProfileSerializer(obj, context={'request': request}).data)

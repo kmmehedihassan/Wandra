@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'AuthenApp.apps.AuthenappConfig',
     'PostsApp.apps.PostsappConfig',
     'TripsApp.apps.TripsappConfig',
+    'MediaApp.apps.MediaappConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -48,6 +49,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'auth': config('AUTH_THROTTLE_RATE', default='10/min'),
+        'uploads': config('UPLOAD_THROTTLE_RATE', default='30/hour'),
     },
 }
 
@@ -113,3 +115,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Behind Railway's proxy, so absolute URLs (e.g. uploaded image links) use https.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Image uploads are sent as multipart form data.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024

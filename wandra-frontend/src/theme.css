@@ -1084,3 +1084,12 @@ textarea {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
 }
+
+img.avatar {
+  object-fit: cover;
+}
+
+.btn.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}

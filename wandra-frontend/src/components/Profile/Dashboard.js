@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { BiEdit } from "react-icons/bi";
@@ -8,7 +8,7 @@ import ViewProfile from "./ViewProfile";
 import EditProfile from "./EditProfile";
 import MyBookings from "./MyBookings";
 import { EmptyState } from "../Layout/Shared";
-import { openAuthModal, saveProfile, useProfile, useUser } from "../../store";
+import { notify, openAuthModal, saveProfile, uploadImage, useProfile, useProfileLoaded, useUser } from "../../store";
 import { logout } from "../../api";
 import "./dashboard.css";
 
@@ -21,6 +21,8 @@ const TABS = [
 export default function Dashboard() {
   const user = useUser();
   const profile = useProfile();
+  const profileLoaded = useProfileLoaded();
+  const [uploading, setUploading] = useState(false);
   const history = useHistory();
   const location = useLocation();
   const tab = new URLSearchParams(location.search).get("tab") || "profile";
@@ -43,14 +45,20 @@ export default function Dashboard() {
 
   const go = (key) => history.push(key === "profile" ? "/dashboard" : `/dashboard?tab=${key}`);
 
-  const handleAvatar = (e) => {
+  const handleAvatar = async (e) => {
     const file = e.target.files && e.target.files[0];
+    e.target.value = "";
     if (!file) return;
-    if (!file.type.startsWith("image/")) return alert("Please choose an image file.");
-    if (file.size > 1024 * 1024) return alert("Please choose an image under 1 MB.");
-    const reader = new FileReader();
-    reader.onload = () => saveProfile({ ...profile, avatar: reader.result });
-    reader.readAsDataURL(file);
+    setUploading(true);
+    try {
+      const image = await uploadImage(file);
+      await saveProfile({ avatar_id: image.id });
+      notify("Profile photo updated.", "success");
+    } catch (err) {
+      notify(err.message, "error");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -75,9 +83,9 @@ export default function Dashboard() {
               <span className="muted small dash-email">{user.email}</span>
             </div>
           </div>
-          <label className="btn btn-outline btn-sm btn-block mt-2">
-            Change photo
-            <input type="file" accept="image/*" onChange={handleAvatar} className="visually-hidden" />
+          <label className={`btn btn-outline btn-sm btn-block mt-2${uploading ? " is-busy" : ""}`} aria-disabled={uploading}>
+            {uploading ? "Uploading…" : profile.avatar ? "Change photo" : "Add a photo"}
+            <input type="file" accept="image/*" onChange={handleAvatar} className="visually-hidden" disabled={uploading} />
           </label>
           <nav className="dash-nav mt-2" aria-label="Dashboard">
             {TABS.map(({ key, label, Icon }) => (
@@ -92,8 +100,17 @@ export default function Dashboard() {
         </aside>
 
         <section className="card card-pad dash-main">
-          {active === "profile" && <ViewProfile user={user} profile={profile} onEdit={() => go("edit")} />}
-          {active === "edit" && <EditProfile profile={profile} onSaved={() => go("profile")} />}
+          {!profileLoaded && active !== "bookings" ? (
+            <>
+              <div className="skeleton" />
+              <div className="skeleton" />
+            </>
+          ) : (
+            <>
+              {active === "profile" && <ViewProfile user={user} profile={profile} onEdit={() => go("edit")} />}
+              {active === "edit" && <EditProfile profile={profile} onSaved={() => go("profile")} />}
+            </>
+          )}
           {active === "bookings" && <MyBookings />}
         </section>
       </div>

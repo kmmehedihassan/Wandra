@@ -39,7 +39,7 @@ export async function logout() {
       // Ignore network errors; the local session is cleared regardless.
     }
   }
-  // Only end the session; the user's profile details stay on this device.
+  // End the session on this device.
   SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
   window.dispatchEvent(new Event("wandra:store"));
 }
@@ -63,13 +63,18 @@ export class ApiError extends Error {
 
 // JSON request to the backend with the auth token attached.
 // Throws ApiError with a user-friendly message on failure.
+// Pass a FormData `body` to upload files.
 export async function apiFetch(path, { method = "GET", body } = {}) {
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   let resp;
   try {
     resp = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: authHeaders({ Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) }),
-      body: body ? JSON.stringify(body) : undefined,
+      headers: authHeaders({
+        Accept: "application/json",
+        ...(body && !isForm ? { "Content-Type": "application/json" } : {}),
+      }),
+      body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
     });
   } catch (e) {
     throw new ApiError("Could not reach the server. Check your connection and try again.", 0);

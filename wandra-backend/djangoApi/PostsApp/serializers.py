@@ -1,28 +1,72 @@
 from rest_framework import serializers
-from PostsApp.models import Categories,AllPost,UploadPostFile
 
-class CategoriesSerializer(serializers.ModelSerializer):
+from MediaApp.models import StoredImage
+from PostsApp.models import CATEGORIES, Post
+
+
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='display_author', read_only=True)
+    image = serializers.SerializerMethodField()
+    image_id = serializers.PrimaryKeyRelatedField(source='image', queryset=StoredImage.objects.all(),
+                                                  write_only=True, required=False)
+    categories = serializers.ListField(child=serializers.ChoiceField(choices=CATEGORIES), allow_empty=False)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
+    likes = serializers.SerializerMethodField()
+    liked = serializers.SerializerMethodField()
+    canEdit = serializers.SerializerMethodField()
+
     class Meta:
-        model = Categories
-        fields = '__all__'
+        model = Post
+        fields = ['id', 'author', 'title', 'body', 'categories', 'image', 'image_id', 'createdAt', 'updatedAt',
+                  'likes', 'liked', 'canEdit']
 
+    def _user(self):
+        request = self.context.get('request')
+        return request.user if request and request.user.is_authenticated else None
 
+    def get_image(self, obj):
+        if obj.image_id:
+            return obj.image.url(self.context.get('request'))
+        return obj.image_path or None
 
-class AllPostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AllPost
-        fields = '__all__'
-        depth = 1
-    
-    def get_queryset(self):
-        post = AllPost.objects.all()
-        return post
+    def get_likes(self, obj):
+        return obj.like_count if hasattr(obj, 'like_count') else obj.likes.count()
 
+    def get_liked(self, obj):
+        user = self._user()
+        if user is None:
+            return False
+        if hasattr(obj, 'liked_by_me'):
+            return bool(obj.liked_by_me)
+        return obj.likes.filter(user=user).exists()
 
-class UploadPostFileSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = UploadPostFile
-        fields = ['PostId','Author','title', 'cover']
-        read_only_fields = ['Author']
-    
-    # def get_queryset(self):
+    def get_canEdit(self, obj):
+        user = self._user()
+        return bool(user and (user.is_staff or obj.author_id == user.id))
+
+    def validate_title(self, value):
+        value = value.strip()
+        if len(value) < 5:
+            raise serializers.ValidationError('Give your post a title (at least 5 characters).')
+        return value
+
+    def validate_body(self, value):
+        value = value.strip()
+        if len(value) < 40:
+            raise serializers.ValidationError('Tell your story in at least 40 characters.')
+        return value
+
+    def validate_categories(self, value):
+        return [c for c in CATEGORIES if c in value]  # dedupe, keep a stable order
+
+    def validate_image_id(self, image):
+        user = self._user()
+        if image is not None and (user is None or image.owner_id != user.id):
+            raise serializers.ValidationError('Upload the image first.')
+        return image
+
+    def validate(self, attrs):
+        if self.instance is None and not attrs.get('image'):
+            raise serializers.ValidationError({'image_id': 'Add a cover photo.'})
+        return attrs

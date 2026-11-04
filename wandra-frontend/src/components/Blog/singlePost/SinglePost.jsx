@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { AiOutlineDelete } from "react-icons/ai";
 import Error from "../../../pages/Error";
 import { LikeButton, timeAgo } from "../post/Post";
-import { toggleLike } from "../Blog";
-import { formatDate, useUser } from "../../../store";
+import { formatDate, notify } from "../../../store";
 import "../blog.css";
 
-export default function SinglePost({ posts, setPosts }) {
+export default function SinglePost({ blog }) {
+  const { posts, loading, deletePost, toggleLike } = blog;
   const { id } = useParams();
   const history = useHistory();
-  const user = useUser();
+  const [deleting, setDeleting] = useState(false);
   const post = posts.find((p) => String(p.id) === id);
+
+  if (loading) {
+    return (
+      <div className="container-w section single-post">
+        <div className="skeleton" style={{ height: 48 }} />
+        <div className="skeleton" style={{ height: 360 }} />
+      </div>
+    );
+  }
   if (!post) return <Error />;
 
-  const canDelete = user && user.username === post.Author;
-
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!window.confirm("Delete this post? This can't be undone.")) return;
-    setPosts((list) => list.filter((p) => p.id !== post.id));
-    history.push("/blog");
+    setDeleting(true);
+    try {
+      await deletePost(post.id);
+      notify("Post deleted.", "success");
+      history.push("/blog");
+    } catch (err) {
+      notify(err.message, "error");
+      setDeleting(false);
+    }
   };
 
   return (
@@ -38,16 +52,16 @@ export default function SinglePost({ posts, setPosts }) {
       <div className="row-between single-post-meta">
         <span className="muted">
           By{" "}
-          <Link to={`/blog?author=${encodeURIComponent(post.Author)}`} className="post-author">
-            {post.Author}
+          <Link to={`/blog?author=${encodeURIComponent(post.author)}`} className="post-author">
+            {post.author}
           </Link>{" "}
           · {formatDate(post.createdAt)} ({timeAgo(post.createdAt)})
         </span>
         <div className="chip-row" style={{ alignItems: "center" }}>
-          <LikeButton post={post} onToggle={toggleLike(setPosts)} />
-          {canDelete && (
-            <button type="button" className="btn btn-danger btn-sm" onClick={handleDelete}>
-              <AiOutlineDelete /> Delete
+          <LikeButton post={post} onToggle={toggleLike} />
+          {post.canEdit && (
+            <button type="button" className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
+              <AiOutlineDelete /> {deleting ? "Deleting…" : "Delete"}
             </button>
           )}
         </div>

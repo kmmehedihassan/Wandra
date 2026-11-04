@@ -16,8 +16,7 @@ export function timeAgo(iso) {
 
 export function LikeButton({ post, onToggle }) {
   const user = useUser();
-  const likedBy = post.likedBy || [];
-  const liked = user ? likedBy.includes(user.username) : false;
+  const liked = Boolean(user && post.liked);
   return (
     <button
       type="button"
@@ -27,10 +26,10 @@ export function LikeButton({ post, onToggle }) {
       onClick={(e) => {
         e.preventDefault();
         if (!user) return openAuthModal("login");
-        onToggle(post.id, user.username);
+        onToggle(post);
       }}
     >
-      {liked ? <AiFillHeart /> : <AiOutlineHeart />} {likedBy.length}
+      {liked ? <AiFillHeart /> : <AiOutlineHeart />} {post.likes}
     </button>
   );
 }
@@ -57,8 +56,8 @@ export default function Post({ post, onToggleLike }) {
         <p className="media-card-desc">{postExcerpt(post.body)}</p>
         <div className="media-card-foot">
           <span className="muted small">
-            <Link to={`/blog?author=${encodeURIComponent(post.Author)}`} className="post-author">
-              {post.Author}
+            <Link to={`/blog?author=${encodeURIComponent(post.author)}`} className="post-author">
+              {post.author}
             </Link>{" "}
             · {timeAgo(post.createdAt)}
           </span>

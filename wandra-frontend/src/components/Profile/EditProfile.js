@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { localISODate, saveProfile } from "../../store";
+import { localISODate, notify, saveProfile } from "../../store";
 
 const EditProfile = ({ profile, onSaved }) => {
   const [form, setForm] = useState({
@@ -11,22 +11,31 @@ const EditProfile = ({ profile, onSaved }) => {
     address: profile.address || "",
   });
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const next = {};
     if (form.phone && !/^\+?[\d\s-]{7,15}$/.test(form.phone.trim())) next.phone = "Enter a valid phone number";
     if (form.birthday && form.birthday > localISODate(0)) next.birthday = "Birthday can't be in the future";
     setErrors(next);
     if (Object.keys(next).length) return;
-    const trimmed = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim()]));
-    saveProfile({ ...profile, ...trimmed });
-    onSaved();
+    const fields = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim()]));
+    fields.birthday = fields.birthday || null;
+    setSaving(true);
+    try {
+      await saveProfile(fields);
+      notify("Profile saved.", "success");
+      onSaved();
+    } catch (err) {
+      setErrors({ form: err.message });
+      setSaving(false);
+    }
   };
 
   const input = (name, label, props = {}) => (
@@ -65,8 +74,9 @@ const EditProfile = ({ profile, onSaved }) => {
       </div>
       <div className="mt-2">{input("phone", "Phone", { type: "tel", autoComplete: "tel", placeholder: "+880 1XXX XXXXXX" })}</div>
       <div className="mt-2">{input("address", "Address", { autoComplete: "street-address" })}</div>
+      {errors.form && <div className="alert alert-error mt-2" role="alert">{errors.form}</div>}
       <div className="chip-row mt-3">
-        <button type="submit" className="btn btn-primary">Save changes</button>
+        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
         <button type="button" className="btn btn-outline" onClick={onSaved}>Cancel</button>
       </div>
     </form>

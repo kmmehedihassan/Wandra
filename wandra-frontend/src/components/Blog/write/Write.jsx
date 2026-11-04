@@ -1,43 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { BiImageAdd } from "react-icons/bi";
 import { EmptyState } from "../../Layout/Shared";
 import { CATEGORIES } from "../../../usePosts";
-import { openAuthModal, useUser } from "../../../store";
+import { notify, openAuthModal, useUser } from "../../../store";
 import "../blog.css";
 
-const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
-
-// Shrink large photos so posts fit in browser storage.
-function resizeImage(file, maxWidth = 1400) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        const scale = Math.min(1, maxWidth / img.width);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-export default function Write({ setPosts }) {
+export default function Write({ blog }) {
   const user = useUser();
   const history = useHistory();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [categories, setCategories] = useState([]);
-  const [image, setImage] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [publishing, setPublishing] = useState(false);
+
+  // Free the preview URL when the image changes or the page closes.
+  useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
 
   if (!user) {
     return (
@@ -52,44 +33,35 @@ export default function Write({ setPosts }) {
   const toggleCategory = (c) =>
     setCategories((list) => (list.includes(c) ? list.filter((x) => x !== c) : [...list, c]));
 
-  const handleImage = async (e) => {
+  const handleImage = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return setErrors({ ...errors, image: "Please choose an image file." });
-    try {
-      const data = file.size > MAX_IMAGE_BYTES ? await resizeImage(file) : await resizeImage(file, 2000);
-      setImage(data);
-      setErrors({ ...errors, image: "" });
-    } catch (err) {
-      setErrors({ ...errors, image: "We couldn't read that image. Try another one." });
-    }
+    if (file.size > 15 * 1024 * 1024) return setErrors({ ...errors, image: "Please choose an image under 15 MB." });
+    setImageFile(file);
+    setPreview(URL.createObjectURL(file));
+    setErrors({ ...errors, image: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const next = {};
-    if (!image) next.image = "Add a cover photo";
+    if (!imageFile) next.image = "Add a cover photo";
     if (title.trim().length < 5) next.title = "Give your post a title (at least 5 characters)";
     if (body.trim().length < 40) next.body = "Tell your story in at least 40 characters";
     if (categories.length === 0) next.categories = "Pick at least one category";
     setErrors(next);
     if (Object.keys(next).length) return;
 
-    const id = Date.now();
-    setPosts((posts) => [
-      ...posts,
-      {
-        id,
-        Author: user.username,
-        title: title.trim(),
-        body: body.trim(),
-        categories,
-        image,
-        createdAt: new Date().toISOString(),
-        likedBy: [],
-      },
-    ]);
-    history.push(`/blog/post/${id}`);
+    setPublishing(true);
+    try {
+      const post = await blog.createPost({ title: title.trim(), body: body.trim(), categories, imageFile });
+      notify("Your story is live!", "success");
+      history.push(`/blog/post/${post.id}`);
+    } catch (err) {
+      setErrors({ form: err.message });
+      setPublishing(false);
+    }
   };
 
   return (
@@ -97,9 +69,9 @@ export default function Write({ setPosts }) {
       <h1 className="section-title">Write a story</h1>
       <p className="section-sub">Share tips and memories from your trip.</p>
       <form className="card card-pad mt-3" onSubmit={handleSubmit} noValidate>
-        <label className={`write-cover${image ? " has-image" : ""}${errors.image ? " is-invalid" : ""}`}>
-          {image ? (
-            <img src={image} alt="Cover preview" />
+        <label className={`write-cover${preview ? " has-image" : ""}${errors.image ? " is-invalid" : ""}`}>
+          {preview ? (
+            <img src={preview} alt="Cover preview" />
           ) : (
             <span className="write-cover-empty">
               <BiImageAdd size={36} />
@@ -108,7 +80,7 @@ export default function Write({ setPosts }) {
           )}
           <input type="file" accept="image/*" onChange={handleImage} className="visually-hidden" />
         </label>
-        {image && <p className="muted small mt-1">Click the photo to change it.</p>}
+        {preview && <p className="muted small mt-1">Click the photo to change it.</p>}
         {errors.image && <span className="field-error">{errors.image}</span>}
 
         <div className="field mt-3">
@@ -133,8 +105,11 @@ export default function Write({ setPosts }) {
           <span className="muted small">Leave a blank line between paragraphs.</span>
           {errors.body && <span className="field-error">{errors.body}</span>}
         </div>
+        {errors.form && <div className="alert alert-error mt-2" role="alert">{errors.form}</div>}
         <div className="chip-row mt-3">
-          <button type="submit" className="btn btn-primary">Publish</button>
+          <button type="submit" className="btn btn-primary" disabled={publishing}>
+            {publishing ? "Publishing…" : "Publish"}
+          </button>
           <button type="button" className="btn btn-outline" onClick={() => history.push("/blog")}>Cancel</button>
         </div>
       </form>

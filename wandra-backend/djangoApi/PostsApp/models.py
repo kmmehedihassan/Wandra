@@ -1,49 +1,39 @@
+from django.conf import settings
 from django.db import models
 
-# Create your models here.
-#  id: 1,
-#             Author: "Fahim",
-#             title: "My First Post",
-#             datetime: "July 01, 2021 03:17:36 PM",
-#             date: "8",
-#             month: "NOVEM",
-#             likes: 3,
-#             catagory: [
-#                 {
-#                     "categoryName": "Music"
-#                 }],
-#             imgLink: false,
-#             imgOrVideoLink: "http://techslides.com/demos/sample-videos/small.ogv",
-#             comments: 3,
-#             body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis consequatur expedita, assumenda similique non optio! Modi nesciunt excepturi corrupti atque blanditiis quo nobis, non optio quae possimus illum exercitationem ipsa!",
-class UploadPostFile(models.Model):
-    PostId=models.IntegerField()
-    Author = models.CharField(max_length=50)
-    title = models.CharField(max_length=50, blank=False)
-    cover = models.FileField(blank=False, null=False)
+CATEGORIES = ['Beach', 'Nature', 'Culture', 'Adventure', 'Food', 'Tips']
 
-class Categories(models.Model):
-    categoryName = models.CharField(max_length=50)
-    category_used= models.IntegerField(default=0)
-    # class_room = models.IntegerField()
 
-    def __str__(self):
-        return self.categoryName
+class Post(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                               related_name='posts')
+    # Shown when the post has no author account (e.g. the seeded starter posts).
+    author_name = models.CharField(max_length=150, blank=True)
+    title = models.CharField(max_length=120)
+    body = models.TextField()
+    categories = models.JSONField(default=list)
+    image = models.ForeignKey('MediaApp.StoredImage', null=True, blank=True, on_delete=models.SET_NULL,
+                              related_name='+')
+    # Path to a bundled frontend image (seeded posts), used when `image` is empty.
+    image_path = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-class AllPost(models.Model):
-    id=models.AutoField(primary_key=True)
-    Author = models.CharField(max_length=50)
-    title = models.CharField(max_length=50)
-    datetime = models.CharField(max_length=50)
-    date = models.CharField(max_length=50)
-    month = models.CharField(max_length=50)
-    likes = models.IntegerField()
-    catagory = models.ManyToManyField(Categories)
-    imgLink=models.BooleanField()
-    imgOrVideoLink=models.URLField()
-    comments=models.IntegerField()
-    body=models.CharField(max_length=50)
+    class Meta:
+        ordering = ['-created_at']
 
+    @property
+    def display_author(self):
+        return self.author.username if self.author_id else self.author_name
 
     def __str__(self):
         return self.title
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='post_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['post', 'user'], name='one_like_per_user')]

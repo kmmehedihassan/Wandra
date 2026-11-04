@@ -67,7 +67,7 @@ export function notify(message, tone = "info") {
  * Guests: the cart is kept in localStorage and moved into the account at login.
  */
 const GUEST_CART = "Cart";
-const remote = { cart: null, bookings: null };
+const remote = { cart: null, bookings: null, profile: null };
 
 export function lineTotal(item) {
   if (item.total !== undefined && item.total !== null) return Number(item.total);
@@ -205,17 +205,19 @@ export function useSessionSync() {
   useEffect(() => {
     remote.cart = null;
     remote.bookings = null;
+    remote.profile = null;
     notifyStoreChanged();
     if (!username) return;
     let active = true;
     (async () => {
       try {
         await mergeGuestCart();
-        if (active) await Promise.all([refreshCart(), refreshBookings()]);
+        if (active) await Promise.all([refreshCart(), refreshBookings(), refreshProfile()]);
       } catch (err) {
         if (active) {
           remote.cart = remote.cart || [];
           remote.bookings = remote.bookings || [];
+          remote.profile = remote.profile || {};
           notifyStoreChanged();
           notify(err.message, "error");
         }
@@ -239,21 +241,66 @@ export async function fetchTourAvailability(tourId, date) {
   return data.left;
 }
 
-/* ---------- Profile (per user) ---------- */
+/* ---------- Profile (stored on the backend) ---------- */
 export function getProfile() {
-  const user = getUser();
-  if (!user) return {};
-  return read(`Profile:${user.username}`, {});
+  return getUser() ? remote.profile || {} : {};
 }
 
 export function useProfile() {
   return useStoreValue(getProfile);
 }
 
-export function saveProfile(profile) {
-  const user = getUser();
-  if (!user) return;
-  write(`Profile:${user.username}`, profile);
+function isProfileLoaded() {
+  return !getUser() || remote.profile !== null;
+}
+
+export function useProfileLoaded() {
+  return useStoreValue(isProfileLoaded);
+}
+
+export async function refreshProfile() {
+  if (!getUser()) return;
+  remote.profile = await apiFetch("/auth/profile");
+  notifyStoreChanged();
+}
+
+// Update some profile fields, e.g. { phone } or { avatar_id }. Throws ApiError.
+export async function saveProfile(fields) {
+  remote.profile = await apiFetch("/auth/profile", { method: "PATCH", body: fields });
+  notifyStoreChanged();
+  return remote.profile;
+}
+
+/* ---------- Image uploads ---------- */
+// Downscale a photo in the browser before uploading (the server also resizes).
+export function resizeImage(file, maxEdge = 1600) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("We couldn't read that image. Try another one."));
+    };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("We couldn't process that image."))), "image/jpeg", 0.85);
+    };
+    img.src = url;
+  });
+}
+
+// Upload an image file; returns { id, url }. Throws ApiError or Error.
+export async function uploadImage(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Please choose an image file.");
+  const blob = await resizeImage(file);
+  const form = new FormData();
+  form.append("file", blob, "photo.jpg");
+  return apiFetch("/api/images/", { method: "POST", body: form });
 }
 
 /* ---------- Formatting ---------- */

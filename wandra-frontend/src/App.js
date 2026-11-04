@@ -21,7 +21,7 @@ import Toast from "./components/Layout/Toast";
 import { useSessionSync } from "./store";
 
 const App = () => {
-  const { posts, setPosts } = usePosts();
+  const blog = usePosts();
   const location = useLocation();
   useScrollTop(location.pathname);
   useSessionSync();
@@ -39,13 +39,13 @@ const App = () => {
           <Route exact path="/hotels" component={List} />
           <Route exact path="/hotels/:id" component={Hoteldescription} />
           <Route exact path="/blog">
-            <Blog posts={posts} setPosts={setPosts} />
+            <Blog blog={blog} />
           </Route>
           <Route exact path="/blog/post/:id">
-            <SinglePost posts={posts} setPosts={setPosts} />
+            <SinglePost blog={blog} />
           </Route>
           <Route exact path="/write">
-            <Write setPosts={setPosts} />
+            <Write blog={blog} />
           </Route>
           <Route exact path="/cart" component={Cart} />
           <Route exact path="/dashboard" component={Dashboard} />

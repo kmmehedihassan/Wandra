@@ -38,6 +38,8 @@ Backend (environment variables, see `wandra-backend/djangoApi/.env.example`):
 - `SECRET_KEY` — required when `DEBUG` is not `True`
 - `DEBUG`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `DATABASE_URL`
 - `AUTH_THROTTLE_RATE` — login/register rate limit per IP (default `10/min`)
+- `UPLOAD_THROTTLE_RATE` — image uploads per user (default `30/hour`)
+- `TIME_ZONE` — defaults to `Asia/Dhaka`
 
 Frontend (see `wandra-frontend/.env.example`):
 
@@ -56,6 +58,26 @@ Send `Authorization: Token <token>` on authenticated requests.
 | POST | `/auth/login` | `{username, password}` → `{token, user}` |
 | POST | `/auth/logout` | revokes the token |
 | GET | `/auth/me` | current user |
+| GET / PATCH | `/auth/profile` | own profile: `firstname, lastname, gender, birthday, phone, address, avatar_id` |
+
+**Images** (profile photos and post covers)
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/api/images/` | multipart `file` (JPEG/PNG/WebP/GIF, ≤ 5 MB) → `{id, url}`; resized to ≤ 1600 px and stored in the database |
+| GET | `/images/<id>` | public, cached forever |
+
+Uploads are stored in the database rather than on disk because hosts like Railway wipe the disk on every deploy.
+
+**Blog**
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/posts/` | public; optional `?q=`, `?cat=`, `?author=` |
+| POST | `/api/posts/` | `{title, body, categories, image_id}` as the signed-in user |
+| GET / PATCH / DELETE | `/api/posts/<id>/` | editing and deleting: author or staff only |
+| POST / DELETE | `/api/posts/<id>/like/` | like / unlike (one like per user) |
+| GET | `/api/posts/categories/` | allowed categories |
 
 **Cart and bookings** (login required unless noted)
 
@@ -91,6 +113,6 @@ Hotel rooms and tour seats (30 per date by default) can also be adjusted in the 
 
 ## Notes
 
-- Logged-in users' carts and bookings are stored in the backend; a guest's cart is kept in the
-  browser and moved into the account when they log in.
-- Profile details and blog posts are still stored in the browser (`localStorage`).
+- Carts, bookings, profiles and blog posts are stored in the backend. A guest's cart is kept in
+  the browser and moved into the account when they log in.
+- `migrate` seeds four starter blog posts; delete or edit them in the Django admin.

@@ -1,13 +1,10 @@
-from django.urls import re_path as url, include
-from django.urls import re_path as url
-from PostsApp import views
-from django.conf.urls.static import static
-from django.conf import settings
-# from djangoApi.PostsApp.views import AllPostViewSet
+from django.urls import path
 
-urlpatterns=[
-     url(r'^categories/$',views.CategoriesViewSet.as_view(),name='categories'),
-     url(r'^posts/$',views.AllPostViewSet.as_view(),name='posts'),
-     url(r'^posts/([0-9]+)$',views.AllPostViewSet.as_view(),name='posts'),
-     url(r'^uploadpost/$', views.PostsFileView.as_view(), name='file-upload')
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+from PostsApp import views
+
+urlpatterns = [
+    path('', views.post_list, name='post-list'),
+    path('categories/', views.categories, name='post-categories'),
+    path('<int:pk>/', views.post_detail, name='post-detail'),
+    path('<int:pk>/like/', views.post_like, name='post-like'),
+]

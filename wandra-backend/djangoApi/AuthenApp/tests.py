@@ -5,9 +5,8 @@ from django.core.cache import cache
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from AuthenApp.models import UploadProfileFile
+from AuthenApp.models import Profile
 from EmployeeApp.models import MyHotelInfo, MyReservation
-from PostsApp.models import AllPost
 
 STRONG_PASSWORD = 'Wandra-Trip-2026'
 
@@ -83,17 +82,44 @@ class RegisterLoginTests(AuthTestCase):
 
 
 class ProfileTests(AuthTestCase):
-    def test_profile_requires_auth_and_is_scoped_to_owner(self):
-        UploadProfileFile.objects.create(UserName='bob', first_name='Bob', last_name='B', gender='',
-                                         birthday='', phone='555', address='Somewhere',
-                                         registrationDate='', cover='x.png')
-        self.assertEqual(self.client.get('/uploadprofile/').status_code, 401)
+    def test_profile_requires_auth(self):
+        self.assertEqual(self.client.get('/auth/profile').status_code, 401)
+        self.assertEqual(self.client.get('/uploadprofile/').status_code, 404)  # old endpoint removed
+
+    def test_get_creates_empty_profile(self):
         self.login_as(self.make_user())
-        resp = self.client.get('/uploadprofile/?username=bob')
+        resp = self.client.get('/auth/profile')
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.data, [])
-        self.assertEqual(self.client.delete('/uploadprofile/').status_code, 404)
-        self.assertTrue(UploadProfileFile.objects.filter(UserName='bob').exists())
+        self.assertEqual(resp.data['username'], 'alice')
+        self.assertEqual(resp.data['email'], 'alice@example.com')
+        self.assertIsNone(resp.data['avatar'])
+
+    def test_update_profile(self):
+        user = self.make_user()
+        self.login_as(user)
+        resp = self.client.patch('/auth/profile', {
+            'firstname': ' Alice ', 'lastname': 'Khan', 'gender': 'Female', 'birthday': '1990-05-01',
+            'phone': '+880 1711 000000', 'address': 'Dhaka',
+        }, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['firstname'], 'Alice')
+        user.refresh_from_db()
+        self.assertEqual((user.first_name, user.last_name), ('Alice', 'Khan'))
+        self.assertEqual(str(user.profile.birthday), '1990-05-01')
+
+    def test_profile_validation(self):
+        self.login_as(self.make_user())
+        self.assertEqual(self.client.patch('/auth/profile', {'phone': 'call me'}, format='json').status_code, 400)
+        self.assertEqual(self.client.patch('/auth/profile', {'birthday': '2999-01-01'}, format='json').status_code, 400)
+        self.assertEqual(self.client.patch('/auth/profile', {'gender': 'robot'}, format='json').status_code, 400)
+
+    def test_profiles_are_private(self):
+        bob = self.make_user('bob')
+        Profile.objects.create(user=bob, phone='555 1234', address='Somewhere')
+        self.login_as(self.make_user())
+        resp = self.client.get('/auth/profile')
+        self.assertEqual(resp.data['phone'], '')
+        self.assertEqual(Profile.objects.get(user=bob).phone, '555 1234')
 
 
 class LockedDownEndpointTests(AuthTestCase):
@@ -140,12 +166,3 @@ class LockedDownEndpointTests(AuthTestCase):
         self.login_as(self.make_user('admin', is_staff=True))
         self.client.post('/myhotel', payload, format='json')
         self.assertTrue(MyHotelInfo.objects.filter(room_id=2).exists())
-
-    def test_users_can_only_delete_their_own_posts(self):
-        post = AllPost.objects.create(Author='bob', title='t', datetime='', date='', month='',
-                                      likes=0, imgLink=False, imgOrVideoLink='http://x.com',
-                                      comments=0, body='b')
-        self.assertEqual(self.client.delete(f'/posts/{post.id}').status_code, 401)
-        self.login_as(self.make_user())
-        self.assertEqual(self.client.delete(f'/posts/{post.id}').status_code, 403)
-        self.assertTrue(AllPost.objects.filter(id=post.id).exists())

@@ -8,12 +8,13 @@ import { MdLogout, MdEditNote } from "react-icons/md";
 import { FaStackOverflow } from "react-icons/fa";
 import Authenticate from "../Authentication/Authenticate";
 import { navItems } from "./NavItems";
-import { useCart, useUser } from "../../store";
+import { useCart, useProfile, useUser } from "../../store";
 import { logout } from "../../api";
 
 const Navbar = () => {
   const user = useUser();
   const cart = useCart();
+  const profile = useProfile();
   const history = useHistory();
   const location = useLocation();
   const [authTab, setAuthTab] = useState(null); // "login" | "register" | null
@@ -99,7 +100,11 @@ const Navbar = () => {
                   aria-expanded={userMenu}
                   onClick={() => setUserMenu(!userMenu)}
                 >
-                  <span className="avatar">{user.username.charAt(0).toUpperCase()}</span>
+                  {profile.avatar ? (
+                    <img className="avatar" src={profile.avatar} alt="" />
+                  ) : (
+                    <span className="avatar">{user.username.charAt(0).toUpperCase()}</span>
+                  )}
                   <span className="user-chip-name">{user.username}</span>
                 </button>
                 {userMenu && (
