@@ -1164,3 +1164,46 @@ img.avatar {
 [id] {
   scroll-margin-top: calc(var(--nav-h) + 16px);
 }
+
+/* ---------- Responsive images ---------- */
+.img-fade {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.img-fade.is-loaded {
+  opacity: 1;
+}
+
+/* Images with width/height attributes keep their aspect ratio where no height is set. */
+.single-post-img,
+.lightbox img {
+  height: auto;
+}
+
+.lightbox img {
+  width: auto;
+  max-width: 100%;
+}
+
+.gallery-item {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.04);
+}

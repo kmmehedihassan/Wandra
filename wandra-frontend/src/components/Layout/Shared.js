@@ -3,12 +3,53 @@ import { Link } from "react-router-dom";
 import { AiFillHeart, AiFillStar, AiOutlineHeart, AiOutlineStar } from "react-icons/ai";
 import { isSaved, toggleWishlist, useWishlist } from "../../store";
 import { BsStarHalf } from "react-icons/bs";
+import manifest from "../../imageManifest.json";
+
+/* ---------- Images ---------- */
+// Photos in /public/images have WebP copies in several widths (see
+// scripts/optimize-images.mjs). Anything else (e.g. uploads) is used as is.
+export function imageInfo(src) {
+  return manifest[src] || null;
+}
+
+// Best WebP copy for a CSS background of roughly `width` pixels.
+export function backgroundUrl(src, width = 1600) {
+  const info = imageInfo(src);
+  if (!info) return src;
+  const pick = info.srcset.find(([, w]) => w >= width) || info.srcset[info.srcset.length - 1];
+  return pick[0];
+}
+
+export function Img({ src, alt = "", sizes = "(max-width: 720px) 100vw, 420px", className = "", eager = false, ...rest }) {
+  const [loaded, setLoaded] = useState(false);
+  const info = imageInfo(src);
+  if (!info) {
+    return <img src={src} alt={alt} className={className} loading={eager ? "eager" : "lazy"} decoding="async" {...rest} />;
+  }
+  return (
+    <img
+      src={info.srcset[Math.min(1, info.srcset.length - 1)][0]}
+      srcSet={info.srcset.map(([url, w]) => `${url} ${w}w`).join(", ")}
+      sizes={sizes}
+      width={info.w}
+      height={info.h}
+      alt={alt}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      className={`img-fade${loaded ? " is-loaded" : ""} ${className}`.trim()}
+      style={{ backgroundColor: info.color }}
+      onLoad={() => setLoaded(true)}
+      {...rest}
+    />
+  );
+}
 
 export function PageHero({ title, subtitle, eyebrow, image, tall = false, children }) {
+  const info = image ? imageInfo(image) : null;
   return (
     <section
       className={`page-hero${tall ? " tall" : ""}`}
-      style={image ? { backgroundImage: `url("${image}")` } : undefined}
+      style={image ? { backgroundImage: `url("${backgroundUrl(image)}")`, backgroundColor: info ? info.color : undefined } : undefined}
     >
       <div className="container-w page-hero-inner">
         {eyebrow && <span className="eyebrow">{eyebrow}</span>}
@@ -51,12 +92,14 @@ export function Gallery({ images, title = "Gallery" }) {
       <p className="section-sub mb-0">Be our guest and see it for yourself</p>
       <div className="gallery mt-2">
         {images.map((src) => (
-          <img key={src} src={src} alt="" loading="lazy" onClick={() => setOpen(src)} />
+          <button key={src} type="button" className="gallery-item" onClick={() => setOpen(src)} aria-label="Open photo">
+            <Img src={src} sizes="(max-width: 560px) 50vw, 260px" />
+          </button>
         ))}
       </div>
       {open && (
         <div className="lightbox" onClick={() => setOpen(null)} role="dialog" aria-label="Photo">
-          <img src={open} alt="" />
+          <Img src={open} sizes="90vw" eager />
         </div>
       )}
     </section>

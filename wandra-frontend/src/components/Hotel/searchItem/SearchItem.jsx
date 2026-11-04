@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
-import { SaveButton, Stars } from "../../Layout/Shared";
+import { Img, SaveButton, Stars } from "../../Layout/Shared";
 import { formatBDT, useReviewSummary } from "../../../store";
 import { ReviewBadge } from "../../Reviews/Reviews";
 
@@ -10,7 +10,7 @@ const SearchItem = ({ hotel }) => {
   return (
   <article className="list-card">
     <Link to={`/hotels/${hotel.id}`} className="list-card-img" aria-label={hotel.name}>
-      <img src={hotel.src} alt="" loading="lazy" />
+      <Img src={hotel.src} sizes="(max-width: 720px) 100vw, 300px" />
     </Link>
     <div className="list-card-body">
       <div className="row-between" style={{ alignItems: "flex-start" }}>

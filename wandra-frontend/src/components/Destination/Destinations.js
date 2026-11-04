@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import { MdOutlinePlace } from "react-icons/md";
-import { PageHero, EmptyState, SaveButton } from "../Layout/Shared";
+import { PageHero, EmptyState, Img, SaveButton } from "../Layout/Shared";
 import { getDestinations, toursForDestination } from "../Database/catalog";
 import "./destination.css";
 
@@ -62,7 +62,7 @@ const Destinations = () => {
                 <div key={d.id} className="card-wrap">
                   <Link to={`/destinations/${d.id}`} className="media-card dest-card">
                     <div className="media-card-img">
-                      <img src={d.image} alt="" loading="lazy" />
+                      <Img src={d.image} />
                     </div>
                     <div className="media-card-body">
                       <h3 className="media-card-title">{d.name}</h3>

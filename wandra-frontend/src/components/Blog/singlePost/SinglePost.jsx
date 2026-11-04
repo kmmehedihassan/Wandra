@@ -4,6 +4,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import Error from "../../../pages/Error";
 import { LikeButton, timeAgo } from "../post/Post";
 import Comments from "../comments/Comments";
+import { Img } from "../../Layout/Shared";
 import { formatDate, notify } from "../../../store";
 import "../blog.css";
 
@@ -67,7 +68,7 @@ export default function SinglePost({ blog }) {
           )}
         </div>
       </div>
-      <img className="single-post-img" src={post.image} alt="" />
+      <Img className="single-post-img" src={post.image} sizes="(max-width: 860px) 100vw, 820px" eager />
       <div className="single-post-body">
         {post.body.split(/\n{2,}/).map((para, i) => (
           <p key={i}>{para}</p>

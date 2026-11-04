@@ -4,7 +4,7 @@ import { BiSearch } from "react-icons/bi";
 import { MdOutlinePlace, MdOutlineTour, MdOutlineHotel } from "react-icons/md";
 import { RiShieldCheckLine } from "react-icons/ri";
 import { sliderImage } from "./sliderImage";
-import { SaveButton, Stars } from "../Layout/Shared";
+import { Img, SaveButton, Stars, backgroundUrl, imageInfo } from "../Layout/Shared";
 import { getDestinations, getTours } from "../Database/catalog";
 import { formatBDT } from "../../store";
 import "./home.css";
@@ -55,7 +55,7 @@ const Home = () => {
     <>
       <section className="home-hero">
         {sliderImage.map((s, i) => (
-          <div key={s.urls} className={`home-hero-bg${i === slide ? " is-visible" : ""}`} style={{ backgroundImage: `url("${s.urls}")` }} aria-hidden="true" />
+          <div key={s.urls} className={`home-hero-bg${i === slide ? " is-visible" : ""}`} style={{ backgroundImage: i === slide || i === (slide + 1) % sliderImage.length ? `url("${backgroundUrl(s.urls)}")` : undefined, backgroundColor: (imageInfo(s.urls) || {}).color }} aria-hidden="true" />
         ))}
         <div className="container-w home-hero-inner">
           <span className="eyebrow">Discover Bangladesh</span>
@@ -112,7 +112,7 @@ const Home = () => {
             <div key={d.id} className="card-wrap">
               <Link to={`/destinations/${d.id}`} className="media-card">
                 <div className="media-card-img">
-                  <img src={d.image} alt="" loading="lazy" />
+                  <Img src={d.image} />
                 </div>
                 <div className="media-card-body">
                   <h3 className="media-card-title">{d.name}</h3>
@@ -138,7 +138,7 @@ const Home = () => {
             <div key={t.id} className="card-wrap">
             <Link to={`/tours/${t.id}`} className="media-card">
               <div className="media-card-img">
-                <img src={t.img} alt="" loading="lazy" />
+                <Img src={t.img} />
               </div>
               <div className="media-card-body">
                 <h3 className="media-card-title">{t.title}</h3>

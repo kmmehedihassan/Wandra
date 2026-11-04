@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { BiTimeFive } from "react-icons/bi";
-import { SaveButton, Stars } from "../Layout/Shared";
+import { Img, SaveButton, Stars } from "../Layout/Shared";
 import { formatBDT, useReviewSummary } from "../../store";
 import { ReviewBadge } from "../Reviews/Reviews";
 
@@ -11,7 +11,7 @@ const TourCard = ({ tour }) => {
   return (
   <article className="list-card">
     <Link to={`/tours/${tour.id}`} className="list-card-img" aria-label={tour.title}>
-      <img src={tour.img} alt="" loading="lazy" />
+      <Img src={tour.img} sizes="(max-width: 720px) 100vw, 300px" />
     </Link>
     <div className="list-card-body">
       <div className="row-between" style={{ alignItems: "flex-start" }}>

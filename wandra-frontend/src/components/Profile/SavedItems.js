@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
-import { EmptyState, SaveButton } from "../Layout/Shared";
+import { EmptyState, Img, SaveButton } from "../Layout/Shared";
 import { getDestination, getHotel, getTour } from "../Database/catalog";
 import { formatBDT, useWishlist, useWishlistLoaded } from "../../store";
 
@@ -63,7 +63,7 @@ const SavedItems = () => {
                 {group.map(({ item, info }) => (
                   <li key={`${item.kind}-${item.refId}`} className="saved-item">
                     <Link to={info.to} className="saved-link">
-                      <img src={info.image} alt="" loading="lazy" />
+                      <Img src={info.image} sizes="72px" />
                       <div>
                         <strong>{info.name}</strong>
                         <span className="muted small"><MdOutlinePlace /> {info.meta}</span>

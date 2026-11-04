@@ -157,6 +157,13 @@ cd wandra-backend/djangoApi && python manage.py sync_catalog
 
 Hotel rooms and tour seats (30 per date by default) can also be adjusted in the Django admin.
 
+## Images
+
+Photos live in `wandra-frontend/public/images`. After adding or replacing photos, run
+`npm run optimize-images` in `wandra-frontend` to generate the responsive WebP copies in
+`public/images/opt` and update `src/imageManifest.json` (sizes and placeholder colours). Pages use
+those automatically through the `<Img>` component.
+
 ## Notes
 
 - Carts, bookings, profiles and blog posts are stored in the backend. A guest's cart is kept in

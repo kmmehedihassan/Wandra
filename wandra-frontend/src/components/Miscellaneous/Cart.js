@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { BiCalendar, BiUser } from "react-icons/bi";
 import { MdOutlineHotel, MdOutlineTour } from "react-icons/md";
 import CreditCardForm from "./CreditCardForm";
-import { EmptyState } from "../Layout/Shared";
+import { EmptyState, Img } from "../Layout/Shared";
 import { cartTotal, formatBDT, formatDate, lineTotal, openAuthModal, removeFromCart, useCart, useCartLoaded, useUser } from "../../store";
 import "./cart.css";
 
@@ -98,7 +98,7 @@ const Cart = () => {
           <div className="cart-list">
             {cart.map((item) => (
               <article key={item.id} className="card cart-item">
-                {item.image && <img className="cart-item-img" src={item.image} alt="" />}
+                {item.image && <Img className="cart-item-img" src={item.image} sizes="(max-width: 560px) 100vw, 140px" />}
                 <div className="cart-item-body">
                   <BookingSummary item={item} />
                   <div className="mt-1">

@@ -4,6 +4,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { BiComment } from "react-icons/bi";
 import { formatDistanceToNow } from "date-fns";
 import { useUser, openAuthModal } from "../../../store";
+import { Img } from "../../Layout/Shared";
 
 export function postExcerpt(body, length = 140) {
   const text = String(body || "").replace(/\s+/g, " ").trim();
@@ -39,7 +40,7 @@ export default function Post({ post, onToggleLike }) {
   return (
     <article className="media-card post-card">
       <Link to={`/blog/post/${post.id}`} className="media-card-img" aria-label={post.title}>
-        <img src={post.image} alt="" loading="lazy" />
+        <Img src={post.image} />
       </Link>
       <div className="media-card-body">
         <div className="chip-row">

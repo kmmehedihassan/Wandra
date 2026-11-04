@@ -23,7 +23,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "export-catalog": "node scripts/export-catalog.mjs"
+    "export-catalog": "node scripts/export-catalog.mjs",
+    "optimize-images": "node scripts/optimize-images.mjs"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +43,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
   }
 }
