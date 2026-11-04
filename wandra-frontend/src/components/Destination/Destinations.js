@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import { MdOutlinePlace } from "react-icons/md";
@@ -6,19 +6,31 @@ import { PageHero, EmptyState, Img, SaveButton } from "../Layout/Shared";
 import { getDestinations, toursForDestination } from "../Database/catalog";
 import "./destination.css";
 
+const DestinationMap = lazy(() => import("./DestinationMap"));
+
 const Destinations = () => {
   const location = useLocation();
   const history = useHistory();
-  const [search, setSearch] = useState(new URLSearchParams(location.search).get("q") || "");
+  const params = new URLSearchParams(location.search);
+  const [search, setSearch] = useState(params.get("q") || "");
+  const view = params.get("view") === "map" ? "map" : "grid";
   const destinations = useMemo(getDestinations, []);
 
   const results = destinations.filter((d) =>
     `${d.name} ${d.region}`.toLowerCase().includes(search.trim().toLowerCase())
   );
 
+  const updateUrl = (q, v) => {
+    const next = new URLSearchParams();
+    if (q) next.set("q", q);
+    if (v === "map") next.set("view", "map");
+    const qs = next.toString();
+    history.replace(`/destinations${qs ? `?${qs}` : ""}`);
+  };
+
   const updateSearch = (value) => {
     setSearch(value);
-    history.replace(value ? `/destinations?q=${encodeURIComponent(value)}` : "/destinations");
+    updateUrl(value, view);
   };
 
   return (
@@ -27,13 +39,21 @@ const Destinations = () => {
         eyebrow="Destinations"
         title="Explore Bangladesh"
         subtitle="Beaches, mangrove forests, tea gardens and hill tracts — find your next adventure."
-        image="/images/two.jpg"
+        image="/images/seven.jpg"
       />
       <section className="container-w section">
         <div className="section-head">
           <div>
             <h2 className="section-title">{results.length} destinations</h2>
             <p className="section-sub">Pick a place to see things to know, photos and tours.</p>
+          </div>
+          <div className="chip-row" style={{ alignItems: "center" }}>
+          <div className="view-switch" role="group" aria-label="View">
+            {["grid", "map"].map((v) => (
+              <button key={v} type="button" className={view === v ? "is-active" : ""} aria-pressed={view === v} onClick={() => updateUrl(search, v)}>
+                {v === "grid" ? "Grid" : "Map"}
+              </button>
+            ))}
           </div>
           <label className="input-icon dest-search">
             <BiSearch />
@@ -45,9 +65,15 @@ const Destinations = () => {
               onChange={(e) => updateSearch(e.target.value)}
             />
           </label>
+          </div>
         </div>
 
-        {results.length === 0 ? (
+        {results.length > 0 && view === "map" ? (
+          <Suspense fallback={<div className="skeleton" style={{ height: 520 }} />}>
+            <DestinationMap destinations={results} />
+            <p className="muted small mt-1">Tap a pin to see the destination. Locations are approximate.</p>
+          </Suspense>
+        ) : results.length === 0 ? (
           <EmptyState
             title="No destinations match your search"
             text="Try another name, such as Sajek or Kuakata."

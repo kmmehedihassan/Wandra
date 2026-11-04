@@ -91,3 +91,94 @@
   color: var(--muted);
   font-size: 0.85rem;
 }
+
+/* ---------- Map ---------- */
+.map-frame {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--neutral-soft);
+  position: relative;
+  z-index: 0; /* keep Leaflet's panes under the navbar and modals */
+}
+
+.map-pin {
+  background: none;
+  border: 0;
+}
+
+.map-pin-dot {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--brand);
+  border: 3px solid #fff;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 200px;
+  font-family: var(--font);
+}
+
+.map-popup img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.map-popup a {
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.leaflet-container {
+  font-family: var(--font);
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Darken map tiles in dark mode. */
+:root[data-theme="dark"] .leaflet-tile {
+  filter: brightness(0.7) invert(1) contrast(0.9) hue-rotate(200deg) saturate(0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .leaflet-tile {
+    filter: brightness(0.7) invert(1) contrast(0.9) hue-rotate(200deg) saturate(0.4);
+  }
+}
+
+.view-switch {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--neutral-soft);
+}
+
+.view-switch button {
+  border: 0;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.view-switch button.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}

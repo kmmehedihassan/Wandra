@@ -6,11 +6,6 @@ export const sliderImage = [
   },
   {
     title: "WANDRA",
-    description: "Not all those who wander are lost",
-    urls: "/images/two.jpg",
-  },
-  {
-    title: "WANDRA",
     description: "Travel is an investment in yourself",
     urls: "/images/three.jpg",
   },
@@ -18,12 +13,6 @@ export const sliderImage = [
     title: "WANDRA",
     description: "The goal is to die with memories not dreams",
     urls: "/images/four.jpg",
-  },
-  {
-    title: "WANDRA",
-    description:
-      "Some beautiful paths can’t be discovered without getting lost",
-    urls: "/images/five.jpg",
   },
   {
     title: "WANDRA",

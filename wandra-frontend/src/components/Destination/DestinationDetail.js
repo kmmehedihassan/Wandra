@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import Accordion from "./Accordion";
@@ -7,6 +7,8 @@ import { PageHero, Gallery, SaveButton, Stars } from "../Layout/Shared";
 import { faqFor, galleryFor, getDestination, hotelsForDestination, toursForDestination } from "../Database/catalog";
 import { formatBDT } from "../../store";
 import "./destination.css";
+
+const DestinationMap = lazy(() => import("./DestinationMap"));
 
 const DestinationDetail = () => {
   const { id } = useParams();
@@ -49,6 +51,17 @@ const DestinationDetail = () => {
           </div>
 
           <aside className="stack sticky-card">
+            {destination.position && (
+              <div className="card card-pad">
+                <h3 className="card-title">On the map</h3>
+                <Suspense fallback={<div className="skeleton" style={{ height: 200 }} />}>
+                  <DestinationMap destinations={[destination]} height={200} zoom={8} />
+                </Suspense>
+                <Link to="/destinations?view=map" className="small mt-1" style={{ display: "inline-block" }}>
+                  See all destinations on the map →
+                </Link>
+              </div>
+            )}
             <div className="card card-pad">
               <h3 className="card-title">Tours to {destination.name}</h3>
               {tours.length === 0 ? (

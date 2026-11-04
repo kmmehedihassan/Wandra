@@ -50,6 +50,22 @@ const REGIONS = {
   12: "Bandarban",
 };
 
+// Approximate map positions [latitude, longitude].
+const COORDINATES = {
+  1: [20.6237, 92.3234], // St. Martin's Island
+  2: [21.9497, 89.1833], // Sundarbans (Karamjal, near Mongla)
+  3: [21.4272, 92.0058], // Cox's Bazar
+  4: [22.8660, 90.2780], // Guthia Mosque, Barisal
+  5: [24.3065, 91.7296], // Srimangal
+  6: [25.1500, 91.0667], // Tanguar Haor
+  7: [21.8167, 90.1206], // Kuakata
+  8: [23.3820, 92.2938], // Sajek Valley
+  9: [23.7086, 90.4060], // Ahsan Manzil, Dhaka
+  10: [21.6900, 92.6000], // Amiakhum waterfall
+  11: [25.0040, 91.9330], // Ratargul swamp forest
+  12: [21.9130, 92.3380], // Nilgiri, Bandarban
+};
+
 const HOTEL_GALLERY = [
   "/images/sayeman.jpg",
   "/images/hotel.jpeg",
@@ -95,6 +111,7 @@ export function getDestinations() {
       heroImage: detail.link || g.link,
       body: detail.body || "",
       region: REGIONS[g.id] || "",
+      position: COORDINATES[g.id] || null,
     };
   });
 }
