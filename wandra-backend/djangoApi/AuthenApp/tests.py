@@ -1,4 +1,11 @@
+import json
+import re
+from unittest import mock
+
 from django.contrib.auth.models import User
+from django.core import mail
+from django.core.mail import EmailMultiAlternatives
+from django.test import override_settings
 from django.core.cache import cache
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
@@ -142,3 +149,112 @@ class PasswordChangeTests(AuthTestCase):
         self.assertEqual(self.client.post(url, {'current_password': STRONG_PASSWORD, 'new_password': STRONG_PASSWORD},
                                           format='json').status_code, 400)
 
+
+
+class LoginIdentifierTests(AuthTestCase):
+    def test_login_with_email_or_any_case(self):
+        self.make_user('Alice')
+        for identifier in ('Alice', 'alice', 'ALICE@example.com'):
+            resp = self.client.post('/auth/login', {'username': identifier, 'password': STRONG_PASSWORD}, format='json')
+            self.assertEqual(resp.status_code, 200, identifier)
+            self.assertEqual(resp.data['user']['username'], 'Alice')
+
+    def test_usernames_are_unique_ignoring_case(self):
+        self.make_user('Alice')
+        resp = self.client.post('/auth/register', {'username': 'alice', 'email': 'other@example.com',
+                                                   'password': STRONG_PASSWORD}, format='json')
+        self.assertEqual(resp.status_code, 400)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+                   FRONTEND_URL='https://wandra.example', DEFAULT_FROM_EMAIL='Wandra <hello@wandra.example>')
+class PasswordResetTests(AuthTestCase):
+    def request_reset(self, email):
+        return self.client.post('/auth/password/reset', {'email': email}, format='json')
+
+    def link_from_email(self):
+        match = re.search(r'https://wandra\.example/reset-password\?uid=([\w-]+)&token=([\w-]+)', mail.outbox[-1].body)
+        return match.group(1), match.group(2)
+
+    def test_reset_flow(self):
+        user = self.make_user()
+        old_token = Token.objects.create(user=user).key
+        resp = self.request_reset('ALICE@example.com')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['alice@example.com'])
+        self.assertIn('text/html', [m for _, m in mail.outbox[0].alternatives])
+        uid, token = self.link_from_email()
+
+        weak = self.client.post('/auth/password/reset/confirm', {'uid': uid, 'token': token, 'new_password': '123'}, format='json')
+        self.assertEqual(weak.status_code, 400)
+        resp = self.client.post('/auth/password/reset/confirm',
+                                {'uid': uid, 'token': token, 'new_password': 'Brand-New-2027'}, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('token', resp.data)
+        user.refresh_from_db()
+        self.assertTrue(user.check_password('Brand-New-2027'))
+        self.assertFalse(Token.objects.filter(key=old_token).exists())  # other sessions ended
+        # The link can't be used twice.
+        again = self.client.post('/auth/password/reset/confirm',
+                                 {'uid': uid, 'token': token, 'new_password': 'Another-One-2028'}, format='json')
+        self.assertEqual(again.status_code, 400)
+
+    def test_unknown_email_gets_same_reply_and_no_mail(self):
+        self.make_user()
+        known = self.request_reset('alice@example.com').data
+        unknown = self.request_reset('nobody@example.com').data
+        self.assertEqual(known, unknown)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_bad_links_are_rejected(self):
+        self.make_user()
+        for payload in ({'uid': 'xx', 'token': 'bad'}, {'uid': 'MQ', 'token': 'bad-token'}):
+            resp = self.client.post('/auth/password/reset/confirm', {**payload, 'new_password': 'Brand-New-2027'}, format='json')
+            self.assertEqual(resp.status_code, 400)
+
+    def test_reset_requests_are_throttled(self):
+        self.make_user()
+        codes = [self.request_reset('alice@example.com').status_code for _ in range(6)]
+        self.assertEqual(codes[-1], 429)
+
+    def test_email_escapes_user_controlled_text(self):
+        user = self.make_user()
+        user.first_name = '<a href="https://evil.example">Click</a>'
+        user.save()
+        self.request_reset('alice@example.com')
+        html = mail.outbox[0].alternatives[0][0]
+        self.assertNotIn('<a href="https://evil.example">', html)
+
+
+class BrevoBackendTests(AuthTestCase):
+    @override_settings(BREVO_API_KEY='test-key')
+    def test_sends_via_brevo_api(self):
+        from AuthenApp.email import BrevoEmailBackend
+
+        captured = {}
+
+        class FakeResponse:
+            status = 201
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        def fake_urlopen(request, timeout):
+            captured['url'] = request.full_url
+            captured['headers'] = dict(request.header_items())
+            captured['body'] = json.loads(request.data)
+            return FakeResponse()
+
+        message = EmailMultiAlternatives('Hello', 'Plain text', 'Wandra <hello@wandra.example>', ['Alice <alice@example.com>'])
+        message.attach_alternative('<p>HTML</p>', 'text/html')
+        with mock.patch('AuthenApp.email.urllib.request.urlopen', fake_urlopen):
+            self.assertEqual(BrevoEmailBackend().send_messages([message]), 1)
+        self.assertEqual(captured['url'], 'https://api.brevo.com/v3/smtp/email')
+        self.assertEqual(captured['headers']['Api-key'], 'test-key')
+        self.assertEqual(captured['body']['sender'], {'email': 'hello@wandra.example', 'name': 'Wandra'})
+        self.assertEqual(captured['body']['to'], [{'email': 'alice@example.com', 'name': 'Alice'}])
+        self.assertEqual(captured['body']['htmlContent'], '<p>HTML</p>')

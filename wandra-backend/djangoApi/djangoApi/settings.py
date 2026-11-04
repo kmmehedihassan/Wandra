@@ -53,6 +53,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'auth': config('AUTH_THROTTLE_RATE', default='10/min'),
         'uploads': config('UPLOAD_THROTTLE_RATE', default='30/hour'),
+        'password_reset': config('PASSWORD_RESET_THROTTLE_RATE', default='5/hour'),
     },
 }
 
@@ -124,6 +125,28 @@ STORAGES = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email (password reset). Brevo's free HTTP API is preferred because Railway
+# blocks outgoing SMTP on free plans; any SMTP server works via EMAIL_HOST.
+# Without either, emails are printed to the server log (fine for development).
+BREVO_API_KEY = config('BREVO_API_KEY', default='')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+if BREVO_API_KEY:
+    EMAIL_BACKEND = 'AuthenApp.email.BrevoEmailBackend'
+elif EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_TIMEOUT = 15
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Wandra <no-reply@example.com>')
+
+# Where links in emails point (the React app).
+FRONTEND_URL = config('FRONTEND_URL', default=CORS_ALLOWED_ORIGINS[0] if CORS_ALLOWED_ORIGINS else 'http://localhost:3000')
+PASSWORD_RESET_TIMEOUT = config('PASSWORD_RESET_TIMEOUT', default=3600, cast=int)  # seconds
 
 # Behind Railway's proxy, so absolute URLs (e.g. uploaded image links) use https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

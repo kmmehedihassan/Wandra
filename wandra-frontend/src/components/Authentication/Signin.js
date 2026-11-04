@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { API_BASE, errorMessage, saveSession } from "../../api";
 
-const Signin = () => {
+const Signin = ({ onForgot }) => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +15,7 @@ const Signin = () => {
 
   const validate = () => {
     const next = {};
-    if (!form.username.trim()) next.username = "Username is required";
+    if (!form.username.trim()) next.username = "Enter your username or email";
     if (!form.password) next.password = "Password is required";
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -47,7 +47,7 @@ const Signin = () => {
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="field">
-        <label className="field-label" htmlFor="login-user">Username</label>
+        <label className="field-label" htmlFor="login-user">Username or email</label>
         <input
           id="login-user"
           name="username"
@@ -60,7 +60,12 @@ const Signin = () => {
         {errors.username && <span className="field-error">{errors.username}</span>}
       </div>
       <div className="field">
-        <label className="field-label" htmlFor="login-pass">Password</label>
+        <div className="row-between">
+          <label className="field-label" htmlFor="login-pass">Password</label>
+          <button type="button" className="link-btn" onClick={onForgot}>
+            Forgot password?
+          </button>
+        </div>
         <div className="password-wrap">
           <input
             id="login-pass"

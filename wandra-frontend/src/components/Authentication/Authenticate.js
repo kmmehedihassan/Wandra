@@ -2,9 +2,17 @@ import React, { useEffect, useState } from "react";
 import { HiOutlineX } from "react-icons/hi";
 import Signup from "./Signup";
 import Signin from "./Signin";
+import ForgotPassword from "./ForgotPassword";
 
+const COPY = {
+  login: { title: "Welcome back", text: "Log in to book tours and hotels, and manage your trips." },
+  register: { title: "Create your account", text: "Join Wandra to book trips and share your travel stories." },
+  forgot: { title: "Reset your password" },
+};
+
+// Login / register / forgot-password modal. `initialTab` is one of the COPY keys.
 const Authenticate = ({ initialTab = "login", onClose }) => {
-  const [tab, setTab] = useState(initialTab);
+  const [tab, setTab] = useState(COPY[initialTab] ? initialTab : "login");
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -18,25 +26,34 @@ const Authenticate = ({ initialTab = "login", onClose }) => {
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-card" role="dialog" aria-modal="true" aria-label="Log in or register">
+      <div className="modal-card" role="dialog" aria-modal="true" aria-label={COPY[tab].title}>
         <button type="button" className="icon-btn modal-close" aria-label="Close" onClick={onClose}>
           <HiOutlineX size={18} />
         </button>
-        <h2 className="card-title">{tab === "login" ? "Welcome back" : "Create your account"}</h2>
-        <p className="muted small mt-0">
-          {tab === "login"
-            ? "Log in to book tours and hotels, and manage your trips."
-            : "Join Wandra to book trips and share your travel stories."}
-        </p>
-        <div className="tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={tab === "login"} className={`tab${tab === "login" ? " is-active" : ""}`} onClick={() => setTab("login")}>
-            Log in
-          </button>
-          <button type="button" role="tab" aria-selected={tab === "register"} className={`tab${tab === "register" ? " is-active" : ""}`} onClick={() => setTab("register")}>
-            Register
-          </button>
-        </div>
-        {tab === "login" ? <Signin /> : <Signup />}
+        <h2 className="card-title">{COPY[tab].title}</h2>
+
+        {tab === "forgot" ? (
+          <ForgotPassword onBack={() => setTab("login")} />
+        ) : (
+          <>
+            <p className="muted small mt-0">{COPY[tab].text}</p>
+            <div className="tabs" role="tablist">
+              {["login", "register"].map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === key}
+                  className={`tab${tab === key ? " is-active" : ""}`}
+                  onClick={() => setTab(key)}
+                >
+                  {key === "login" ? "Log in" : "Register"}
+                </button>
+              ))}
+            </div>
+            {tab === "login" ? <Signin onForgot={() => setTab("forgot")} /> : <Signup />}
+          </>
+        )}
       </div>
     </div>
   );

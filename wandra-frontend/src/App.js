@@ -15,6 +15,7 @@ import Write from "./components/Blog/write/Write";
 import Cart from "./components/Miscellaneous/Cart";
 import Dashboard from "./components/Profile/Dashboard";
 import Error from "./pages/Error";
+import ResetPassword from "./pages/ResetPassword";
 import { useScrollTop } from "./components/Layout/Shared";
 import { usePosts } from "./usePosts";
 import Toast from "./components/Layout/Toast";
@@ -49,6 +50,7 @@ const App = () => {
           </Route>
           <Route exact path="/cart" component={Cart} />
           <Route exact path="/dashboard" component={Dashboard} />
+          <Route exact path="/reset-password" component={ResetPassword} />
           <Route component={Error} />
         </Switch>
       </main>

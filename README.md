@@ -44,6 +44,27 @@ Set these variables on the backend service: `DEBUG=False`, `SECRET_KEY`, `ALLOWE
 Create an admin account once with `python manage.py createsuperuser` (Railway shell) and sign in at
 `/admin/`.
 
+## Email (password reset)
+
+Password-reset emails are sent with [Brevo](https://www.brevo.com) — free for 300 emails a day,
+no credit card. It sends over HTTPS, so it works on Railway (which blocks outgoing SMTP on free
+plans).
+
+1. Create a free Brevo account.
+2. **Senders, Domains & Dedicated IPs → Senders → Add a sender**: add the address emails should
+   come from (e.g. your Gmail) and click the confirmation link Brevo sends to it.
+3. **SMTP & API → API Keys → Generate a new API key**.
+4. Set on the backend service:
+   - `BREVO_API_KEY=<the key>`
+   - `DEFAULT_FROM_EMAIL=Wandra <the-sender-you-verified@example.com>`
+   - `FRONTEND_URL=https://your-frontend.example.com` (where links in the email point; defaults to
+     the first `CORS_ALLOWED_ORIGINS` entry)
+
+Any SMTP server works instead (e.g. Gmail with an app password, on hosts that allow SMTP): set
+`EMAIL_HOST`, `EMAIL_PORT` (587), `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` and `DEFAULT_FROM_EMAIL`.
+With neither configured, emails are printed to the server log, which is handy for local development;
+`manage.py check --deploy` warns about this in production.
+
 ## Configuration
 
 Backend (environment variables, see `wandra-backend/djangoApi/.env.example`):
@@ -70,10 +91,12 @@ Send `Authorization: Token <token>` on authenticated requests.
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/auth/register` | `{username, email, password}` → `{token, user}` |
-| POST | `/auth/login` | `{username, password}` → `{token, user}` |
+| POST | `/auth/login` | `{username, password}` (username or email, any case) → `{token, user}` |
 | POST | `/auth/logout` | revokes the token |
 | GET | `/auth/me` | current user |
 | POST | `/auth/password` | `{current_password, new_password}` → new `{token, user}`; signs out other devices |
+| POST | `/auth/password/reset` | `{email}` → emails a reset link (same reply whether or not the email exists; 5/hour per IP) |
+| POST | `/auth/password/reset/confirm` | `{uid, token, new_password}` from the link → `{token, user}`; links expire after 1 hour and work once |
 | GET / PATCH | `/auth/profile` | own profile: `firstname, lastname, gender, birthday, phone, address, avatar_id` |
 
 **Images** (profile photos and post covers)

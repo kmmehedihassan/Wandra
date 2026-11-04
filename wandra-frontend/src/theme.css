@@ -1093,3 +1093,18 @@ img.avatar {
   opacity: 0.6;
   pointer-events: none;
 }
+
+.link-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--brand);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+}

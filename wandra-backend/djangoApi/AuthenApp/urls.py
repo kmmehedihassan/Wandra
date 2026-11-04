@@ -8,5 +8,7 @@ urlpatterns = [
     path('auth/logout', views.logout, name='auth-logout'),
     path('auth/me', views.me, name='auth-me'),
     path('auth/password', views.change_password, name='auth-password'),
+    path('auth/password/reset', views.password_reset_request, name='auth-password-reset'),
+    path('auth/password/reset/confirm', views.password_reset_confirm, name='auth-password-reset-confirm'),
     path('auth/profile', views.profile, name='auth-profile'),
 ]
