@@ -54,6 +54,7 @@ REST_FRAMEWORK = {
         'auth': config('AUTH_THROTTLE_RATE', default='10/min'),
         'uploads': config('UPLOAD_THROTTLE_RATE', default='30/hour'),
         'password_reset': config('PASSWORD_RESET_THROTTLE_RATE', default='5/hour'),
+        'comments': config('COMMENT_THROTTLE_RATE', default='30/hour'),
     },
 }
 

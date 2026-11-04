@@ -96,11 +96,23 @@ export function Stepper({ value, min = 0, max = 99, onChange, label }) {
   );
 }
 
-// Scroll to the top whenever the route changes.
-export function useScrollTop(dep) {
+// Scroll to the top when the route changes, or to #anchor when the URL has one.
+export function useScrollTop(pathname, hash = "") {
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [dep]);
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return undefined;
+    }
+    let tries = 0;
+    const timer = setInterval(() => {
+      const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (el || ++tries > 20) {
+        clearInterval(timer);
+        if (el) el.scrollIntoView({ block: "start" });
+      }
+    }, 100);
+    return () => clearInterval(timer);
+  }, [pathname, hash]);
 }
 
 // Heart toggle for saving a destination, tour or hotel to the wishlist.

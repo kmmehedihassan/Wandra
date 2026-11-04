@@ -1,15 +1,17 @@
 from django.db.models import Count, Exists, OuterRef, Q
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
-from PostsApp.models import CATEGORIES, Post, PostLike
-from PostsApp.serializers import PostSerializer
+from PostsApp.models import CATEGORIES, Post, PostComment, PostLike
+from PostsApp.serializers import CommentSerializer, PostSerializer
 
 
 def _posts(request):
-    qs = Post.objects.select_related('author', 'image').annotate(like_count=Count('likes', distinct=True))
+    qs = Post.objects.select_related('author', 'image').annotate(
+        like_count=Count('likes', distinct=True), comment_count=Count('comments', distinct=True))
     if request.user.is_authenticated:
         qs = qs.annotate(liked_by_me=Exists(PostLike.objects.filter(post=OuterRef('pk'), user=request.user)))
     return qs
@@ -82,3 +84,44 @@ def post_like(request, pk):
     else:
         PostLike.objects.filter(post=post, user=request.user).delete()
     return Response({'likes': post.likes.count(), 'liked': request.method == 'POST'})
+
+
+class CommentThrottle(UserRateThrottle):
+    scope = 'comments'
+
+    def allow_request(self, request, view):
+        if request.method != 'POST':  # only limit new comments
+            return True
+        return super().allow_request(request, view)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+@throttle_classes([CommentThrottle])
+def post_comments(request, pk):
+    """GET a post's comments (oldest first); POST {body} as the signed-in user."""
+    post = Post.objects.filter(pk=pk).first()
+    if post is None:
+        return Response({'detail': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+    context = {'request': request}
+    if request.method == 'POST':
+        serializer = CommentSerializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        comment = serializer.save(post=post, user=request.user)
+        return Response(CommentSerializer(comment, context=context).data, status=status.HTTP_201_CREATED)
+    comments = post.comments.select_related('user', 'post')
+    return Response(CommentSerializer(comments, many=True, context=context).data)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def comment_detail(request, pk, comment_pk):
+    """Delete a comment: its author, the post's author or staff."""
+    comment = PostComment.objects.select_related('post').filter(pk=comment_pk, post_id=pk).first()
+    if comment is None:
+        return Response({'detail': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
+    user = request.user
+    if not (user.is_staff or comment.user_id == user.id or comment.post.author_id == user.id):
+        return Response({'detail': "You can't delete this comment."}, status=status.HTTP_403_FORBIDDEN)
+    comment.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

@@ -57,5 +57,9 @@ export function usePosts() {
     }
   }, []);
 
-  return { posts: posts || [], loading: posts === null, error, reload: load, createPost, deletePost, toggleLike };
+  const adjustComments = useCallback((id, delta) => {
+    setPosts((current) => (current || []).map((p) => (p.id === id ? { ...p, comments: Math.max(0, (p.comments || 0) + delta) } : p)));
+  }, []);
+
+  return { posts: posts || [], loading: posts === null, error, reload: load, createPost, deletePost, toggleLike, adjustComments };
 }

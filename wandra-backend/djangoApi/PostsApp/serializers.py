@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from MediaApp.models import StoredImage
-from PostsApp.models import CATEGORIES, Post
+from PostsApp.models import CATEGORIES, Post, PostComment
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -14,12 +14,13 @@ class PostSerializer(serializers.ModelSerializer):
     updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
     likes = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
     canEdit = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = ['id', 'author', 'title', 'body', 'categories', 'image', 'image_id', 'createdAt', 'updatedAt',
-                  'likes', 'liked', 'canEdit']
+                  'likes', 'liked', 'comments', 'canEdit']
 
     def _user(self):
         request = self.context.get('request')
@@ -32,6 +33,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_likes(self, obj):
         return obj.like_count if hasattr(obj, 'like_count') else obj.likes.count()
+
+    def get_comments(self, obj):
+        return obj.comment_count if hasattr(obj, 'comment_count') else obj.comments.count()
 
     def get_liked(self, obj):
         user = self._user()
@@ -70,3 +74,23 @@ class PostSerializer(serializers.ModelSerializer):
         if self.instance is None and not attrs.get('image'):
             raise serializers.ValidationError({'image_id': 'Add a cover photo.'})
         return attrs
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='user.username', read_only=True)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    canDelete = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PostComment
+        fields = ['id', 'author', 'body', 'createdAt', 'canDelete']
+
+    def get_canDelete(self, obj):
+        user = self.context['request'].user
+        return bool(user.is_authenticated and (user.is_staff or obj.user_id == user.id or obj.post.author_id == user.id))
+
+    def validate_body(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('Write a comment first.')
+        return value

@@ -120,3 +120,58 @@
   color: var(--muted);
   font-weight: 600;
 }
+
+.comment-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-form-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-form .textarea {
+  min-height: 88px;
+}
+
+.comment-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-body {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.post-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comment-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}

@@ -24,7 +24,7 @@ import { useSessionSync } from "./store";
 const App = () => {
   const blog = usePosts();
   const location = useLocation();
-  useScrollTop(location.pathname);
+  useScrollTop(location.pathname, location.hash);
   useSessionSync();
 
   return (

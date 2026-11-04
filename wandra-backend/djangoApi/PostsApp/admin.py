@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from PostsApp.models import Post, PostLike
+from PostsApp.models import Post, PostComment, PostLike
 
 
 @admin.register(Post)
@@ -11,3 +11,9 @@ class PostAdmin(admin.ModelAdmin):
 
 
 admin.site.register(PostLike)
+
+
+@admin.register(PostComment)
+class PostCommentAdmin(admin.ModelAdmin):
+    list_display = ('post', 'user', 'created_at')
+    search_fields = ('body', 'user__username')

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { BiComment } from "react-icons/bi";
 import { formatDistanceToNow } from "date-fns";
 import { useUser, openAuthModal } from "../../../store";
 
@@ -61,7 +62,12 @@ export default function Post({ post, onToggleLike }) {
             </Link>{" "}
             · {timeAgo(post.createdAt)}
           </span>
-          <LikeButton post={post} onToggle={onToggleLike} />
+          <span className="post-stats">
+            <Link to={`/blog/post/${post.id}#comments-title`} className="comment-count" aria-label={`${post.comments || 0} comments`}>
+              <BiComment /> {post.comments || 0}
+            </Link>
+            <LikeButton post={post} onToggle={onToggleLike} />
+          </span>
         </div>
       </div>
     </article>

@@ -116,6 +116,8 @@ Uploads are stored in the database rather than on disk because hosts like Railwa
 | GET / PATCH / DELETE | `/api/posts/<id>/` | editing and deleting: author or staff only |
 | POST / DELETE | `/api/posts/<id>/like/` | like / unlike (one like per user) |
 | GET | `/api/posts/categories/` | allowed categories |
+| GET / POST | `/api/posts/<id>/comments/` | public list; POST `{body}` (≤ 1000 chars, 30/hour per user) |
+| DELETE | `/api/posts/<id>/comments/<comment_id>/` | comment author, post author or staff |
 
 **Cart and bookings** (login required unless noted)
 

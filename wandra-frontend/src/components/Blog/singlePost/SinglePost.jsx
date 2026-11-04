@@ -3,11 +3,12 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import { AiOutlineDelete } from "react-icons/ai";
 import Error from "../../../pages/Error";
 import { LikeButton, timeAgo } from "../post/Post";
+import Comments from "../comments/Comments";
 import { formatDate, notify } from "../../../store";
 import "../blog.css";
 
 export default function SinglePost({ blog }) {
-  const { posts, loading, deletePost, toggleLike } = blog;
+  const { posts, loading, deletePost, toggleLike, adjustComments } = blog;
   const { id } = useParams();
   const history = useHistory();
   const [deleting, setDeleting] = useState(false);
@@ -72,6 +73,7 @@ export default function SinglePost({ blog }) {
           <p key={i}>{para}</p>
         ))}
       </div>
+      <Comments postId={post.id} onCountChange={(delta) => adjustComments(post.id, delta)} />
       <div className="mt-4">
         <Link to="/blog" className="btn btn-outline">← Back to all posts</Link>
       </div>

@@ -1159,3 +1159,8 @@ img.avatar {
   position: relative;
   height: 100%;
 }
+
+/* Keep anchored headings clear of the fixed navbar. */
+[id] {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
