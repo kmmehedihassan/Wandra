@@ -39,7 +39,7 @@ export async function logout() {
       // Ignore network errors; the local session is cleared regardless.
     }
   }
-  // Only end the session; keep the user's saved bookings and profile.
+  // Only end the session; the user's profile details stay on this device.
   SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
   window.dispatchEvent(new Event("wandra:store"));
 }
@@ -48,8 +48,39 @@ export async function logout() {
 export function errorMessage(data, fallback = "Something went wrong. Try again!") {
   if (!data) return fallback;
   if (typeof data === "string") return data;
+  if (Array.isArray(data)) return data.length ? errorMessage(data[0], fallback) : fallback;
   if (data.detail) return data.detail;
   const first = Object.values(data)[0];
-  if (Array.isArray(first)) return first[0];
-  return typeof first === "string" ? first : fallback;
+  return first === undefined ? fallback : errorMessage(first, fallback);
+}
+
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+// JSON request to the backend with the auth token attached.
+// Throws ApiError with a user-friendly message on failure.
+export async function apiFetch(path, { method = "GET", body } = {}) {
+  let resp;
+  try {
+    resp = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: authHeaders({ Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) }),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+  }
+  const data = resp.status === 204 ? null : await resp.json().catch(() => null);
+  if (resp.status === 401 && getToken()) {
+    // The token was revoked or expired: end the local session.
+    SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
+    window.dispatchEvent(new Event("wandra:store"));
+    throw new ApiError("Your session has expired. Please log in again.", 401);
+  }
+  if (!resp.ok) throw new ApiError(errorMessage(data), resp.status);
+  return data;
 }

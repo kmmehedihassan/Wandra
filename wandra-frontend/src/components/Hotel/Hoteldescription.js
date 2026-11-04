@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { BiUser } from "react-icons/bi";
@@ -7,7 +7,7 @@ import Error from "../../pages/Error";
 import { PageHero, Gallery, Stars, Stepper } from "../Layout/Shared";
 import { getDestination, getHotel, hotelGallery, roomsForHotel } from "../Database/catalog";
 import { HOTEL_INVENTORY } from "../Database/SingleHotel";
-import { addToCart, formatBDT, localISODate } from "../../store";
+import { addToCart, fetchHotelAvailability, formatBDT, localISODate } from "../../store";
 import "./hotel.css";
 
 const isoDay = (offset = 0) => localISODate(offset);
@@ -27,13 +27,41 @@ const Hoteldescription = () => {
   const [dates, setDates] = useState({ checkin: isoDay(1), checkout: isoDay(2) });
   const [qty, setQty] = useState({});
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [live, setLive] = useState(null); // { roomId: roomsLeft } for the chosen dates
+  const hotelId = hotel ? hotel.id : null;
+
+  useEffect(() => {
+    setLive(null);
+    if (!hotelId || nightsBetween(dates.checkin, dates.checkout) < 1) return undefined;
+    let active = true;
+    fetchHotelAvailability(hotelId, dates.checkin, dates.checkout)
+      .then((left) => active && setLive(left))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [hotelId, dates.checkin, dates.checkout]);
+
+  // Never keep more rooms selected than are free for the new dates.
+  useEffect(() => {
+    if (!live) return;
+    setQty((current) => {
+      const next = { ...current };
+      Object.keys(next).forEach((roomId) => {
+        if (live[roomId] !== undefined && next[roomId] > live[roomId]) next[roomId] = live[roomId];
+      });
+      return next;
+    });
+  }, [live]);
 
   if (!hotel) return <Error />;
 
   const destination = hotel.destinationId ? getDestination(hotel.destinationId) : null;
   const rooms = roomsForHotel(hotel.id).map((room) => {
     const stock = HOTEL_INVENTORY.find((i) => i.roomid === room.id && i.hotelid === hotel.id);
-    return { ...room, available: stock ? stock.roomquantity : 10 };
+    const total = stock ? stock.roomquantity : 10;
+    return { ...room, available: live && live[room.id] !== undefined ? live[room.id] : total };
   });
 
   const nights = nightsBetween(dates.checkin, dates.checkout);
@@ -51,12 +79,14 @@ const Hoteldescription = () => {
     setError("");
   };
 
-  const handleBook = () => {
+  const handleBook = async () => {
     if (!dates.checkin || !dates.checkout) return setError("Choose your check-in and check-out dates.");
     if (dates.checkin < isoDay(0)) return setError("Check-in can't be in the past.");
     if (nights < 1) return setError("Check-out must be at least one night after check-in.");
     if (selected.length === 0) return setError("Select at least one room.");
-    addToCart(
+    setSubmitting(true);
+    try {
+      await addToCart(
       selected.map((r) => ({
         type: "hotel",
         refId: hotel.id,
@@ -70,8 +100,12 @@ const Hoteldescription = () => {
         checkout: dates.checkout,
         days: nights,
       }))
-    );
-    history.push("/cart");
+      );
+      history.push("/cart");
+    } catch (err) {
+      setError(err.message);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -124,7 +158,9 @@ const Hoteldescription = () => {
                       <div className="room-meta">
                         <span><BiUser /> {room.Adult} adult{room.Adult === 1 ? "" : "s"}</span>
                         {room.children > 0 && <span><MdChildCare /> {room.children} child{room.children === 1 ? "" : "ren"}</span>}
-                        <span>{room.available} left</span>
+                        <span className={room.available === 0 ? "field-error" : undefined}>
+                          {room.available === 0 ? "Sold out for these dates" : `${room.available} left${live ? " for these dates" : ""}`}
+                        </span>
                       </div>
                     </div>
                     <div className="room-actions">
@@ -191,8 +227,8 @@ const Hoteldescription = () => {
                 </div>
               </div>
               {error && <div className="alert alert-error mt-2" role="alert">{error}</div>}
-              <button type="button" className="btn btn-primary btn-block mt-2" onClick={handleBook}>
-                Add to cart
+              <button type="button" className="btn btn-primary btn-block mt-2" onClick={handleBook} disabled={submitting}>
+                {submitting ? "Adding…" : "Add to cart"}
               </button>
             </div>
           </aside>

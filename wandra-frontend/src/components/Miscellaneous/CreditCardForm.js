@@ -3,7 +3,7 @@ import Cards from "react-credit-cards-2";
 import "react-credit-cards-2/es/styles-compiled.css";
 import emailjs from "@emailjs/browser";
 import validateInfo from "../../validateInfo";
-import { addBookings, cartTotal, clearCart, formatBDT, getCart, getUser } from "../../store";
+import { cartTotal, checkout, formatBDT, getUser } from "../../store";
 
 // Optional booking-confirmation email. Configure these in .env to enable it.
 const EMAILJS = {
@@ -20,11 +20,12 @@ const formatExpiry = (value) => {
   return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
 };
 
-const CreditCardForm = ({ onPaid }) => {
+const CreditCardForm = ({ cart, onPaid }) => {
   const [values, setValues] = useState({ cardName: "", cardNumber: "", cardExpiration: "", cardSecurityCode: "" });
   const [focus, setFocus] = useState("");
   const [errors, setErrors] = useState({});
   const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -33,6 +34,7 @@ const CreditCardForm = ({ onPaid }) => {
     if (name === "cardSecurityCode") value = value.replace(/\D/g, "").slice(0, 4);
     setValues({ ...values, [name]: value });
     setErrors({ ...errors, [name]: "" });
+    setPayError("");
   };
 
   const handleSubmit = async (e) => {
@@ -41,21 +43,26 @@ const CreditCardForm = ({ onPaid }) => {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
-    const cart = getCart();
     if (cart.length === 0) return;
     setPaying(true);
+    setPayError("");
+    let result;
+    try {
+      // Card details stay in the browser; the server only confirms the cart.
+      result = await checkout();
+    } catch (err) {
+      setPayError(err.message);
+      setPaying(false);
+      return;
+    }
     const user = getUser();
-    const total = cartTotal(cart);
-    addBookings(cart.map((item) => ({ ...item, status: "confirmed" })));
-    clearCart();
-
     if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey && user) {
       emailjs
         .send(EMAILJS.service, EMAILJS.template, { user_name: user.username, res_email: user.email }, EMAILJS.publicKey)
         .catch(() => {});
     }
     setPaying(false);
-    onPaid(total);
+    onPaid(result.total);
   };
 
   const field = (name, label, props = {}) => (
@@ -91,8 +98,9 @@ const CreditCardForm = ({ onPaid }) => {
         {field("cardExpiration", "Expiry", { inputMode: "numeric", autoComplete: "cc-exp", placeholder: "MM/YY" })}
         {field("cardSecurityCode", "CVC", { inputMode: "numeric", autoComplete: "cc-csc", placeholder: "123" })}
       </div>
+      {payError && <div className="alert alert-error mt-2" role="alert">{payError}</div>}
       <button type="submit" className="btn btn-primary btn-block mt-3" disabled={paying}>
-        {paying ? "Processing…" : `Pay ${formatBDT(cartTotal(getCart()))}`}
+        {paying ? "Processing…" : `Pay ${formatBDT(cartTotal(cart))}`}
       </button>
       <p className="muted small mt-1 mb-0" style={{ textAlign: "center" }}>
         Demo checkout — no real payment is taken.

@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 from django.urls import re_path as url, include
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('TripsApp.urls')),
     url(r'^',include('EmployeeApp.urls')),
     url(r'^',include('AuthenApp.urls')),
     url(r'^',include('PostsApp.urls'))

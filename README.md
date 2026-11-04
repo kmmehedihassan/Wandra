@@ -46,6 +46,10 @@ Frontend (see `wandra-frontend/.env.example`):
 
 ## API
 
+Send `Authorization: Token <token>` on authenticated requests.
+
+**Accounts**
+
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/auth/register` | `{username, email, password}` → `{token, user}` |
@@ -53,9 +57,40 @@ Frontend (see `wandra-frontend/.env.example`):
 | POST | `/auth/logout` | revokes the token |
 | GET | `/auth/me` | current user |
 
-Send `Authorization: Token <token>` on authenticated requests.
+**Cart and bookings** (login required unless noted)
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/cart/` | `{items, total}` |
+| POST | `/api/cart/` | tour: `{type: "tour", refId, quantity, checkin, contact: {name, email, phone}}`; hotel: `{type: "hotel", roomid, quantity, checkin, checkout}`. Prices come from the server; `409` if not available |
+| DELETE | `/api/cart/` | empty the cart |
+| DELETE | `/api/cart/<id>/` | remove one line |
+| POST | `/api/checkout/` | books the whole cart or nothing (`409` if something sold out) |
+| GET | `/api/bookings/` | the user's bookings, newest first |
+| POST | `/api/bookings/<id>/cancel/` | only before the trip starts |
+| GET | `/api/availability/hotels/<id>/?checkin=&checkout=` | public — rooms left per room type |
+| GET | `/api/availability/tours/<id>/?date=` | public — seats left that day |
+
+Checkout is a demo: card details are validated in the browser and never sent to the server.
+
+## Catalog
+
+The tour, hotel and destination catalog lives in `wandra-frontend/src/components/Database/`.
+The backend keeps its own copy of tour/room prices and stock (`TripsApp/catalog.json`, loaded
+by `migrate`). After changing prices, rooms or tours in the frontend data, run:
+
+```bash
+cd wandra-frontend && npm run export-catalog
+```
+
+```bash
+cd wandra-backend/djangoApi && python manage.py sync_catalog
+```
+
+Hotel rooms and tour seats (30 per date by default) can also be adjusted in the Django admin.
 
 ## Notes
 
-- The tour, hotel and destination catalog lives in `wandra-frontend/src/components/Database/`.
-- Cart, bookings, profile details and blog posts are currently stored in the browser (`localStorage`); checkout is a demo and takes no real payment.
+- Logged-in users' carts and bookings are stored in the backend; a guest's cart is kept in the
+  browser and moved into the account when they log in.
+- Profile details and blog posts are still stored in the browser (`localStorage`).

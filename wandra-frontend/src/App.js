@@ -17,11 +17,14 @@ import Dashboard from "./components/Profile/Dashboard";
 import Error from "./pages/Error";
 import { useScrollTop } from "./components/Layout/Shared";
 import { usePosts } from "./usePosts";
+import Toast from "./components/Layout/Toast";
+import { useSessionSync } from "./store";
 
 const App = () => {
   const { posts, setPosts } = usePosts();
   const location = useLocation();
   useScrollTop(location.pathname);
+  useSessionSync();
 
   return (
     <>
@@ -50,6 +53,7 @@ const App = () => {
         </Switch>
       </main>
       <Footer />
+      <Toast />
     </>
   );
 };

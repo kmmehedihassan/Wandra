@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'EmployeeApp.apps.EmployeeappConfig',
     'AuthenApp.apps.AuthenappConfig',
     'PostsApp.apps.PostsappConfig',
+    'TripsApp.apps.TripsappConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -102,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = config('TIME_ZONE', default='Asia/Dhaka')
 USE_I18N = True
 USE_TZ = True
 

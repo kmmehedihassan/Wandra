@@ -1,7 +1,8 @@
 // Small client-side store for the session, cart and bookings.
-// Everything lives in localStorage; components subscribe through the hooks
-// below so the navbar badge, cart and dashboard update immediately.
+// Components subscribe through the hooks below so the navbar badge, cart and
+// dashboard update immediately.
 import { useEffect, useState } from "react";
+import { apiFetch } from "./api";
 
 const EVENT = "wandra:store";
 
@@ -55,19 +56,45 @@ export function openAuthModal(tab = "login") {
   window.dispatchEvent(new CustomEvent("wandra:auth", { detail: tab }));
 }
 
-/* ---------- Cart ---------- */
+/* ---------- Notices ---------- */
+// Short messages shown as a toast (see components/Layout/Toast.js).
+export function notify(message, tone = "info") {
+  window.dispatchEvent(new CustomEvent("wandra:notice", { detail: { message, tone } }));
+}
+
+/* ---------- Cart & bookings ----------
+ * Logged-in users: the cart and bookings live on the backend and are cached here.
+ * Guests: the cart is kept in localStorage and moved into the account at login.
+ */
+const GUEST_CART = "Cart";
+const remote = { cart: null, bookings: null };
+
 export function lineTotal(item) {
+  if (item.total !== undefined && item.total !== null) return Number(item.total);
   if (item.type === "tour") return Number(item.price) * Number(item.ticket || 0);
   return Number(item.price) * Number(item.totalrooms || 0) * Number(item.days || 1);
 }
 
-export function getCart() {
-  const cart = read("Cart", []);
+function guestCart() {
+  const cart = read(GUEST_CART, []);
   return Array.isArray(cart) ? cart : [];
+}
+
+export function getCart() {
+  if (getUser()) return remote.cart || [];
+  return guestCart();
 }
 
 export function useCart() {
   return useStoreValue(getCart);
+}
+
+function isCartLoaded() {
+  return !getUser() || remote.cart !== null;
+}
+
+export function useCartLoaded() {
+  return useStoreValue(isCartLoaded);
 }
 
 export function cartTotal(cart) {
@@ -80,50 +107,136 @@ function nextId() {
   return id;
 }
 
-export function addToCart(items) {
+function toPayload(item) {
+  return item.type === "tour"
+    ? { type: "tour", refId: item.refId, quantity: Number(item.ticket), checkin: item.checkin, contact: item.contact }
+    : { type: "hotel", roomid: item.roomid, quantity: Number(item.totalrooms), checkin: item.checkin, checkout: item.checkout };
+}
+
+function setRemoteCart(data) {
+  remote.cart = data.items;
+  notifyStoreChanged();
+}
+
+export async function refreshCart() {
+  if (!getUser()) return;
+  setRemoteCart(await apiFetch("/api/cart/"));
+}
+
+// Add one or more lines. Logged in: validated by the server (price and
+// availability); throws ApiError with a readable message if a line is refused.
+export async function addToCart(items) {
   const list = Array.isArray(items) ? items : [items];
-  const cart = getCart();
-  list.forEach((item) => cart.push({ ...item, id: nextId(), status: "inprogress" }));
-  write("Cart", cart);
+  if (getUser()) {
+    for (const item of list) {
+      setRemoteCart(await apiFetch("/api/cart/", { method: "POST", body: toPayload(item) }));
+    }
+    return;
+  }
+  write(GUEST_CART, [...guestCart(), ...list.map((item) => ({ ...item, id: `guest-${nextId()}` }))]);
 }
 
-export function removeFromCart(id) {
-  write("Cart", getCart().filter((item) => item.id !== id));
+export async function removeFromCart(id) {
+  if (getUser()) {
+    setRemoteCart(await apiFetch(`/api/cart/${id}/`, { method: "DELETE" }));
+    return;
+  }
+  write(GUEST_CART, guestCart().filter((item) => item.id !== id));
 }
 
-export function clearCart() {
-  write("Cart", []);
-}
-
-/* ---------- Bookings (per user) ---------- */
-function bookingKey(username) {
-  return `Bookings:${username}`;
+// Move the guest cart into the account after logging in.
+async function mergeGuestCart() {
+  const items = guestCart();
+  if (items.length === 0) return;
+  const refused = [];
+  for (const item of items) {
+    try {
+      await apiFetch("/api/cart/", { method: "POST", body: toPayload(item) });
+    } catch (err) {
+      if (err.status === 0) throw err; // offline: keep the guest cart for next time
+      refused.push(`${item.name}: ${err.message}`);
+    }
+  }
+  write(GUEST_CART, []);
+  if (refused.length) notify(`Some items couldn't be moved to your cart. ${refused.join(" ")}`, "error");
 }
 
 export function getBookings() {
-  const user = getUser();
-  if (!user) return [];
-  const list = read(bookingKey(user.username), []);
-  return Array.isArray(list) ? list : [];
+  return getUser() ? remote.bookings || [] : [];
 }
 
 export function useBookings() {
   return useStoreValue(getBookings);
 }
 
-export function addBookings(items) {
-  const user = getUser();
-  if (!user) return;
-  const bookedAt = new Date().toISOString();
-  const next = [...getBookings(), ...items.map((item) => ({ ...item, bookedAt }))];
-  write(bookingKey(user.username), next);
+function isBookingsLoaded() {
+  return !getUser() || remote.bookings !== null;
 }
 
-export function cancelBooking(id) {
-  const user = getUser();
-  if (!user) return;
-  const next = getBookings().map((b) => (b.id === id ? { ...b, status: "cancelled" } : b));
-  write(bookingKey(user.username), next);
+export function useBookingsLoaded() {
+  return useStoreValue(isBookingsLoaded);
+}
+
+export async function refreshBookings() {
+  if (!getUser()) return;
+  remote.bookings = await apiFetch("/api/bookings/");
+  notifyStoreChanged();
+}
+
+// Book everything in the cart. Returns { reference, total, bookings }.
+export async function checkout() {
+  const data = await apiFetch("/api/checkout/", { method: "POST" });
+  remote.cart = [];
+  remote.bookings = [...data.bookings, ...(remote.bookings || [])];
+  notifyStoreChanged();
+  return data;
+}
+
+export async function cancelBooking(id) {
+  const updated = await apiFetch(`/api/bookings/${id}/cancel/`, { method: "POST" });
+  remote.bookings = (remote.bookings || []).map((b) => (b.id === id ? updated : b));
+  notifyStoreChanged();
+}
+
+// Keep the cached cart/bookings in step with the session. Used once in App.
+export function useSessionSync() {
+  const user = useUser();
+  const username = user ? user.username : null;
+  useEffect(() => {
+    remote.cart = null;
+    remote.bookings = null;
+    notifyStoreChanged();
+    if (!username) return;
+    let active = true;
+    (async () => {
+      try {
+        await mergeGuestCart();
+        if (active) await Promise.all([refreshCart(), refreshBookings()]);
+      } catch (err) {
+        if (active) {
+          remote.cart = remote.cart || [];
+          remote.bookings = remote.bookings || [];
+          notifyStoreChanged();
+          notify(err.message, "error");
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [username]);
+}
+
+export async function fetchHotelAvailability(hotelId, checkin, checkout) {
+  const data = await apiFetch(
+    `/api/availability/hotels/${hotelId}/?checkin=${encodeURIComponent(checkin)}&checkout=${encodeURIComponent(checkout)}`
+  );
+  return Object.fromEntries(data.rooms.map((r) => [r.roomid, r.left]));
+}
+
+export async function fetchTourAvailability(tourId, date) {
+  const data = await apiFetch(`/api/availability/tours/${tourId}/?date=${encodeURIComponent(date)}`);
+  return data.left;
 }
 
 /* ---------- Profile (per user) ---------- */

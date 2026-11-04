@@ -4,7 +4,7 @@ import { BiCalendar, BiUser } from "react-icons/bi";
 import { MdOutlineHotel, MdOutlineTour } from "react-icons/md";
 import CreditCardForm from "./CreditCardForm";
 import { EmptyState } from "../Layout/Shared";
-import { cartTotal, formatBDT, formatDate, lineTotal, openAuthModal, removeFromCart, useCart, useUser } from "../../store";
+import { cartTotal, formatBDT, formatDate, lineTotal, openAuthModal, removeFromCart, useCart, useCartLoaded, useUser } from "../../store";
 import "./cart.css";
 
 export function BookingSummary({ item }) {
@@ -40,8 +40,23 @@ export function BookingSummary({ item }) {
 const Cart = () => {
   const cart = useCart();
   const user = useUser();
+  const loaded = useCartLoaded();
   const [paidTotal, setPaidTotal] = useState(null);
+  const [removing, setRemoving] = useState(null);
+  const [error, setError] = useState("");
   const total = cartTotal(cart);
+
+  const handleRemove = async (id) => {
+    setRemoving(id);
+    setError("");
+    try {
+      await removeFromCart(id);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRemoving(null);
+    }
+  };
 
   if (paidTotal !== null) {
     return (
@@ -65,10 +80,16 @@ const Cart = () => {
     <div className="container-w section">
       <h1 className="section-title">Your cart</h1>
       <p className="section-sub">
-        {cart.length === 0 ? "Nothing here yet." : `${cart.length} item${cart.length > 1 ? "s" : ""} ready to book.`}
+        {!loaded ? "Loading your cart…" : cart.length === 0 ? "Nothing here yet." : `${cart.length} item${cart.length > 1 ? "s" : ""} ready to book.`}
       </p>
+      {error && <div className="alert alert-error mt-2" role="alert">{error}</div>}
 
-      {cart.length === 0 ? (
+      {!loaded ? (
+        <div className="mt-3">
+          <div className="skeleton" />
+          <div className="skeleton" />
+        </div>
+      ) : cart.length === 0 ? (
         <div className="card mt-3">
           <EmptyState title="Your cart is empty" text="Find a tour or a hotel and add it to your cart." actionTo="/tours" actionLabel="Browse tours" />
         </div>
@@ -81,8 +102,8 @@ const Cart = () => {
                 <div className="cart-item-body">
                   <BookingSummary item={item} />
                   <div className="mt-1">
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeFromCart(item.id)}>
-                      Remove
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleRemove(item.id)} disabled={removing === item.id}>
+                      {removing === item.id ? "Removing…" : "Remove"}
                     </button>
                   </div>
                 </div>
@@ -105,7 +126,7 @@ const Cart = () => {
               </div>
               <div className="mt-3">
                 {user ? (
-                  <CreditCardForm onPaid={setPaidTotal} />
+                  <CreditCardForm cart={cart} onPaid={setPaidTotal} />
                 ) : (
                   <div className="alert alert-error" style={{ background: "var(--brand-soft)", color: "var(--ink-2)" }}>
                     <p className="mb-0">Log in to complete your booking. Your cart will be kept.</p>

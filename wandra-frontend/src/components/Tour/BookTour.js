@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { addToCart, formatBDT, getUser, localISODate } from "../../store";
+import { addToCart, fetchTourAvailability, formatBDT, getUser, localISODate } from "../../store";
 import { Stepper } from "../Layout/Shared";
 
 const today = () => localISODate(0);
@@ -16,6 +16,21 @@ const BookTour = ({ tour }) => {
   });
   const [tickets, setTickets] = useState(1);
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [seatsLeft, setSeatsLeft] = useState(null);
+
+  // Show live seat availability for the chosen date.
+  useEffect(() => {
+    setSeatsLeft(null);
+    if (!form.date || form.date < today()) return undefined;
+    let active = true;
+    fetchTourAvailability(tour.id, form.date)
+      .then((left) => active && setSeatsLeft(left))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [tour.id, form.date]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,14 +44,18 @@ const BookTour = ({ tour }) => {
     if (!/^\+?[\d\s-]{7,15}$/.test(form.phone.trim())) next.phone = "Enter a valid phone number";
     if (!form.date) next.date = "Choose a travel date";
     else if (form.date < today()) next.date = "The date can't be in the past";
+    if (!next.date && seatsLeft !== null && tickets > seatsLeft)
+      next.date = seatsLeft === 0 ? "This tour is fully booked on that date" : `Only ${seatsLeft} seats left on that date`;
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    addToCart({
+    setSubmitting(true);
+    try {
+      await addToCart({
       type: "tour",
       refId: tour.id,
       name: tour.title,
@@ -45,8 +64,12 @@ const BookTour = ({ tour }) => {
       price: tour.price,
       ticket: tickets,
       contact: { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() },
-    });
-    history.push("/cart");
+      });
+      history.push("/cart");
+    } catch (err) {
+      setErrors({ form: err.message });
+      setSubmitting(false);
+    }
   };
 
   const fieldProps = (name) => ({
@@ -67,13 +90,21 @@ const BookTour = ({ tour }) => {
       <div className="field">
         <label className="field-label" htmlFor="book-date">Travel date</label>
         <input type="date" min={today()} {...fieldProps("date")} />
-        {errors.date && <span className="field-error">{errors.date}</span>}
+        {errors.date ? (
+          <span className="field-error">{errors.date}</span>
+        ) : (
+          seatsLeft !== null && (
+            <span className={`small ${seatsLeft > 5 ? "muted" : "field-error"}`}>
+              {seatsLeft === 0 ? "Fully booked on this date" : `${seatsLeft} seat${seatsLeft === 1 ? "" : "s"} left on this date`}
+            </span>
+          )
+        )}
       </div>
       <div className="field">
         <span className="field-label">Travellers</span>
         <div className="row-between">
           <span className="muted small">Tickets</span>
-          <Stepper value={tickets} min={1} max={20} onChange={setTickets} label="Number of tickets" />
+          <Stepper value={tickets} min={1} max={Math.max(1, Math.min(20, seatsLeft === null ? 20 : seatsLeft))} onChange={setTickets} label="Number of tickets" />
         </div>
       </div>
       <div className="field">
@@ -102,8 +133,9 @@ const BookTour = ({ tour }) => {
         <span>Total</span>
         <span className="price">{formatBDT(tour.price * tickets)}</span>
       </div>
-      <button type="submit" className="btn btn-primary btn-block mt-2">
-        Add to cart
+      {errors.form && <div className="alert alert-error mt-2" role="alert">{errors.form}</div>}
+      <button type="submit" className="btn btn-primary btn-block mt-2" disabled={submitting || seatsLeft === 0}>
+        {submitting ? "Adding…" : "Add to cart"}
       </button>
     </form>
   );
