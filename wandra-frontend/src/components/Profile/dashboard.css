@@ -23,7 +23,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
   font-weight: 700;
   font-size: 1.4rem;
@@ -65,7 +65,7 @@
 
 .dash-nav-item.is-active {
   background: var(--brand-soft);
-  color: var(--brand-dark);
+  color: var(--brand-text);
 }
 
 .dash-logout {
@@ -129,7 +129,7 @@
 }
 
 .saved-link:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .saved-link img {

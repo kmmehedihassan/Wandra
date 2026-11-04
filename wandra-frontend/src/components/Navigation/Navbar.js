@@ -30,6 +30,19 @@ const Navbar = () => {
     setUserMenu(false);
   }, [location.pathname]);
 
+  // Escape closes the mobile menu and the user menu.
+  useEffect(() => {
+    if (!menuOpen && !userMenu) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setUserMenu(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen, userMenu]);
+
   // Other components can request the login modal.
   useEffect(() => {
     const open = (e) => setAuthTab(e.detail || "login");
@@ -61,6 +74,7 @@ const Navbar = () => {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <header className="site-nav">
         <div className="container-w site-nav-inner">
           <Link to="/" className="brand" aria-label="Wandra home">
@@ -68,7 +82,7 @@ const Navbar = () => {
             <span className="brand-name">Wandra</span>
           </Link>
 
-          <nav className={`nav-links${menuOpen ? " is-open" : ""}`} aria-label="Main">
+          <nav id="main-nav" className={`nav-links${menuOpen ? " is-open" : ""}`} aria-label="Main">
             {navItems.map((item) => (
               <NavLink
                 key={item.id}
@@ -153,6 +167,7 @@ const Navbar = () => {
               className="icon-btn nav-toggle"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
+              aria-controls="main-nav"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <HiOutlineX size={20} /> : <HiOutlineMenu size={20} />}

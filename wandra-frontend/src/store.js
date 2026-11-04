@@ -310,19 +310,43 @@ export function formatBDT(amount) {
   return `৳${Number(amount || 0).toLocaleString("en-US")}`;
 }
 
+// Show a date as "5 Nov 2026". Plain YYYY-MM-DD dates are calendar dates (no
+// time zone shift); timestamps are shown in Bangladesh time.
 export function formatDate(value) {
   if (!value) return "";
-  const d = new Date(value);
+  const plain = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const d = new Date(plain ? `${value}T00:00:00Z` : value);
   if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: plain ? "UTC" : "Asia/Dhaka",
+  });
 }
 
-// YYYY-MM-DD in the user's local time zone (toISOString would use UTC).
-export function localISODate(offsetDays = 0, from = new Date()) {
-  const d = new Date(from);
-  d.setDate(d.getDate() + offsetDays);
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+// Trips happen in Bangladesh, so "today" is always Bangladesh's date — the
+// same rule the server uses (TIME_ZONE=Asia/Dhaka) — whatever the device's
+// time zone. Dates are YYYY-MM-DD strings.
+export const TRIP_TIME_ZONE = "Asia/Dhaka";
+
+const tripDateFormat = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TRIP_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// Add whole days to a YYYY-MM-DD date.
+export function addDays(isoDate, days) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+// Today's date in Bangladesh, optionally shifted by `offsetDays`.
+export function localISODate(offsetDays = 0) {
+  const today = tripDateFormat.format(new Date());
+  return offsetDays ? addDays(today, offsetDays) : today;
 }
 
 /* ---------- Review summaries (average rating per tour/hotel) ---------- */

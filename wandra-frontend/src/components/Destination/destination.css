@@ -3,7 +3,7 @@
 }
 
 .link-arrow {
-  color: var(--brand);
+  color: var(--brand-text);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -46,7 +46,7 @@
   height: 28px;
   border-radius: 999px;
   background: var(--brand-soft);
-  color: var(--brand-dark);
+  color: var(--brand-text);
   font-size: 1.1rem;
   flex-shrink: 0;
 }
@@ -81,7 +81,7 @@
 }
 
 .mini-list a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .mini-list-meta {
@@ -173,7 +173,7 @@
   padding: 8px 16px;
   border-radius: 999px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--ink-2);
   cursor: pointer;
 }
 

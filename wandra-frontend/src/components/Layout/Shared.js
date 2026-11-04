@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { HiChevronLeft, HiChevronRight, HiOutlineX } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { AiFillHeart, AiFillStar, AiOutlineHeart, AiOutlineStar } from "react-icons/ai";
 import { isSaved, toggleWishlist, useWishlist } from "../../store";
@@ -69,47 +70,122 @@ export function Stars({ value = 0, size = 16 }) {
     else items.push(<AiOutlineStar key={i} size={size} />);
   }
   return (
-    <span className="stars" aria-label={`${value} out of 5 stars`}>
+    <span className="stars" role="img" aria-label={`${value} out of 5 stars`}>
       {items}
     </span>
   );
 }
 
+// Keep Tab focus inside `ref` while active, and restore focus afterwards.
+export function useFocusTrap(ref, active) {
+  // Remember what had focus *before* the dialog rendered (autoFocus inside the
+  // dialog runs before effects), so it can be restored on close.
+  const previousRef = useRef(null);
+  if (active && previousRef.current === null && typeof document !== "undefined") {
+    previousRef.current = document.activeElement;
+  }
+  useEffect(() => {
+    if (!active || !ref.current) {
+      previousRef.current = null;
+      return undefined;
+    }
+    const previous = previousRef.current;
+    const selector = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+    const onKey = (e) => {
+      if (e.key !== "Tab" || !ref.current) return;
+      const items = [...ref.current.querySelectorAll(selector)].filter((el) => el.offsetParent !== null);
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    if (!ref.current.contains(document.activeElement)) {
+      const target = ref.current.querySelector("[autofocus], input, button");
+      if (target) target.focus();
+    }
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      if (previous && previous.focus) previous.focus();
+    };
+  }, [ref, active]);
+}
+
 export function Gallery({ images, title = "Gallery" }) {
-  const [open, setOpen] = useState(null);
+  const [index, setIndex] = useState(null);
+  const dialogRef = useRef(null);
+  const open = index !== null;
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
-    if (open === null) return undefined;
-    const onKey = (e) => e.key === "Escape" && setOpen(null);
+    if (!open) return undefined;
+    const count = images.length;
+    const onKey = (e) => {
+      if (e.key === "Escape") setIndex(null);
+      if (e.key === "ArrowRight") setIndex((i) => (i + 1) % count);
+      if (e.key === "ArrowLeft") setIndex((i) => (i - 1 + count) % count);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open, images]);
 
   if (!images || images.length === 0) return null;
+  const step = (delta) => (e) => {
+    e.stopPropagation();
+    setIndex((i) => (i + delta + images.length) % images.length);
+  };
+
   return (
     <section className="mt-4">
       <h2 className="section-title">{title}</h2>
       <p className="section-sub mb-0">Be our guest and see it for yourself</p>
       <div className="gallery mt-2">
-        {images.map((src) => (
-          <button key={src} type="button" className="gallery-item" onClick={() => setOpen(src)} aria-label="Open photo">
+        {images.map((src, i) => (
+          <button key={src} type="button" className="gallery-item" onClick={() => setIndex(i)} aria-label={`Open photo ${i + 1} of ${images.length}`}>
             <Img src={src} sizes="(max-width: 560px) 50vw, 260px" />
           </button>
         ))}
       </div>
       {open && (
-        <div className="lightbox" onClick={() => setOpen(null)} role="dialog" aria-label="Photo">
-          <Img src={open} sizes="90vw" eager />
+        <div className="lightbox" onClick={() => setIndex(null)} role="dialog" aria-modal="true" aria-label={`${title}: photo ${index + 1} of ${images.length}`} ref={dialogRef}>
+          <Img src={images[index]} sizes="90vw" eager onClick={(e) => e.stopPropagation()} />
+          <button type="button" className="lightbox-btn lightbox-close" aria-label="Close" onClick={() => setIndex(null)}>
+            <HiOutlineX size={22} />
+          </button>
+          {images.length > 1 && (
+            <>
+              <button type="button" className="lightbox-btn lightbox-prev" aria-label="Previous photo" onClick={step(-1)}>
+                <HiChevronLeft size={28} />
+              </button>
+              <button type="button" className="lightbox-btn lightbox-next" aria-label="Next photo" onClick={step(1)}>
+                <HiChevronRight size={28} />
+              </button>
+            </>
+          )}
+          <span className="lightbox-count" aria-live="polite">
+            {index + 1} / {images.length}
+          </span>
         </div>
       )}
     </section>
   );
 }
 
-export function EmptyState({ title, text, actionTo, actionLabel, onAction }) {
+export function EmptyState({ title, text, actionTo, actionLabel, onAction, headingLevel = 3 }) {
+  const Heading = `h${headingLevel}`;
   return (
     <div className="empty-state">
-      <h3>{title}</h3>
+      <Heading className="empty-state-title">{title}</Heading>
       {text && <p>{text}</p>}
       {actionTo && (
         <Link to={actionTo} className="btn btn-primary">

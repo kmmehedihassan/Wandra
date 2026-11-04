@@ -169,3 +169,5 @@ those automatically through the `<Img>` component.
 - Carts, bookings, profiles and blog posts are stored in the backend. A guest's cart is kept in
   the browser and moved into the account when they log in.
 - `migrate` seeds four starter blog posts; delete or edit them in the Django admin.
+- Dates ("today", check-in limits, cancellation cut-off) always use Bangladesh time on both the
+  server and the browser, so travellers abroad see the same rules the server applies.

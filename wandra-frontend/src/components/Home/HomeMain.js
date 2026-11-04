@@ -29,7 +29,9 @@ const Home = () => {
   const [query, setQuery] = useState("");
   const [target, setTarget] = useState("tours");
 
+  // Auto-advance the slideshow, unless the user asked for reduced motion.
   useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const t = setInterval(() => setSlide((s) => (s + 1) % sliderImage.length), 6000);
     return () => clearInterval(t);
   }, []);

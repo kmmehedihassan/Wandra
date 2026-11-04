@@ -8,6 +8,11 @@
   --brand: #ff681a;
   --brand-dark: #e0550c;
   --brand-soft: #fff1e8;
+  /* Accessible variants: text on light surfaces, and fills behind white text. */
+  --brand-text: #c2410c;
+  --brand-text-hover: #9a3412;
+  --brand-btn: #c94a0a;
+  --brand-btn-hover: #a93c06;
   --ink: #1d2127;
   --ink-2: #3d434c;
   --muted: #6b7280;
@@ -49,6 +54,8 @@
 :root[data-theme="dark"] {
   --brand-dark: #ff8a4c;
   --brand-soft: #3a2417;
+  --brand-text: #ff8a4c;
+  --brand-text-hover: #ffa26f;
   --ink: #e8eaed;
   --ink-2: #c3c8cf;
   --muted: #9aa1ab;
@@ -80,6 +87,8 @@
   :root:not([data-theme="light"]) {
     --brand-dark: #ff8a4c;
     --brand-soft: #3a2417;
+    --brand-text: #ff8a4c;
+    --brand-text-hover: #ffa26f;
     --ink: #e8eaed;
     --ink-2: #c3c8cf;
     --muted: #9aa1ab;
@@ -151,12 +160,12 @@ p {
 }
 
 a {
-  color: var(--brand);
+  color: var(--brand-text);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--brand-dark);
+  color: var(--brand-text-hover);
 }
 
 img {
@@ -215,7 +224,7 @@ textarea {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brand);
+  color: var(--brand-text);
   margin-bottom: 6px;
 }
 
@@ -350,12 +359,12 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--brand-dark);
+  background: var(--brand-btn-hover);
   color: #fff;
 }
 
@@ -366,8 +375,8 @@ textarea {
 }
 
 .btn-outline:hover:not(:disabled) {
-  border-color: var(--brand);
-  color: var(--brand);
+  border-color: var(--brand-text);
+  color: var(--brand-text);
 }
 
 .btn-ghost {
@@ -376,7 +385,7 @@ textarea {
 
 .btn-ghost:hover:not(:disabled) {
   background: var(--brand-soft);
-  color: var(--brand-dark);
+  color: var(--brand-text);
 }
 
 .btn-danger {
@@ -414,8 +423,8 @@ textarea {
 }
 
 .icon-btn:hover {
-  border-color: var(--brand);
-  color: var(--brand);
+  border-color: var(--brand-text);
+  color: var(--brand-text);
 }
 
 /* ---------- Cards ---------- */
@@ -562,7 +571,7 @@ textarea {
 }
 
 .list-card-title a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .list-card-foot {
@@ -589,7 +598,7 @@ textarea {
 .price {
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .price small {
@@ -607,7 +616,7 @@ textarea {
   font-size: 0.78rem;
   font-weight: 600;
   background: var(--brand-soft);
-  color: var(--brand-dark);
+  color: var(--brand-text);
   white-space: nowrap;
 }
 
@@ -647,13 +656,13 @@ textarea {
 }
 
 .chip:hover {
-  border-color: var(--brand);
-  color: var(--brand);
+  border-color: var(--brand-text);
+  color: var(--brand-text);
 }
 
 .chip.is-active {
-  background: var(--brand);
-  border-color: var(--brand);
+  background: var(--brand-btn);
+  border-color: var(--brand-btn);
   color: #fff;
 }
 
@@ -697,7 +706,7 @@ textarea {
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--brand);
+  border-color: var(--brand-text);
   box-shadow: 0 0 0 3px rgba(255, 104, 26, 0.15);
 }
 
@@ -714,7 +723,7 @@ textarea {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--brand);
+  color: var(--brand-text);
   pointer-events: none;
 }
 
@@ -784,7 +793,7 @@ textarea {
 
 .stepper button:hover:not(:disabled) {
   background: var(--brand-soft);
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .stepper button:disabled {
@@ -905,7 +914,7 @@ textarea {
   color: var(--muted);
 }
 
-.empty-state h3 {
+.empty-state .empty-state-title {
   color: var(--ink);
   font-size: 1.25rem;
 }
@@ -1021,7 +1030,7 @@ textarea {
 }
 
 .password-toggle:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 /* ---------- Page furniture ---------- */
@@ -1173,14 +1182,14 @@ img.avatar {
   border: 0;
   padding: 0;
   background: none;
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
 }
 
 .link-btn:hover {
-  color: var(--brand-dark);
+  color: var(--brand-text);
   text-decoration: underline;
 }
 
@@ -1291,4 +1300,107 @@ img.avatar {
 
 .theme-toggle svg {
   display: block;
+}
+
+/* ---------- Accessibility & motion ---------- */
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: -60px;
+  z-index: 3000;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-btn);
+  color: #fff;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 12px;
+  color: #fff;
+}
+
+main.app-main:focus {
+  outline: none;
+}
+
+.page-enter {
+  animation: page-in 0.28s ease both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lightbox-btn {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+}
+
+.lightbox-btn:hover,
+.lightbox-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.lightbox-close {
+  top: 16px;
+  right: 16px;
+}
+
+.lightbox-prev {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-next {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-count {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+}
+
+.lightbox img {
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Links inside running text are underlined, not only coloured. */
+.breadcrumb a,
+.lead a,
+p a:not(.btn),
+dd a,
+.detail-list a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }

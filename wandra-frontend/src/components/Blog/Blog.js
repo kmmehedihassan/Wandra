@@ -43,6 +43,7 @@ const Blog = ({ blog }) => {
         </Link>
       </PageHero>
       <div className="container-w section">
+        <h2 className="visually-hidden">Latest stories</h2>
         <div className="section-head">
           <div className="chip-row">
             <button type="button" className={`chip${!cat ? " is-active" : ""}`} onClick={() => setParam("cat", "")}>

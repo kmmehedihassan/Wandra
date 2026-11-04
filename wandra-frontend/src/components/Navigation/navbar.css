@@ -66,7 +66,7 @@
 }
 
 .nav-link.is-active {
-  color: var(--brand-dark);
+  color: var(--brand-text);
   background: var(--brand-soft);
 }
 
@@ -89,7 +89,7 @@
   height: 20px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -123,7 +123,7 @@
 }
 
 .user-chip:hover {
-  border-color: var(--brand);
+  border-color: var(--brand-text);
 }
 
 .user-chip-name {
@@ -139,7 +139,7 @@
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
   font-weight: 700;
   flex-shrink: 0;

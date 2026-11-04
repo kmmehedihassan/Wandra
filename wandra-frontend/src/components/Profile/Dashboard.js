@@ -39,7 +39,7 @@ export default function Dashboard() {
       <div className="container-w section">
         <div className="card">
           <EmptyState
-            title="Log in to see your dashboard"
+            title="Log in to see your dashboard" headingLevel={1}
             text="Your profile and bookings are available once you're signed in."
             onAction={() => openAuthModal("login")}
             actionLabel="Log in"

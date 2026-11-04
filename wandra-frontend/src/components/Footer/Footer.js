@@ -31,14 +31,14 @@ const Footer = () => (
         </div>
       </div>
       <div>
-        <h4>Explore</h4>
+        <h2 className="footer-heading">Explore</h2>
         <Link to="/destinations">Destinations</Link>
         <Link to="/tours">Tours</Link>
         <Link to="/hotels">Hotels</Link>
         <Link to="/blog">Travel blog</Link>
       </div>
       <div>
-        <h4>Account</h4>
+        <h2 className="footer-heading">Account</h2>
         <Link to="/dashboard">My profile</Link>
         <Link to="/dashboard?tab=bookings">My bookings</Link>
         <Link to="/cart">Cart</Link>

@@ -91,7 +91,7 @@ const Cart = () => {
         </div>
       ) : cart.length === 0 ? (
         <div className="card mt-3">
-          <EmptyState title="Your cart is empty" text="Find a tour or a hotel and add it to your cart." actionTo="/tours" actionLabel="Browse tours" />
+          <EmptyState headingLevel={2} title="Your cart is empty" text="Find a tour or a hotel and add it to your cart." actionTo="/tours" actionLabel="Browse tours" />
         </div>
       ) : (
         <div className="layout-aside mt-3">

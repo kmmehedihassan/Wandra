@@ -30,7 +30,8 @@ const App = () => {
   return (
     <>
       <Navbar />
-      <main className="app-main">
+      <main className="app-main" id="main-content" tabIndex={-1}>
+        <div className="page-enter" key={location.pathname}>
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/destinations" component={Destinations} />
@@ -53,6 +54,7 @@ const App = () => {
           <Route exact path="/reset-password" component={ResetPassword} />
           <Route component={Error} />
         </Switch>
+        </div>
       </main>
       <Footer />
       <Toast />

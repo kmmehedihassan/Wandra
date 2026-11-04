@@ -30,7 +30,7 @@
 }
 
 .cart-item-title a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .cart-item-price {

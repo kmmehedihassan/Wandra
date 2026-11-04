@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../Layout/Shared";
 import { HiOutlineX } from "react-icons/hi";
 import Signup from "./Signup";
 import Signin from "./Signin";
@@ -13,6 +14,8 @@ const COPY = {
 // Login / register / forgot-password modal. `initialTab` is one of the COPY keys.
 const Authenticate = ({ initialTab = "login", onClose }) => {
   const [tab, setTab] = useState(COPY[initialTab] ? initialTab : "login");
+  const cardRef = useRef(null);
+  useFocusTrap(cardRef, true);
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -26,7 +29,7 @@ const Authenticate = ({ initialTab = "login", onClose }) => {
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-card" role="dialog" aria-modal="true" aria-label={COPY[tab].title}>
+      <div className="modal-card" role="dialog" aria-modal="true" aria-label={COPY[tab].title} ref={cardRef}>
         <button type="button" className="icon-btn modal-close" aria-label="Close" onClick={onClose}>
           <HiOutlineX size={18} />
         </button>

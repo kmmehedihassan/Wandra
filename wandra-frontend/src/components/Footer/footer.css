@@ -23,7 +23,7 @@
   color: #a7adb7;
 }
 
-.site-footer h4 {
+.site-footer .footer-heading {
   color: #fff;
   font-size: 1rem;
   margin-bottom: 14px;
@@ -36,7 +36,7 @@
 }
 
 .footer-grid > div > a:not(.brand):hover {
-  color: var(--brand);
+  color: #ff8a4c; /* the footer is always dark */
 }
 
 .footer-socials {
@@ -56,7 +56,7 @@
 }
 
 .footer-socials a:hover {
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
 }
 

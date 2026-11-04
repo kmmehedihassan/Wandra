@@ -156,7 +156,7 @@
   height: 42px;
   border-radius: 12px;
   background: var(--brand-soft);
-  color: var(--brand);
+  color: var(--brand-text);
   flex-shrink: 0;
 }
 
@@ -167,7 +167,7 @@
   gap: 24px;
   padding: 36px 40px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(120deg, var(--brand) 0%, #ff8f4f 100%);
+  background: linear-gradient(120deg, #a93c06 0%, var(--brand-btn) 100%);
   color: #fff;
   flex-wrap: wrap;
 }
@@ -184,7 +184,7 @@
 
 .home-cta .btn-primary {
   background: #fff;
-  color: var(--brand-dark);
+  color: #9a3412;
 }
 
 .home-cta .btn-primary:hover {

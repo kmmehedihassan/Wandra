@@ -7,7 +7,7 @@
 }
 
 .post-card .badge:hover {
-  background: var(--brand);
+  background: var(--brand-btn);
   color: #fff;
 }
 
@@ -17,7 +17,7 @@
 }
 
 .post-title-link:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .post-author {
@@ -93,7 +93,7 @@
 }
 
 .write-cover:hover {
-  border-color: var(--brand);
+  border-color: var(--brand-text);
 }
 
 .write-cover.is-invalid {

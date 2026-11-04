@@ -8,7 +8,7 @@ import { PageHero, Gallery, SaveButton, Stars, Stepper } from "../Layout/Shared"
 import { getDestination, getHotel, hotelGallery, roomsForHotel } from "../Database/catalog";
 import { HOTEL_INVENTORY } from "../Database/SingleHotel";
 import Reviews, { ReviewBadge } from "../Reviews/Reviews";
-import { addToCart, fetchHotelAvailability, formatBDT, localISODate, useReviewSummary } from "../../store";
+import { addDays, addToCart, fetchHotelAvailability, formatBDT, localISODate, useReviewSummary } from "../../store";
 import "./hotel.css";
 
 const isoDay = (offset = 0) => localISODate(offset);
@@ -76,7 +76,7 @@ const Hoteldescription = () => {
     const next = { ...dates, [key]: value };
     // Keep check-out after check-in.
     if (key === "checkin" && nightsBetween(value, next.checkout) < 1) {
-      next.checkout = localISODate(1, new Date(`${value}T00:00:00`));
+      next.checkout = addDays(value, 1);
     }
     setDates(next);
     setError("");

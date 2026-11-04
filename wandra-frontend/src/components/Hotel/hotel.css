@@ -31,7 +31,7 @@
 }
 
 .room-card.is-selected {
-  border-color: var(--brand);
+  border-color: var(--brand-text);
   background: var(--brand-soft);
 }
 

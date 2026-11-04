@@ -24,7 +24,7 @@ export default function Write({ blog }) {
     return (
       <div className="container-w section">
         <div className="card">
-          <EmptyState title="Log in to write a story" text="Share your trip with other travellers." onAction={() => openAuthModal("login")} actionLabel="Log in" />
+          <EmptyState title="Log in to write a story" headingLevel={1} text="Share your trip with other travellers." onAction={() => openAuthModal("login")} actionLabel="Log in" />
         </div>
       </div>
     );
