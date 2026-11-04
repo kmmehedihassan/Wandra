@@ -44,9 +44,9 @@ Set these variables on the backend service: `DEBUG=False`, `SECRET_KEY`, `ALLOWE
 Create an admin account once with `python manage.py createsuperuser` (Railway shell) and sign in at
 `/admin/`.
 
-## Email (password reset)
+## Email (password reset and booking confirmations)
 
-Password-reset emails are sent with [Brevo](https://www.brevo.com) — free for 300 emails a day,
+Password-reset, booking-confirmation and cancellation emails are sent with [Brevo](https://www.brevo.com) — free for 300 emails a day,
 no credit card. It sends over HTTPS, so it works on Railway (which blocks outgoing SMTP on free
 plans).
 
@@ -80,7 +80,6 @@ Backend (environment variables, see `wandra-backend/djangoApi/.env.example`):
 Frontend (see `wandra-frontend/.env.example`):
 
 - `REACT_APP_API_URL` — backend base URL
-- `REACT_APP_EMAILJS_SERVICE_ID`, `REACT_APP_EMAILJS_TEMPLATE_ID`, `REACT_APP_EMAILJS_PUBLIC_KEY` — optional booking-confirmation emails
 
 ## API
 

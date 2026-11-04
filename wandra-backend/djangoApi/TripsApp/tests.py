@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.core import mail
+from django.test import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
@@ -180,3 +182,37 @@ class AvailabilityTests(TripsTestCase):
         resp = self.client.get(f'/api/availability/tours/1/?date={day(5)}')
         self.assertEqual(resp.data['left'], 3)
         self.assertEqual(self.client.get('/api/availability/hotels/1/?checkin=bad').status_code, 400)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', FRONTEND_URL='https://wandra.example')
+class BookingEmailTests(TripsTestCase):
+    def test_confirmation_email_lists_every_line(self):
+        self.add_hotel(rooms=2, checkin=1, checkout=3)
+        self.add_tour(tickets=2)
+        data = self.client.post('/api/checkout/').data
+        self.assertEqual(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self.assertEqual(msg.to, ['alice@example.com'])
+        self.assertEqual(msg.subject, 'Your Wandra booking is confirmed')
+        self.assertIn(data['reference'][:8].upper(), msg.body)
+        self.assertIn('Sayeman Beach Resort', msg.body)
+        self.assertIn(self.tour.title, msg.body)
+        self.assertIn(f"Total: ৳{data['total']:,}", msg.body)
+        self.assertIn('https://wandra.example/dashboard?tab=bookings', msg.alternatives[0][0])
+
+    def test_cancellation_email(self):
+        self.add_hotel(rooms=1)
+        booking_id = self.client.post('/api/checkout/').data['bookings'][0]['id']
+        self.client.post(f'/api/bookings/{booking_id}/cancel/')
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].subject, 'Your Wandra booking was cancelled')
+
+    def test_failed_checkout_sends_nothing(self):
+        self.client.post('/api/checkout/')
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend', EMAIL_HOST='127.0.0.1', EMAIL_PORT=1)
+    def test_email_failure_does_not_break_checkout(self):
+        self.add_hotel(rooms=1)
+        self.assertEqual(self.client.post('/api/checkout/').status_code, 201)
+

@@ -1,16 +1,8 @@
 import React, { useState } from "react";
 import Cards from "react-credit-cards-2";
 import "react-credit-cards-2/es/styles-compiled.css";
-import emailjs from "@emailjs/browser";
 import validateInfo from "../../validateInfo";
-import { cartTotal, checkout, formatBDT, getUser } from "../../store";
-
-// Optional booking-confirmation email. Configure these in .env to enable it.
-const EMAILJS = {
-  service: process.env.REACT_APP_EMAILJS_SERVICE_ID,
-  template: process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
-  publicKey: process.env.REACT_APP_EMAILJS_PUBLIC_KEY,
-};
+import { cartTotal, checkout, formatBDT } from "../../store";
 
 const formatCardNumber = (value) =>
   value.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
@@ -55,12 +47,7 @@ const CreditCardForm = ({ cart, onPaid }) => {
       setPaying(false);
       return;
     }
-    const user = getUser();
-    if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey && user) {
-      emailjs
-        .send(EMAILJS.service, EMAILJS.template, { user_name: user.username, res_email: user.email }, EMAILJS.publicKey)
-        .catch(() => {});
-    }
+    // The server emails the booking confirmation.
     setPaying(false);
     onPaid(result.total);
   };

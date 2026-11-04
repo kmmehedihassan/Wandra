@@ -65,7 +65,7 @@ const Cart = () => {
           <span className="eyebrow">Payment received</span>
           <h1>You're all set! 🎉</h1>
           <p className="muted">
-            We received {formatBDT(paidTotal)} and confirmed your booking. You'll find the details in your dashboard.
+            We received {formatBDT(paidTotal)} and confirmed your booking. A confirmation email is on its way, and the details are in your dashboard.
           </p>
           <div className="chip-row" style={{ justifyContent: "center" }}>
             <Link to="/dashboard?tab=bookings" className="btn btn-primary">View my bookings</Link>

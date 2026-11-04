@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from TripsApp.emails import send_booking_cancelled, send_booking_confirmation
 from TripsApp.models import Booking, CartItem, Hotel, Kind, RoomType, Tour
 from TripsApp.serializers import AddToCartSerializer, BookingSerializer, CartItemSerializer
 from TripsApp.services import Unavailable, rooms_left, seats_left, today, validate_line
@@ -118,7 +119,8 @@ def checkout(request):
         Booking.objects.bulk_create(bookings)
         CartItem.objects.filter(id__in=[i.id for i in items]).delete()
 
-    created = Booking.objects.filter(user=request.user, reference=reference).select_related(*LINE_RELATED)
+    created = list(Booking.objects.filter(user=request.user, reference=reference).select_related(*LINE_RELATED))
+    send_booking_confirmation(request.user, created)
     return Response({
         'reference': str(reference),
         'total': sum(b.total for b in created),
@@ -147,6 +149,7 @@ def cancel_booking(request, pk):
     booking.status = Booking.Status.CANCELLED
     booking.cancelled_at = timezone.now()
     booking.save(update_fields=['status', 'cancelled_at'])
+    send_booking_cancelled(request.user, booking)
     return Response(BookingSerializer(booking).data)
 
 
