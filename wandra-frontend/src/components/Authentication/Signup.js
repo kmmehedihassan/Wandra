@@ -1,268 +1,121 @@
-import React, { useState, useEffect } from "react";
-import "./register.css";
-import { BsEye, BsRainbow } from "react-icons/bs";
+import React, { useState } from "react";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { API_BASE, errorMessage, saveSession } from "../../api";
 
-const emailValidator =
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-const passwordValidator = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+const fields = [
+  { name: "username", label: "Username", type: "text", autoComplete: "username" },
+  { name: "email", label: "Email address", type: "email", autoComplete: "email" },
+  { name: "password", label: "Password", type: "password", autoComplete: "new-password" },
+  { name: "repeatPassword", label: "Confirm password", type: "password", autoComplete: "new-password" },
+];
 
 const Signup = () => {
+  const [form, setForm] = useState({ username: "", email: "", password: "", repeatPassword: "" });
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [userData, setUserData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    repeatPassword: "",
-  });
-
-  const [visibility, setVisibility] = useState({
-    password: false,
-    repeatPassword: false,
-  });
-
-  const [formSubmission, setFormSubmission] = useState(false);
-
-
-  const [error, setError] = useState({
-    usernameError: "",
-    emailError: "",
-    passwordError: "",
-    repeatPasswordError: "",
-  });
-
-
-
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setUserData({ ...userData, [name]: value });
-    console.log(name, value);
-
-    console.log("1", error.usernameError);
-    console.log("2", error.emailError);
-    console.log("3", error.passwordError);
-    console.log("4", error.repeatPasswordError);
-    return;
+  const validateField = (name, values = form) => {
+    const value = values[name];
+    if (name === "username" && !value.trim()) return "Username is required";
+    if (name === "email") {
+      if (!value.trim()) return "Email address is required";
+      if (!emailPattern.test(value.trim())) return "Enter a valid email address";
+    }
+    if (name === "password") {
+      if (!value) return "Password is required";
+      if (value.length < 8 || !/[a-zA-Z]/.test(value) || !/\d/.test(value))
+        return "Use at least 8 characters with letters and numbers";
+    }
+    if (name === "repeatPassword" && value !== values.password) return "Passwords do not match";
+    return "";
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let formFields = [
-      "username",
-      "email",
-      "password",
-      "repeatPassword",
-    ];
-    let isValid = true;
-    formFields.forEach((field) => {
-      isValid = validateField(field) && isValid;
-    });
-
-    if (isValid) {
-      fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-        }),
-      })
-        .then(async (res) => {
-          const data = await res.json().catch(() => null);
-          if (!res.ok) {
-            setFormSubmission(false);
-            alert(errorMessage(data, "Registration failed"));
-            return;
-          }
-          saveSession(data);
-          setFormSubmission(true);
-          // Reload shortly so the navbar picks up the new session.
-          setTimeout(() => window.location.reload(), 1500);
-        })
-        .catch(() => {
-          setFormSubmission(false);
-          alert("Could not reach the server. Try again later.");
-        });
-    } else {
-      setFormSubmission(false);
-      alert("Failed");
-    }
-    console.log(isValid);
-
-
-    return formSubmission;
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "", form: "" });
   };
 
   const handleBlur = (e) => {
-    const name = e.target.name;
-    validateField(name);
-
-
-    console.log(name);
-    return;
+    if (form[e.target.name]) setErrors({ ...errors, [e.target.name]: validateField(e.target.name) });
   };
 
-  const toggleVisibility = () => {
-    if (visibility.password === true)
-      setVisibility({ password: false, repeatPassword: visibility.repeatPassword });
-    else setVisibility({ password: true, repeatPassword: visibility.repeatPassword });
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const next = {};
+    fields.forEach(({ name }) => {
+      const message = validateField(name);
+      if (message) next[name] = message;
+    });
+    setErrors(next);
+    if (Object.keys(next).length) return;
 
-  const toggleRVisibility = () => {
-    if (visibility.repeatPassword === true)
-      setVisibility({
-        repeatPassword: false,
-        password: visibility.password
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: form.username.trim(),
+          email: form.email.trim(),
+          password: form.password,
+        }),
       });
-    else setVisibility({ repeatPassword: true, password: visibility.password });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setErrors({ form: errorMessage(data, "Registration failed. Try again!") });
+        return;
+      }
+      saveSession(data); // signed in straight away; the navbar closes the modal
+    } catch (err) {
+      setErrors({ form: "Could not reach the server. Try again later." });
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-  const validateField = (name) => {
-    let isValid = false;
-    console.log("validate", name);
-    if (name === "username") isValid = validateUserName();
-    else if (name === "email") isValid = validateEmailAddress();
-    else if (name === "password") isValid = validatePassword();
-    else if (name === "repeatPassword")
-      isValid = validatePasswordConfirmation();
-    return isValid;
-  }
-
-  const validateUserName = () => {
-    let userNameError = "";
-    const value = userData.username;
-    if (value.trim() === "") userNameError = "User Name is required";
-    console.log(value, "usercalled");
-    setError({ usernameError: userNameError });
-
-    return userNameError === "";
-  }
-
-  const validateEmailAddress = () => {
-    let emailAddressError = "";
-    const value = userData.email;
-    if (value.trim() === "") emailAddressError = "Email Address is required";
-    else if (!emailValidator.test(value))
-      emailAddressError = "Email is not valid";
-    console.log(value, "emailcalled");
-    setError({ emailError: emailAddressError });
-    return emailAddressError === "";
-  }
-
-  const validatePassword = () => {
-    let passError = "";
-    const value = userData.password;
-    if (value.trim() === "") passError = "Password is required";
-    else if (!passwordValidator.test(value))
-      passError =
-        "Password must contain at least 8 characters, 1 number, 1 upper and 1 lowercase!";
-    console.log(value, "passcalled");
-    setError({ passwordError: passError });
-    return passError === "";
-  }
-
-  const validatePasswordConfirmation = () => {
-    let passwordConfirmationError = "";
-    if (userData.password !== userData.repeatPassword)
-      passwordConfirmationError = "Password does not match Confirmation";
-    console.log(userData.repeatPassword, "confcalled");
-    setError({ RepeadPasswordError: passwordConfirmationError });
-    return passwordConfirmationError === "";
-  }
-
 
   return (
-    <>
-      {formSubmission ? (
-        <div className="details">
-          <h2>Registration Successful!</h2>
-          <div>User Name: {userData.username}</div>
-          <div>Email Address: {userData.email}</div>
-        </div>
-      ) : (
-        <div style={{ textAlign: "center" }}>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="User Name"
-              name="username"
-              id="reg-user"
-              value={userData.username}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              autoComplete="off"
-            />
-            {error.usernameError && (
-              <div className="errorMsg">{error.usernameError}</div>
-            )}
-            <input
-              type="email"
-              placeholder="Email Address"
-              name="email"
-              id="reg-email"
-              value={userData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              autoComplete="off"
-            />
-            {error.emailError && (
-              <div className="errorMsg">{error.emailError}</div>
-            )}
-            <div id="pass-wrapper">
+    <form onSubmit={handleSubmit} noValidate>
+      {fields.map(({ name, label, type, autoComplete }) => {
+        const isPassword = type === "password";
+        return (
+          <div className="field" key={name}>
+            <label className="field-label" htmlFor={`reg-${name}`}>{label}</label>
+            <div className={isPassword ? "password-wrap" : undefined}>
               <input
-                type={visibility.password ? "text" : "password"}
-                placeholder="Password"
-                name="password"
-                id="reg-pass"
-                value={userData.password}
+                id={`reg-${name}`}
+                name={name}
+                type={isPassword && showPassword ? "text" : type}
+                className={`input${errors[name] ? " is-invalid" : ""}`}
+                value={form[name]}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                autoComplete="off"
+                autoComplete={autoComplete}
+                autoFocus={name === "username"}
               />
-              <span id="icn-eye" onClick={toggleVisibility}>
-                {visibility.password === true && (
-                  <BsEye color="#ff681a" size="1rem" />
-                )}
-                {visibility.password === false && (
-                  <BsEye color="black" size="1rem" />
-                )}
-
-              </span>
+              {name === "password" && (
+                <button
+                  type="button"
+                  className="password-toggle"
+                  aria-label={showPassword ? "Hide passwords" : "Show passwords"}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <BsEyeSlash /> : <BsEye />}
+                </button>
+              )}
             </div>
-            {error.passwordError && (
-              <div className="errorMsg">{error.passwordError}</div>
-            )}
-            <div id="pass-wrapper">
-              <input
-                type={visibility.repeatPassword ? "text" : "password"}
-                placeholder="Confirm Password"
-                name="repeatPassword"
-                id="reg-c-pass"
-                value={userData.repeatPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                autoComplete="off"
-              />
-              <span id="icn-eye" onClick={toggleRVisibility}>
-                {visibility.repeatPassword === true && (
-                  <BsEye color="#ff681a" size="1rem" />
-                )}
-                {visibility.repeatPassword === false && (
-                  <BsEye color="black" size="1rem" />
-                )}
-              </span>
-            </div>
-            {error.repeatPasswordError && (
-              <div className="errorMsg">{error.repeatPasswordError}</div>
-            )}
-            <button className="btn-reg">REGISTER</button>
-          </form>
-        </div>
-      )}
-    </>
+            {errors[name] && <span className="field-error">{errors[name]}</span>}
+          </div>
+        );
+      })}
+      {errors.form && <div className="alert alert-error mt-2" role="alert">{errors.form}</div>}
+      <button type="submit" className="btn btn-primary btn-block mt-3" disabled={submitting}>
+        {submitting ? "Creating account…" : "Create account"}
+      </button>
+    </form>
   );
 };
+
 export default Signup;

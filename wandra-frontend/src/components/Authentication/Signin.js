@@ -1,168 +1,92 @@
 import React, { useState } from "react";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { API_BASE, errorMessage, saveSession } from "../../api";
-import "./login.css";
-import { BsEye } from "react-icons/bs";
 
 const Signin = () => {
-  const [userData, setUserData] = useState({
-    username: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "", form: "" });
+  };
 
-  async function fetchData() {
+  const validate = () => {
+    const next = {};
+    if (!form.username.trim()) next.username = "Username is required";
+    if (!form.password) next.password = "Password is required";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setSubmitting(true);
     try {
       const resp = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: userData.username,
-          password: userData.password,
-        }),
+        body: JSON.stringify({ username: form.username.trim(), password: form.password }),
       });
       const data = await resp.json().catch(() => null);
       if (!resp.ok) {
-        setError({ loginError: errorMessage(data, "Login Unsuccessful. Try Again!") });
-        setFormSubmission(false);
+        setErrors({ form: errorMessage(data, "Login unsuccessful. Try again!") });
         return;
       }
-      saveSession(data);
-      setFormSubmission(true);
-      window.location.reload();
-    } catch (e) {
-      setError({ loginError: "Could not reach the server. Try again later." });
-      setFormSubmission(false);
+      saveSession(data); // the navbar closes the modal once the session exists
+    } catch (err) {
+      setErrors({ form: "Could not reach the server. Try again later." });
+    } finally {
+      setSubmitting(false);
     }
-  }
-
-  const [visibility, setVisibility] = useState({
-    password: false,
-  });
-
-  const [formSubmission, setFormSubmission] = useState(false);
-
-  const [error, setError] = useState({
-    usernameError: "",
-    passwordError: "",
-    loginError: ""
-  });
-
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setUserData({ ...userData, [name]: value });
-    return;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let formFields = ["username", "password"];
-    let isValid = true;
-    formFields.forEach((field) => {
-      isValid = validateField(field) && isValid;
-    });
-    if (isValid) fetchData();
-    return formSubmission;
-  };
-
-  const handleBlur = (e) => {
-    const name = e.target.name;
-    validateField(name);
-    return;
-  };
-
-  const toggleVisibility = () => {
-    if (visibility.password === true)
-      setVisibility({
-        password: false,
-      });
-    else
-      setVisibility({
-        password: true,
-      });
-  };
-
-  const validateField = (name) => {
-    let isValid = false;
-    if (name === "username") isValid = validateUserName();
-    else if (name === "password") isValid = validatePassword();
-    return isValid;
-  };
-
-  const validateUserName = () => {
-    let userNameError = "";
-    const value = userData.username;
-    if (value.trim() === "") userNameError = "User Name is required";
-    setError({ usernameError: userNameError });
-    return userNameError === "";
-  };
-
-  const validatePassword = () => {
-    let passError = "";
-    const value = userData.password;
-    if (value.trim() === "") passError = "Password is required";
-    setError({ passwordError: passError });
-    return passError === "";
   };
 
   return (
-    <>
-      {formSubmission ? (
-        <div className="details">
-          <h2>Login Successful!</h2>
-          <div>User Name: {userData.username}</div>
-          <div>Email Address: {userData.email}</div>
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="field">
+        <label className="field-label" htmlFor="login-user">Username</label>
+        <input
+          id="login-user"
+          name="username"
+          className={`input${errors.username ? " is-invalid" : ""}`}
+          value={form.username}
+          onChange={handleChange}
+          autoComplete="username"
+          autoFocus
+        />
+        {errors.username && <span className="field-error">{errors.username}</span>}
+      </div>
+      <div className="field">
+        <label className="field-label" htmlFor="login-pass">Password</label>
+        <div className="password-wrap">
+          <input
+            id="login-pass"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            className={`input${errors.password ? " is-invalid" : ""}`}
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <BsEyeSlash /> : <BsEye />}
+          </button>
         </div>
-      ) : (
-        <div style={{ textAlign: "center" }}>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="User Name"
-              name="username"
-              id="reg-user"
-              value={userData.username}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              autoComplete="off"
-            />
-            {error.usernameError && (
-              <div className="errorMsg">{error.usernameError}</div>
-            )}
-            <div id="pass-wrapper">
-              <input
-                type={visibility.password ? "text" : "password"}
-                placeholder="Password"
-                name="password"
-                id="reg-pass"
-                value={userData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                autoComplete="off"
-              />
-              <span id="icn-eye" onClick={toggleVisibility}>
-                {visibility.password === true && (
-                  <BsEye color="#ff681a" size="1rem" />
-                )}
-                {visibility.password === false && (
-                  <BsEye color="black" size="1rem" />
-                )}
-              </span>
-            </div>
-            {error.passwordError && (
-              <div className="errorMsg">{error.passwordError}</div>
-            )}
-            {error.loginError && (
-              <div className="errorMsg">{error.loginError}</div>
-            )}
-            <button className="btn-reg" type="submit">
-              Login
-            </button>
-          </form>
-        </div>
-      )}
-    </>
+        {errors.password && <span className="field-error">{errors.password}</span>}
+      </div>
+      {errors.form && <div className="alert alert-error mt-2" role="alert">{errors.form}</div>}
+      <button type="submit" className="btn btn-primary btn-block mt-3" disabled={submitting}>
+        {submitting ? "Logging in…" : "Log in"}
+      </button>
+    </form>
   );
 };
 

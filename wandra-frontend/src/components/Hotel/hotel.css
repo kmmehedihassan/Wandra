@@ -1,0 +1,72 @@
+.score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px 8px 8px 2px;
+  background: #1f3c88;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.room-list {
+  display: grid;
+  gap: 12px;
+}
+
+.room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.room-card.is-selected {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.room-name {
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+
+.room-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.room-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.room-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .room-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .room-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

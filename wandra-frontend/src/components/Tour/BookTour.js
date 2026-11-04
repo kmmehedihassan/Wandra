@@ -1,195 +1,112 @@
-import React from "react";
-import "./searchTour.css";
-import "./bookTour.css";
-import { useState } from "react";
-import { BiUser } from "react-icons/bi";
-import { AiOutlineMail } from "react-icons/ai";
-import { FiPhone } from "react-icons/fi";
-import { HiOutlineTicket } from "react-icons/hi"
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import { tour_details, tourCardData } from "../Database/data";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { addToCart, formatBDT, getUser, localISODate } from "../../store";
+import { Stepper } from "../Layout/Shared";
 
-const BookTour = () => {
-    const [bookData, setBookData] = useState({
-      name:"",
-      email:"",
-      phone: "",
-      date: "",
-      ticket: "",
+const today = () => localISODate(0);
+
+const BookTour = ({ tour }) => {
+  const history = useHistory();
+  const user = getUser();
+  const [form, setForm] = useState({
+    name: user ? user.username : "",
+    email: user ? user.email : "",
+    phone: "",
+    date: "",
+  });
+  const [tickets, setTickets] = useState(1);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  };
+
+  const validate = () => {
+    const next = {};
+    if (!form.name.trim()) next.name = "Enter the lead traveller's name";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) next.email = "Enter a valid email";
+    if (!/^\+?[\d\s-]{7,15}$/.test(form.phone.trim())) next.phone = "Enter a valid phone number";
+    if (!form.date) next.date = "Choose a travel date";
+    else if (form.date < today()) next.date = "The date can't be in the past";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    addToCart({
+      type: "tour",
+      refId: tour.id,
+      name: tour.title,
+      image: tour.img,
+      checkin: form.date,
+      price: tour.price,
+      ticket: tickets,
+      contact: { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() },
     });
+    history.push("/cart");
+  };
 
-    const history = useHistory();
+  const fieldProps = (name) => ({
+    id: `book-${name}`,
+    name,
+    value: form[name],
+    onChange: handleChange,
+    className: `input${errors[name] ? " is-invalid" : ""}`,
+  });
 
-    const { id } = useParams();
-    console.log("THis id from description" + { id });
-    const post = tour_details.find((post) => post.id.toString() === id);
-    const tourFirstDetail = tourCardData.find(
-      (post) => post.id.toString() === id
-    );
+  return (
+    <form className="card card-pad" onSubmit={handleSubmit} noValidate>
+      <div className="price">
+        {formatBDT(tour.price)} <small>/ person</small>
+      </div>
+      <p className="muted small">{tour.dur} night{tour.dur === 1 ? "" : "s"} · best in {tour.month}</p>
 
-    const msg = `Your Tour has been successfully booked.                                                       Name: ${
-      tourFirstDetail.title
-    }                                                       Destination: ${
-      tourFirstDetail.location
-    }/n
-    Duration: ${post.dur}
-    Total cost for ${bookData.ticket} persons: ${
-      Number(tourFirstDetail.price) * Number(bookData.ticket)
-    }`;
-    
-    const handleSubmit = () => {
-      let itemid = JSON.parse(window.localStorage.getItem("ItemId")) || 0;
-      itemid = itemid + 1;
-      window.localStorage.setItem("ItemId", JSON.stringify(itemid));
-
-      let cartTotal = JSON.parse(window.localStorage.getItem("CartTotal")) || 0;
-      cartTotal =
-        cartTotal + Number(tourFirstDetail.price) * Number(bookData.ticket);
-      window.localStorage.setItem("CartTotal", JSON.stringify(cartTotal));
-
-      let obj = {
-        id: itemid,
-        type: "tour",
-        name: tourFirstDetail.title,
-        checkin: bookData.date,
-        checkout: "",
-        roomtype: "",
-        totalrooms: "",
-        price: tourFirstDetail.price,
-        ticket: bookData.ticket,
-        status: "inprogress",
-      }
-
-      let cart = JSON.parse(window.localStorage.getItem('Cart') || "[]");
-      cart.push(obj);
-      window.localStorage.setItem("Cart", JSON.stringify(cart));
-
-      // let continfo = JSON.stringify({
-      //   email: bookData.email,
-      // });
-
-      // window.localStorage.setItem("contactinfo", continfo);
-
-      // var templateParams = {
-      //   user_name: bookData.name,
-      //   sender_email: "account@trekker.com",
-      //   res_email: bookData.email,
-      //   message: msg,
-      // };
-      
-      console.log(bookData);  
-    // emailjs
-          //   .send(
-          //     "service_8h8dopm",
-          //     "template_bgg27nb",
-          //     templateParams,
-          //     "O1-P6q-7AAzb86MXG"
-          //   )
-          //   .then(
-          //     function (response) {
-          //       console.log("SUCCESS!", response.status, response.text);
-          //       alert("Booking successful");
-          //     },
-          //     function (error) {
-          //       console.log("FAILED...", error);
-          //     }
-          //   );
-          history.push("/cart");
-    };
-
-    const handleChange = (e) => {
-        const name = e.target.name;
-        const value = e.target.value;
-        setBookData({ ...bookData, [name]: value });
-        console.log("handle change:", bookData);
-        return;
-    };
-
-    const [popover, setPopover] = useState(false);
-
-    return (
-      <>
-        <div className="book-tour-container">
-          <label className="search-tour-title">Book Tour</label>
-          <div className="search-tour-items">
-            <BiUser color="#ff681a" />
-            <input
-              type="text"
-              placeholder="Name"
-              name="name"
-              className="search-tour-item"
-              // value={bookData.name}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="search-tour-items">
-            <AiOutlineMail color="#ff681a" />
-            <input
-              type="email"
-              placeholder="Email"
-              name="email"
-              className="search-tour-item"
-              // value={bookData.email}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="search-tour-items">
-            <FiPhone color="#ff681a" />
-            <input
-              type="phone"
-              placeholder="Phone"
-              name="phone"
-              className="search-tour-item"
-              // value={bookData.phone}
-              onChange={handleChange}
-            />
-          </div>
-          {/* <div className="search-tour-items">
-          <MdOutlinePlace color="#ff681a" />
-          <input
-            type="date"
-            placeholder="MM/DD/YYYY"
-            min={1}
-            className="search-tour-item"
-            onChange={handleChange}
-          />
-        </div> */}
-          <div className="search-tour-items">
-            <HiOutlineTicket color="#ff681a" />
-            <input
-              type="number"
-              placeholder="Tickets"
-              name="ticket"
-              min={1}
-              className="search-tour-item"
-              // value={bookData.ticket}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* <Link
-            to="/hotels"
-            className="link-to-hotel"
-            onMouseEnter={() => setPopover(true)}
-            onMouseLeave={() => setPopover(false)}
-          >
-            <label className="txt-link-to-hotel">Include Accomodation</label>
-            {popover && (
-              <div className="hotel-popover-msg">
-                You can include accomodation to the current tour. The overall
-                tour price will be adjusted according to your hotel reservation.
-              </div>
-            )}
-          </Link> */}
-
-          <button className="tour-search-btn" onClick={handleSubmit}>
-            Submit
-          </button>
+      <div className="field">
+        <label className="field-label" htmlFor="book-date">Travel date</label>
+        <input type="date" min={today()} {...fieldProps("date")} />
+        {errors.date && <span className="field-error">{errors.date}</span>}
+      </div>
+      <div className="field">
+        <span className="field-label">Travellers</span>
+        <div className="row-between">
+          <span className="muted small">Tickets</span>
+          <Stepper value={tickets} min={1} max={20} onChange={setTickets} label="Number of tickets" />
         </div>
-      </>
-    );
+      </div>
+      <div className="field">
+        <label className="field-label" htmlFor="book-name">Lead traveller</label>
+        <input autoComplete="name" {...fieldProps("name")} />
+        {errors.name && <span className="field-error">{errors.name}</span>}
+      </div>
+      <div className="field">
+        <label className="field-label" htmlFor="book-email">Email</label>
+        <input type="email" autoComplete="email" {...fieldProps("email")} />
+        {errors.email && <span className="field-error">{errors.email}</span>}
+      </div>
+      <div className="field">
+        <label className="field-label" htmlFor="book-phone">Phone</label>
+        <input type="tel" autoComplete="tel" placeholder="+880 1XXX XXXXXX" {...fieldProps("phone")} />
+        {errors.phone && <span className="field-error">{errors.phone}</span>}
+      </div>
+
+      <div className="summary-line mt-2">
+        <span>
+          {formatBDT(tour.price)} × {tickets} ticket{tickets > 1 ? "s" : ""}
+        </span>
+        <span>{formatBDT(tour.price * tickets)}</span>
+      </div>
+      <div className="summary-total">
+        <span>Total</span>
+        <span className="price">{formatBDT(tour.price * tickets)}</span>
+      </div>
+      <button type="submit" className="btn btn-primary btn-block mt-2">
+        Add to cart
+      </button>
+    </form>
+  );
 };
 
 export default BookTour;

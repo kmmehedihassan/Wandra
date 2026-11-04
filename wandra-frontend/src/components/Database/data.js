@@ -1,62 +1,62 @@
 // export const gridData = [
 //   {
 //     id: 1,
-//     link: "images/saintmartin.jpg",
+//     link: "/images/saintmartin.jpg",
 //     name: "St. Martin's Island",
 //   },
 //   {
 //     id: 2,
-//     link: "images/sundarban.jpg",
+//     link: "/images/sundarban.jpg",
 //     name: "Sundarban",
 //   },
 //   {
 //     id: 3,
-//     link: "images/coxsbazar.gif",
+//     link: "/images/coxsbazar.gif",
 //     name: "Cox's Bazar",
 //   },
 //   {
 //     id: 4,
-//     link: "images/guthiamosque.jpg",
+//     link: "/images/guthiamosque.jpg",
 //     name: "Guthia Mosque",
 //   },
 //   {
 //     id: 5,
-//     link: "images/srimangal.jpg",
+//     link: "/images/srimangal.jpg",
 //     name: "Srimangal",
 //   },
 //   {
 //     id: 6,
-//     link: "images/tanguar.jpg",
+//     link: "/images/tanguar.jpg",
 //     name: "Tanguar Haor",
 //   },
 //   {
 //     id: 7,
-//     link: "images/kuakata.jpg",
+//     link: "/images/kuakata.jpg",
 //     name: "Kuakata",
 //   },
 //   {
 //     id: 8,
-//     link: "images/sajek.jpg",
+//     link: "/images/sajek.jpg",
 //     name: "Sajek Valley",
 //   },
 //   {
 //     id: 9,
-//     link: "images/ahsan.jpg",
+//     link: "/images/ahsan.jpg",
 //     name: "Ahsan Manzil",
 //   },
 //   {
 //     id: 10,
-//     link: "images/amiakhum.jpg",
+//     link: "/images/amiakhum.jpg",
 //     name: "Amiakhum",
 //   },
 //   {
 //     id: 11,
-//     link: "images/ratargul.jpg",
+//     link: "/images/ratargul.jpg",
 //     name: "Ratargul",
 //   },
 //   {
 //     id: 12,
-//     link: "images/nilgiri.jpg",
+//     link: "/images/nilgiri.jpg",
 //     name: "Nilgiri",
 //   },
 // ];
@@ -129,62 +129,62 @@
 export const gridData = [
   {
     id: 1,
-    link: "images/saintmartin.jpg",
+    link: "/images/saintmartin.jpg",
     name: "St. Martin's Island",
   },
   {
     id: 2,
-    link: "images/sundarban.jpg",
+    link: "/images/sundarban.jpg",
     name: "Sundarban",
   },
   {
     id: 3,
-    link: "images/coxsbazar.jpg",
+    link: "/images/coxsbazar.jpg",
     name: "Cox's Bazar",
   },
   {
     id: 4,
-    link: "images/guthiamosque.jpg",
+    link: "/images/guthiamosque.jpg",
     name: "Guthia Mosque",
   },
   {
     id: 5,
-    link: "images/srimangal.jpg",
+    link: "/images/srimangal.jpg",
     name: "Srimangal",
   },
   {
     id: 6,
-    link: "images/tanguar.jpg",
+    link: "/images/tanguar.jpg",
     name: "Tanguar Haor",
   },
   {
     id: 7,
-    link: "images/kuakata.jpg",
+    link: "/images/kuakata.jpg",
     name: "Kuakata",
   },
   {
     id: 8,
-    link: "images/sajek.jpg",
+    link: "/images/sajek.jpg",
     name: "Sajek Valley",
   },
   {
     id: 9,
-    link: "images/ahsan.jpg",
+    link: "/images/ahsan.jpg",
     name: "Ahsan Manzil",
   },
   {
     id: 10,
-    link: "images/amiakhum.jpg",
+    link: "/images/amiakhum.jpg",
     name: "Amiakhum",
   },
   {
     id: 11,
-    link: "images/ratargul.jpg",
+    link: "/images/ratargul.jpg",
     name: "Ratargul",
   },
   {
     id: 12,
-    link: "images/nilgiri.jpg",
+    link: "/images/nilgiri.jpg",
     name: "Nilgiri",
   },
 ];
@@ -267,7 +267,7 @@ export const destinationData = [
 export const tourCardData = [
   {
     id: 1,
-    img: "images/saintmartin.jpg",
+    img: "/images/saintmartin.jpg",
     title: "Saint Martin Premium Tour",
     name: "St. Martin Island",
     rating: 5,
@@ -280,7 +280,7 @@ export const tourCardData = [
   },
   {
     id: 2,
-    img: "images/saintmartin.jpg",
+    img: "/images/saintmartin.jpg",
     title: "Saint Martin Elite Tour",
     name: "St. Martin Island",
     rating: 4.5,
@@ -293,7 +293,7 @@ export const tourCardData = [
   },
   {
     id: 3,
-    img: "images/saintmartin.jpg",
+    img: "/images/saintmartin.jpg",
     title: "Saint Martin Excellent Tour",
     name: "St. Martin Island",
     rating: 4,
@@ -306,7 +306,7 @@ export const tourCardData = [
   },
   {
     id: 4,
-    img: "images/saintmartin.jpg",
+    img: "/images/saintmartin.jpg",
     title: "Saint Martin Quality Tour",
     name: "St. Martin Island",
     rating: 3.5,
@@ -319,7 +319,7 @@ export const tourCardData = [
   },
   {
     id: 5,
-    img: "images/saintmartin.jpg",
+    img: "/images/saintmartin.jpg",
     title: "Saint Martin Economy Tour",
     name: "St. Martin Island",
     rating: 3,
@@ -333,7 +333,7 @@ export const tourCardData = [
 
   {
     id: 6,
-    img: "images/sundarban.jpg",
+    img: "/images/sundarban.jpg",
     title: "Sundarban Premium Tour",
     name: "Sundarban",
     rating: 5,
@@ -346,7 +346,7 @@ export const tourCardData = [
   },
   {
     id: 7,
-    img: "images/sundarban.jpg",
+    img: "/images/sundarban.jpg",
     title: "Sundarban Elite Tour",
     name: "Sundarban",
     rating: 4.5,
@@ -359,7 +359,7 @@ export const tourCardData = [
   },
   {
     id: 8,
-    img: "images/sundarban.jpg",
+    img: "/images/sundarban.jpg",
     title: "Sundarban Excellent Tour",
     name: "Sundarban",
     rating: 4,
@@ -372,7 +372,7 @@ export const tourCardData = [
   },
   {
     id: 9,
-    img: "images/sundarban.jpg",
+    img: "/images/sundarban.jpg",
     title: "Sundarban Good Tour",
     name: "Sundarban",
     rating: 3.5,
@@ -385,7 +385,7 @@ export const tourCardData = [
   },
   {
     id: 10,
-    img: "images/sundarban.jpg",
+    img: "/images/sundarban.jpg",
     title: "Sundarban Economy Tour",
     name: "Sundarban",
     rating: 3,
@@ -398,7 +398,7 @@ export const tourCardData = [
   },
   {
     id: 11,
-    img: "images/sajek.jpg",
+    img: "/images/sajek.jpg",
     title: "Sajek Valley Premium Tour",
     name: "Sajek",
     rating: 5,
@@ -411,7 +411,7 @@ export const tourCardData = [
   },
   {
     id: 12,
-    img: "images/sajek.jpg",
+    img: "/images/sajek.jpg",
     title: "Sajek Valley Elite Tour",
     name: "Sajek",
     rating: 4.5,
@@ -424,7 +424,7 @@ export const tourCardData = [
   },
   {
     id: 13,
-    img: "images/sajek.jpg",
+    img: "/images/sajek.jpg",
     title: "Sajek Valley Excellent Tour",
     name: "Sajek",
     rating: 4,
@@ -437,7 +437,7 @@ export const tourCardData = [
   },
   {
     id: 14,
-    img: "images/sajek.jpg",
+    img: "/images/sajek.jpg",
     title: "Sajek Valley Quality Tour",
     name: "Sajek",
     rating: 3.5,
@@ -450,7 +450,7 @@ export const tourCardData = [
   },
   {
     id: 15,
-    img: "images/sajek.jpg",
+    img: "/images/sajek.jpg",
     title: "Sajek Valley Economy Tour",
     name: "Sajek",
     rating: 3,
@@ -464,7 +464,7 @@ export const tourCardData = [
 
   {
     id: 16,
-    img: "images/coxsbazar.jpg",
+    img: "/images/coxsbazar.jpg",
     title: "Cox'sbazar Premium Tour",
     name: "Cox'sBazar",
     rating: 5,
@@ -477,7 +477,7 @@ export const tourCardData = [
   },
   {
     id: 17,
-    img: "images/coxsbazar.jpg",
+    img: "/images/coxsbazar.jpg",
     title: "Cox'sbazar Elite Tour",
     name: "Cox'sBazar",
     rating: 4.5,
@@ -490,7 +490,7 @@ export const tourCardData = [
   },
   {
     id: 18,
-    img: "images/coxsbazar.jpg",
+    img: "/images/coxsbazar.jpg",
     title: "Cox'sbazar Excellent Tour",
     name: "Cox'sBazar",
     rating: 4,
@@ -503,7 +503,7 @@ export const tourCardData = [
   },
   {
     id: 19,
-    img: "images/coxsbazar.jpg",
+    img: "/images/coxsbazar.jpg",
     title: "Cox'sbazar Quality Tour",
     name: "Cox'sBazar",
     rating: 3.5,
@@ -516,7 +516,7 @@ export const tourCardData = [
   },
   {
     id: 20,
-    img: "images/coxsbazar.jpg",
+    img: "/images/coxsbazar.jpg",
     title: "Cox'sbazar Economy Tour",
     name: "Cox'sBazar",
     rating: 3,
@@ -530,7 +530,7 @@ export const tourCardData = [
 
   {
     id: 21,
-    img: "images/srimangal.jpg",
+    img: "/images/srimangal.jpg",
     title: "Srimangal Premium Tour",
     name: "Srimangal",
     rating: 5,
@@ -543,7 +543,7 @@ export const tourCardData = [
   },
   {
     id: 22,
-    img: "images/srimangal.jpg",
+    img: "/images/srimangal.jpg",
     title: "Srimangal Elite Tour",
     name: "Srimangal",
     rating: 4.5,
@@ -556,7 +556,7 @@ export const tourCardData = [
   },
   {
     id: 23,
-    img: "images/srimangal.jpg",
+    img: "/images/srimangal.jpg",
     title: "Srimangal Excellent Tour",
     name: "Srimangal",
     rating: 4,
@@ -565,11 +565,11 @@ export const tourCardData = [
       "Sreemangal is the tea capital of Bangladesh also called a green carpet, tea mountain. There are over 163 tea estates, including the largest one in the world.There are other top attractions to visit in Sreemangal: Lawachara national park , Ham ham waterfall , madhabpur lake , baikka beel wetland sanctuary.",
     price: 8000,
     category: "Trees and exploration",
-    month: "Decemeber",
+    month: "December",
   },
   {
     id: 24,
-    img: "images/srimangal.jpg",
+    img: "/images/srimangal.jpg",
     title: "Srimangal Quality Tour",
     name: "Srimangal",
     rating: 3.5,
@@ -582,7 +582,7 @@ export const tourCardData = [
   },
   {
     id: 25,
-    img: "images/srimangal.jpg",
+    img: "/images/srimangal.jpg",
     title: "Srimangal Economy Tour",
     name: "Srimangal",
     rating: 3,
@@ -596,7 +596,7 @@ export const tourCardData = [
 
   {
     id: 26,
-    img: "images/kuakata.jpg",
+    img: "/images/kuakata.jpg",
     title: "Kuakata Premium Tour",
     name: "Kuakata",
     rating: 5,
@@ -609,7 +609,7 @@ export const tourCardData = [
   },
   {
     id: 27,
-    img: "images/kuakata.jpg",
+    img: "/images/kuakata.jpg",
     title: "Kuakata Elite Tour",
     name: "Kuakata",
     rating: 4.5,
@@ -622,7 +622,7 @@ export const tourCardData = [
   },
   {
     id: 28,
-    img: "images/kuakata.jpg",
+    img: "/images/kuakata.jpg",
     title: "Kuakata Excellent Tour",
     name: "Kuakata",
     rating: 4,
@@ -635,7 +635,7 @@ export const tourCardData = [
   },
   {
     id: 29,
-    img: "images/kuakata.jpg",
+    img: "/images/kuakata.jpg",
     title: "Kuakata Quality Tour",
     name: "Kuakata",
     rating: 3.5,
@@ -648,7 +648,7 @@ export const tourCardData = [
   },
   {
     id: 30,
-    img: "images/kuakata.jpg",
+    img: "/images/kuakata.jpg",
     title: "Kuakata Economy Tour",
     name: "Kuakata",
     rating: 3,
@@ -661,9 +661,9 @@ export const tourCardData = [
   },
   {
     id: 31,
-    img: "images/tanguar.jpg",
-    title: "Tanguar Hoar Premium Tour",
-    name: "Kuakata",
+    img: "/images/tanguar.jpg",
+    title: "Tanguar Haor Premium Tour",
+    name: "Tanguar Haor",
     rating: 5,
     location: "Sylhet",
     description:
@@ -677,7 +677,7 @@ export const tourCardData = [
 export const hotel_list = [
   {
     id: 1,
-    src: "images/sayeman.jpg",
+    src: "/images/sayeman.jpg",
     name: "Seyeman Beach resort",
     dist: "500m from center",
     service: "Free airport taxi",
@@ -710,7 +710,7 @@ export const hotel_list = [
   },
   {
     id: 2,
-    src: "images/cox.jpeg",
+    src: "/images/cox.jpeg",
     name: "Hotel The Cox Today",
     dist: "500m from center",
     service: "Free airport taxi",
@@ -743,7 +743,7 @@ export const hotel_list = [
   },
   {
     id: 3,
-    src: "images/long.jpg",
+    src: "/images/long.jpg",
     name: "Long Beach Hotel Cox's Bazar",
     dist: "500m from center",
     service: "Free airport taxi",
@@ -777,7 +777,7 @@ export const hotel_list = [
 
   {
     id: 4,
-    src: "images/hotel.jpeg",
+    src: "/images/hotel.jpeg",
     name: "Hotel Victorial Inn",
     dist: "300m from center",
     service: "Free wifi",
@@ -810,7 +810,7 @@ export const hotel_list = [
   },
   {
     id: 5,
-    src: "images/tulip.jpg",
+    src: "/images/tulip.jpg",
     name: "Royal Tulip Hotel and Spa",
     dist: "1000m from center",
     service: "Free airport taxi",
@@ -843,7 +843,7 @@ export const hotel_list = [
   },
   {
     id: 6,
-    src: "images/palace.jpg",
+    src: "/images/palace.jpg",
     name: "Grand Sultan tea Garden",
     dist: "1000m from center",
     service: "Free airport taxi",
@@ -877,7 +877,7 @@ export const hotel_list = [
 
   {
     id: 7,
-    src: "images/dusai.jpg",
+    src: "/images/dusai.jpg",
     name: "Dusai Resort",
     dist: "1500m from city",
     service: "Free airport taxi, wifi",
@@ -910,7 +910,7 @@ export const hotel_list = [
   },
   {
     id: 8,
-    src: "images/palace.jpg",
+    src: "/images/palace.jpg",
     name: "The Palace Resort",
     dist: "1500m from city",
     service: "Free airport taxi, wifi",
@@ -943,7 +943,7 @@ export const hotel_list = [
   },
   {
     id: 9,
-    src: "images/hotel.jpeg",
+    src: "/images/hotel.jpeg",
     name: "Hotel Grand Park Barisal",
     dist: "1500m from city",
     service: "Free airport taxi, wifi",
@@ -977,7 +977,7 @@ export const hotel_list = [
 
   {
     id: 10,
-    src: "images/convention.jpeg",
+    src: "/images/convention.jpeg",
     name: "Ocean View Hotel and Convention",
     dist: "500m from city",
     service: "Free airport taxi, wifi",
@@ -1010,7 +1010,7 @@ export const hotel_list = [
   },
   {
     id: 11,
-    src: "images/st3.jpg",
+    src: "/images/st3.jpg",
     name: "Hotel Saint Martin",
     dist: "400m from jetty",
     service: "Free airport taxi, wifi",
@@ -1044,7 +1044,7 @@ export const hotel_list = [
 
   {
     id: 12,
-    src: "images/runmoy.jpg",
+    src: "/images/runmoy.jpg",
     name: "Runmoy Resort",
     dist: "400m from center",
     service: "Free airport taxi, wifi",
@@ -1077,7 +1077,7 @@ export const hotel_list = [
   },
   {
     id: 13,
-    src: "images/s3.jpeg",
+    src: "/images/s3.jpeg",
     name: "Meghomala Resort",
     dist: "400m from center",
     service: "Free airport taxi, wifi",
@@ -1111,7 +1111,7 @@ export const hotel_list = [
 
   {
     id: 14,
-    src: "images/convention.jpeg",
+    src: "/images/convention.jpeg",
     name: "Hotel Obokash",
     dist: "2000m from city",
     service: "Free airport taxi, wifi",
@@ -1144,7 +1144,7 @@ export const hotel_list = [
   },
   {
     id: 15,
-    src: "images/n3.jpeg",
+    src: "/images/n3.jpeg",
     name: "Nilgiri Hill Resort",
     dist: "2000m from city",
     service: "Free airport taxi, wifi",
@@ -1918,37 +1918,37 @@ export const accordiondata = [
 
 export const popularDestination = [
   {
-    image: "images/saintmartin.jpg",
+    image: "/images/saintmartin.jpg",
     title: "St. Martin's Island",
     description: "Chittagong",
   },
   {
-    image: "images/sundarban.jpg",
+    image: "/images/sundarban.jpg",
     title: "Sundarbans",
     description: "Khulna",
   },
   {
-    image: "images/coxsbazar.gif",
+    image: "/images/coxsbazar.gif",
     title: "Cox's Bazar",
     description: "Chittagong",
   },
   {
-    image: "images/guthiamosque.jpg",
-    title: "Ghutia Mosque",
+    image: "/images/guthiamosque.jpg",
+    title: "Guthia Mosque",
     description: "Barisal",
   },
   {
-    image: "images/srimangal.jpg",
+    image: "/images/srimangal.jpg",
     title: "Sreemangal",
     description: "Sylhet",
   },
   {
-    image: "images/tanguar.jpg",
-    title: "Tangauar Haor",
+    image: "/images/tanguar.jpg",
+    title: "Tanguar Haor",
     description: "Sylhet",
   },
   {
-    image: "images/kuakata.jpg",
+    image: "/images/kuakata.jpg",
     title: "Kuakata",
     description: "Barisal",
   },
@@ -1956,37 +1956,37 @@ export const popularDestination = [
 
 export const popularTour = [
   {
-    image: "images/sajek.jpg",
+    image: "/images/sajek.jpg",
     title: "Sajek Vally",
     description: "This is a description",
   },
   {
-    image: "images/coxsbazar.gif",
+    image: "/images/coxsbazar.gif",
     title: "Cox's Bazar",
     description: "This is a second description",
   },
   {
-    image: "images/srimangal.jpg",
+    image: "/images/srimangal.jpg",
     title: "Sreemangal",
     description: "This is a third description",
   },
   {
-    image: "images/nilgiri.jpg",
+    image: "/images/nilgiri.jpg",
     title: "Chittagong Hill Tracks",
     description: "This is a fourth description",
   },
   {
-    image: "images/ratargul.jpg",
+    image: "/images/ratargul.jpg",
     title: "Ratargul",
     description: "This is a fifth description",
   },
   {
-    image: "images/nilgiri.jpg",
+    image: "/images/nilgiri.jpg",
     title: "Nilgiri",
     description: "This is a sixth description",
   },
   {
-    image: "images/amiakhum.jpg",
+    image: "/images/amiakhum.jpg",
     title: "Amiakhum",
     description: "This is a seventh description",
   },

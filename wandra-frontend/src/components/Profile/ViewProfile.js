@@ -1,65 +1,37 @@
 import React from "react";
-import "./viewProfile.css"
+import { formatDate } from "../../store";
 
+const ViewProfile = ({ user, profile, onEdit }) => {
+  const rows = [
+    ["Username", user.username],
+    ["Email", user.email],
+    ["First name", profile.firstname],
+    ["Last name", profile.lastname],
+    ["Gender", profile.gender],
+    ["Birthday", profile.birthday ? formatDate(profile.birthday) : ""],
+    ["Phone", profile.phone],
+    ["Address", profile.address],
+  ];
+  const incomplete = rows.some(([, value]) => !value);
 
-const ViewProfile = () => {
   return (
-    <div className="view-profile-container">
-      {/* <h2>
-        Name: {JSON.parse(window.localStorage.getItem("userdata")).username}
-      </h2>
-      <h2>
-        Email: {JSON.parse(window.localStorage.getItem("userdata")).useremail}
-      </h2> */}
-      <label className="view-prof-title">MY PROFILE</label>
-
-      <label className="info-title">BASIC INFORMATION</label>
-      
-      <label className="info-row">
-        <span className="info-attribute">First Name:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).firstname}
-        </span>
-      </label>
-      <label className="info-row">
-        <span className="info-attribute">Last Name:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).lastname}
-        </span>
-      </label>
-      <label className="info-row">
-        <span className="info-attribute">Gender:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).gender}
-        </span>
-      </label>
-      <label className="info-title">CONTACT INFORMATION</label>
-
-      <label className="info-row">
-        <span className="info-attribute">Phone:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).phone}
-        </span>
-      </label>
-      <label className="info-row">
-        <span className="info-attribute">Address:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).address}
-        </span>
-      </label>
-      <label className="info-row">
-        <span className="info-attribute">E-mail:</span>
-        <span className="info-value">
-          {window.localStorage.getItem("formData") &&
-            JSON.parse(window.localStorage.getItem("formData")).email}
-        </span>
-      </label>
-    </div>
+    <>
+      <div className="row-between">
+        <h1 className="card-title mb-0">My profile</h1>
+        <button type="button" className="btn btn-outline btn-sm" onClick={onEdit}>
+          Edit profile
+        </button>
+      </div>
+      {incomplete && <p className="muted small mt-1">Complete your profile so we can reach you about your trips.</p>}
+      <dl className="detail-list mt-2">
+        {rows.map(([label, value]) => (
+          <React.Fragment key={label}>
+            <dt>{label}</dt>
+            <dd>{value || <span className="muted">Not set</span>}</dd>
+          </React.Fragment>
+        ))}
+      </dl>
+    </>
   );
 };
 

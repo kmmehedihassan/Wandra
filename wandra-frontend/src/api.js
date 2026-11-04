@@ -22,7 +22,10 @@ export function saveSession({ token, user }) {
     "userdata",
     JSON.stringify({ username: user.username, useremail: user.email })
   );
+  window.dispatchEvent(new Event("wandra:store"));
 }
+
+const SESSION_KEYS = ["authToken", "isAuthenticated", "userdata"];
 
 export async function logout() {
   const token = getToken();
@@ -36,7 +39,9 @@ export async function logout() {
       // Ignore network errors; the local session is cleared regardless.
     }
   }
-  window.localStorage.clear();
+  // Only end the session; keep the user's saved bookings and profile.
+  SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
+  window.dispatchEvent(new Event("wandra:store"));
 }
 
 // Turn a DRF error response into a single readable message.

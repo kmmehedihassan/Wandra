@@ -1,72 +1,64 @@
 import React from "react";
-import "./description.css";
-import Descsubs from "./Descsubs";
-import Gallery from "./Gallery";
+import { Link, useParams } from "react-router-dom";
+import { MdOutlinePlace } from "react-icons/md";
 import BookTour from "./BookTour";
-import "../Destination/Header.css";
-import { useState } from "react";
-import { tour_details, tourCardData } from "../Database/data";
-import { Link, useHistory, useParams } from "react-router-dom";
+import Error from "../../pages/Error";
+import { PageHero, Gallery, Stars } from "../Layout/Shared";
+import { galleryFor, getDestination, getTour } from "../Database/catalog";
 
-const Description = ({
-  link,
-  name,
-  price,
-  desc,
-  type,
-  time,
-  dur,
-  req,
-  inc,
-  ninc,
-}) => {
+const Description = () => {
   const { id } = useParams();
-  console.log("THis id from description" + { id });
-  const post = tour_details.find((post) => post.id.toString() === id);
-  const tourFirstDetail = tourCardData.find(
-    (post) => post.id.toString() === id
-  );
-  console.log(post);
-  console.log(tourFirstDetail.img);
+  const tour = getTour(id);
+  if (!tour) return <Error />;
+  const destination = tour.destinationId ? getDestination(tour.destinationId) : null;
 
-  // const [tourDetailsData,setTourDetailsData]=useState(tour_details);
   return (
-    <div>
-      <img
-        className="image"
-        src={"../../" + tourFirstDetail.img}
-        alt="intro"
-      ></img>
-      <div className="main-container-tour ">
-        <h1 className="title">{tourFirstDetail.title}</h1>
-        <p className="para">{tourFirstDetail.price}Tk/per person</p>
-        <p className="desc_box">{tourFirstDetail.description}</p>
-        <div className="subs">
-          <div className="each-row"><h6 className="point">Type</h6>
-            <p className="detail-tour-desc">{tourFirstDetail.category}</p>
-          </div>
-          <div className="each-row"><h6 className="point">Departure time</h6>
-            <p className="detail-tour-desc">{post.time}</p>
-          </div>
-          <div className="each-row"><h6 className="point">Duration</h6>
-            <p className="detail-tour-desc">{post.dur} Nights</p>
-          </div>
-          <div className="each-row"><h6 className="point">Requirements</h6>
-            <p className="detail-tour-desc">{post.req}</p>
-          </div>
-          <div className="each-row"><h6 className="point">Included</h6>
-            <p className="detail-tour-desc">{post.inc}</p>
-          </div>
-          <div className="each-row"><h6 className="point">Not Included</h6>
-            <p className="detail-tour-desc">{post.ninc}</p>
-          </div>
+    <>
+      <PageHero eyebrow={tour.category} title={tour.title} image={tour.img} tall>
+        <div className="hero-meta">
+          <Stars value={tour.rating} />
+          <span>
+            <MdOutlinePlace /> {tour.name}, {tour.location}
+          </span>
         </div>
-        <Gallery />
-        <div className="book-tour-position">
-          <BookTour />
+      </PageHero>
+      <div className="container-w section">
+        <nav className="breadcrumb" aria-label="Breadcrumb">
+          <Link to="/tours">Tours</Link> <span>/</span> {tour.title}
+        </nav>
+        <div className="layout-aside">
+          <div>
+            <h2 className="section-title">About this tour</h2>
+            <p className="lead">{tour.description}</p>
+            <dl className="detail-list mt-3">
+              <dt>Type</dt>
+              <dd>{tour.category}</dd>
+              <dt>Departure</dt>
+              <dd>{tour.time}</dd>
+              <dt>Duration</dt>
+              <dd>{tour.dur} night{tour.dur === 1 ? "" : "s"}</dd>
+              <dt>Best month</dt>
+              <dd>{tour.month}</dd>
+              <dt>What to bring</dt>
+              <dd>{tour.req}</dd>
+              <dt>Included</dt>
+              <dd>{tour.inc}</dd>
+              <dt>Not included</dt>
+              <dd>{tour.ninc}</dd>
+            </dl>
+            {destination && (
+              <p className="mt-3">
+                Learn more about <Link to={`/destinations/${destination.id}`}>{destination.name}</Link> before you go.
+              </p>
+            )}
+            <Gallery images={tour.destinationId ? galleryFor(tour.destinationId) : []} title="Photos" />
+          </div>
+          <aside className="sticky-card">
+            <BookTour tour={tour} />
+          </aside>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 export const HotelRoomData=[
   {
       id:1,
@@ -319,9 +318,8 @@ Adult:2
 
 ]
 
-export function HotelRoomState() {
-
-  const [hotels,setHotels]=useState([
+// Rooms available per hotel and room type.
+export const HOTEL_INVENTORY = [
       {
         roomid:1,
         hotelid:1,
@@ -594,12 +592,4 @@ export function HotelRoomState() {
       },
      
       
-  ])
-  return {hotels,setHotels};
-}
-export function BookingRoomState() {
-
-    const [booking,setBooking]=useState([
-    ])
-
-}
+];

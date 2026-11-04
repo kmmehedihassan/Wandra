@@ -1,50 +1,58 @@
-import React, {useState, useEffect} from "react";
-import BookedHotel from "./BookedHotel";
-import BookedTour from "./BookedTour";
-import "./myBookings.css";
+import React from "react";
+import { BookingSummary } from "../Miscellaneous/Cart";
+import { EmptyState } from "../Layout/Shared";
+import { cancelBooking, formatDate, localISODate, useBookings } from "../../store";
+
+const STATUS = {
+  confirmed: { label: "Confirmed", className: "badge-success" },
+  cancelled: { label: "Cancelled", className: "badge-danger" },
+  completed: { label: "Completed", className: "badge-neutral" },
+};
 
 const MyBookings = () => {
+  const bookings = [...useBookings()].reverse();
+  const today = localISODate(0);
 
-  const [booklist, setBooklist] = useState([]);
-  
-  useEffect(() => {
-      setBooklist(JSON.parse(window.localStorage.getItem("Booklist") || "[]"));
-  }, [booklist]);
+  const statusOf = (b) => {
+    if (b.status === "cancelled") return "cancelled";
+    const end = b.type === "hotel" ? b.checkout : b.checkin;
+    return end && end < today ? "completed" : "confirmed";
+  };
+
+  const handleCancel = (b) => {
+    if (window.confirm(`Cancel your booking for ${b.name}? We'll contact you about the refund.`)) cancelBooking(b.id);
+  };
 
   return (
-    <div className="booking-container">
-      <label className="view-prof-title">MY BOOKINGS</label>
-      {booklist.map((bookdata) =>
-        bookdata.type === "tour" ? (
-          <BookedTour
-            id={bookdata.id}
-            name={bookdata.name}
-            date={bookdata.checkin}
-            ticket={bookdata.ticket}
-            price={bookdata.price}
-            status={bookdata.status}
-          />
-        ) : (
-          <BookedHotel
-            id={bookdata.id}
-            name={bookdata.name}
-            checkin={bookdata.checkin}
-            checkout={bookdata.checkout}
-            roomtype={bookdata.roomtype}
-            totalrooms={bookdata.totalrooms}
-            price={bookdata.price}
-            status={bookdata.status}
-          />
-        )
+    <>
+      <h1 className="card-title">My bookings</h1>
+      {bookings.length === 0 ? (
+        <EmptyState title="No bookings yet" text="When you book a tour or hotel it will show up here." actionTo="/tours" actionLabel="Find a tour" />
+      ) : (
+        <div className="booking-list">
+          {bookings.map((b) => {
+            const status = statusOf(b);
+            return (
+              <article key={b.id} className={`booking-item${status === "cancelled" ? " is-cancelled" : ""}`}>
+                <BookingSummary item={b} />
+                <div className="row-between mt-1">
+                  <span className="muted small">Booked {formatDate(b.bookedAt)}</span>
+                  <div className="chip-row" style={{ alignItems: "center" }}>
+                    <span className={`badge ${STATUS[status].className}`}>{STATUS[status].label}</span>
+                    {status === "confirmed" && (
+                      <button type="button" className="btn btn-danger btn-sm" onClick={() => handleCancel(b)}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       )}
-      {Object.keys(booklist).length === 0 && (
-        <h4 style={{ margin: "150px 100px", color: "#222" }}>
-          You do not have any bookings!
-        </h4>
-      )}
-    </div>
+    </>
   );
 };
 
 export default MyBookings;
-

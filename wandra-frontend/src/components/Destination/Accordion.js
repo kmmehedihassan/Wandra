@@ -1,18 +1,14 @@
-
-// import React from 'react'
-import React, { useState } from 'react';
-import './Accordion.css'
+import React, { useState } from "react";
 
 const Accordion = ({ title, content }) => {
-  const [isActive, setIsActive] = useState(false);
-
+  const [open, setOpen] = useState(false);
   return (
-    <div className="accordion-item">
-      <div className="accordion-title" onClick={() => setIsActive(!isActive)}>
-        <div>{title}</div>
-        <div>{isActive ? '-' : '+'}</div>
-      </div>
-      {isActive && <div className="accordion-content">{content}</div>}
+    <div className={`accordion-item${open ? " is-open" : ""}`}>
+      <button type="button" className="accordion-title" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span>{title}</span>
+        <span className="accordion-icon" aria-hidden="true">{open ? "−" : "+"}</span>
+      </button>
+      {open && <div className="accordion-content">{content}</div>}
     </div>
   );
 };

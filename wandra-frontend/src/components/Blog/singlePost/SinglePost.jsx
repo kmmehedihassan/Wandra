@@ -1,92 +1,66 @@
+import React from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import Post from "../post/Post";
-import "./singlePost.css";
 import { AiOutlineDelete } from "react-icons/ai";
-import { FaEdit } from "react-icons/fa";
-import formatDistance from "date-fns/formatDistance";
-export default function SinglePost({ posts, handleDelete }) {
+import Error from "../../../pages/Error";
+import { LikeButton, timeAgo } from "../post/Post";
+import { toggleLike } from "../Blog";
+import { formatDate, useUser } from "../../../store";
+import "../blog.css";
+
+export default function SinglePost({ posts, setPosts }) {
   const { id } = useParams();
-  console.log({ id });
   const history = useHistory();
-  const post = posts.find((post) => post.id.toString() === id);
-  let timeDistance = (time) => {
-    return formatDistance(new Date(), new Date(time));
+  const user = useUser();
+  const post = posts.find((p) => String(p.id) === id);
+  if (!post) return <Error />;
+
+  const canDelete = user && user.username === post.Author;
+
+  const handleDelete = () => {
+    if (!window.confirm("Delete this post? This can't be undone.")) return;
+    setPosts((list) => list.filter((p) => p.id !== post.id));
+    history.push("/blog");
   };
 
-  // const createdAt = new Date(post.datetime);
-  // const today = new Date();
-  const differenceInTime = timeDistance(post.datetime);
-  console.log(differenceInTime);
   return (
-    <div className="singlePost">
-      <div className="singlePostWrapper">
-        {/* <img className="singlePostImg" src={post.imgOrVideoLink} alt="" /> */}
-
-        {post.imgLink === true ? (
-          <img className="singlePostImg" src={post.imgOrVideoLink} alt="" />
-        ) : (
-          <video className="singlePostImg" controls>
-            <source src={post.imgOrVideoLink} type="video/mp4" />
-          </video>
-        )}
-
-        <h1 className="singlePostTitle">
-          {post.title}
-          <div className="singlePostEdit">
-            {/* <FaEdit size="1.5rem"/> */}
-            <AiOutlineDelete
-              size="1.5rem"
-              onClick={() => {
-                console.log(typeof handleDelete);
-
-                handleDelete(post.id);
-                history.push("/blog");
-              }}
-            />
-          </div>
-        </h1>
-        <div className="singlePostInfo">
-          <span>
-            Author:
-            <b className="singlePostAuthor">
-              <Link className="link" to={`/blog/posts?username=${post.Author}`}>
-                {post.Author}
-              </Link>
-            </b>
-          </span>
-          <span>{differenceInTime}</span>
-        </div>
-        <p className="singlePostDesc">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iste error
-          quibusdam ipsa quis quidem doloribus eos, dolore ea iusto impedit!
-          Voluptatum necessitatibus eum beatae, adipisci voluptas a odit modi
-          eos! Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iste
-          error quibusdam ipsa quis quidem doloribus eos, dolore ea iusto
-          impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas a
-          odit modi eos! Lorem, ipsum dolor sit amet consectetur adipisicing
-          elit. Iste error quibusdam ipsa quis quidem doloribus eos, dolore ea
-          iusto impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas
-          a odit modi eos! Lorem, ipsum dolor sit amet consectetur adipisicing
-          elit. Iste error quibusdam ipsa quis quidem doloribus eos, dolore ea
-          iusto impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas
-          a odit modi eos! Lorem, ipsum dolor sit amet consectetur adipisicing
-          elit. Iste error quibusdam ipsa quis quidem doloribus eos, dolore ea
-          iusto impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas
-          a odit modi eos!
-          <br />
-          <br />
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iste error
-          quibusdam ipsa quis quidem doloribus eos, dolore ea iusto impedit!
-          Voluptatum necessitatibus eum beatae, adipisci voluptas a odit modi
-          eos! Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iste
-          error quibusdam ipsa quis quidem doloribus eos, dolore ea iusto
-          impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas a
-          odit modi eos! Lorem, ipsum dolor sit amet consectetur adipisicing
-          elit. Iste error quibusdam ipsa quis quidem doloribus eos, dolore ea
-          iusto impedit! Voluptatum necessitatibus eum beatae, adipisci voluptas
-          a odit modi eos! Lorem, ipsum dolor sit amet consectetur.
-        </p>
+    <article className="container-w section single-post">
+      <nav className="breadcrumb" aria-label="Breadcrumb">
+        <Link to="/blog">Blog</Link> <span>/</span> {post.title}
+      </nav>
+      <div className="chip-row">
+        {post.categories.map((c) => (
+          <Link key={c} to={`/blog?cat=${encodeURIComponent(c)}`} className="badge">
+            {c}
+          </Link>
+        ))}
       </div>
-    </div>
+      <h1 className="single-post-title">{post.title}</h1>
+      <div className="row-between single-post-meta">
+        <span className="muted">
+          By{" "}
+          <Link to={`/blog?author=${encodeURIComponent(post.Author)}`} className="post-author">
+            {post.Author}
+          </Link>{" "}
+          · {formatDate(post.createdAt)} ({timeAgo(post.createdAt)})
+        </span>
+        <div className="chip-row" style={{ alignItems: "center" }}>
+          <LikeButton post={post} onToggle={toggleLike(setPosts)} />
+          {canDelete && (
+            <button type="button" className="btn btn-danger btn-sm" onClick={handleDelete}>
+              <AiOutlineDelete /> Delete
+            </button>
+          )}
+        </div>
+      </div>
+      <img className="single-post-img" src={post.image} alt="" />
+      <div className="single-post-body">
+        {post.body.split(/\n{2,}/).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+      <div className="mt-4">
+        <Link to="/blog" className="btn btn-outline">← Back to all posts</Link>
+      </div>
+    </article>
   );
 }

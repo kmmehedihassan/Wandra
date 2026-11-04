@@ -1,75 +1,70 @@
+import React from "react";
 import { Link } from "react-router-dom";
-import "./post.css";
-import Categories from "../categories/Categories";
-import { FaInstagramSquare, FaFacebookSquare, FaComment } from "react-icons/fa";
-import { AiFillLike } from "react-icons/ai";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { formatDistanceToNow } from "date-fns";
+import { useUser, openAuthModal } from "../../../store";
 
-export default function Post({ img, vid, post, updateLike }) {
-  const refreshPage = () => {
-    upLike();
-  };
-  let upLike = () => {
-    post.like++;
-    updateLike(post.id, "Posts", post.likes);
-    // window.location.reload();
-    console.log("Up Like " + post.id + " " + post.likes++);
-  };
+export function postExcerpt(body, length = 140) {
+  const text = String(body || "").replace(/\s+/g, " ").trim();
+  return text.length > length ? `${text.slice(0, length).trim()}…` : text;
+}
+
+export function timeAgo(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : `${formatDistanceToNow(d)} ago`;
+}
+
+export function LikeButton({ post, onToggle }) {
+  const user = useUser();
+  const likedBy = post.likedBy || [];
+  const liked = user ? likedBy.includes(user.username) : false;
   return (
-    <div className="post">
-      {post.imgLink === true ? (
-        <img className="postImg" src={post.imgOrVideoLink} alt="" />
-      ) : (
-        <video className="postImg" controls>
-          <source src={post.imgOrVideoLink} type="video/mp4" />
-        </video>
-      )}
+    <button
+      type="button"
+      className={`like-btn${liked ? " is-liked" : ""}`}
+      aria-pressed={liked}
+      aria-label={liked ? "Unlike" : "Like"}
+      onClick={(e) => {
+        e.preventDefault();
+        if (!user) return openAuthModal("login");
+        onToggle(post.id, user.username);
+      }}
+    >
+      {liked ? <AiFillHeart /> : <AiOutlineHeart />} {likedBy.length}
+    </button>
+  );
+}
 
-      <div className="postInfo">
-        <div id="datePost">
-          <p id="square">
-            {post.date} {post.month}
-          </p>
-        </div>
-        <div className="postInfoAll">
-          <div className="postCats">
-            {post.catagory.map((cat) => {
-              return <Categories catagory={cat.categoryName} />;
-            })}
-          </div>
-          {/* <span className="postCat">
-              <Link className="postlink" to="/blog/posts?cat=Music">
-                Music
-              </Link>
-            </span>
-            <span className="postCat">
-              <Link className="postlink" to="/blog/posts?cat=Music">
-                Life
-              </Link>
-            </span>
-          </div> */}
-          <span className="postTitle">
-            <Link to={`/blog/post/${post.id}`} className="postlink">
-              <p>{post.title}</p>
+export default function Post({ post, onToggleLike }) {
+  return (
+    <article className="media-card post-card">
+      <Link to={`/blog/post/${post.id}`} className="media-card-img" aria-label={post.title}>
+        <img src={post.image} alt="" loading="lazy" />
+      </Link>
+      <div className="media-card-body">
+        <div className="chip-row">
+          {post.categories.map((c) => (
+            <Link key={c} to={`/blog?cat=${encodeURIComponent(c)}`} className="badge">
+              {c}
             </Link>
+          ))}
+        </div>
+        <h3 className="media-card-title">
+          <Link to={`/blog/post/${post.id}`} className="post-title-link">
+            {post.title}
+          </Link>
+        </h3>
+        <p className="media-card-desc">{postExcerpt(post.body)}</p>
+        <div className="media-card-foot">
+          <span className="muted small">
+            <Link to={`/blog?author=${encodeURIComponent(post.Author)}`} className="post-author">
+              {post.Author}
+            </Link>{" "}
+            · {timeAgo(post.createdAt)}
           </span>
-          <hr />
-          <span className="postDate">1 hour ago</span>
-          <p className="postDesc">{post.body}</p>
-          <div className="IconsInPost">
-            <p className="LeftSideIcon">
-              <AiFillLike className="PostIcon" onClick={refreshPage} />
-              {post.likes}
-              <FaComment className="PostIcon2" />
-              {post.comments}{" "}
-            </p>
-
-            <p className="RightSideIcon">
-              <FaFacebookSquare className="topIcon" />
-              <FaInstagramSquare className="topIcon" />
-            </p>
-          </div>
+          <LikeButton post={post} onToggle={onToggleLike} />
         </div>
       </div>
-    </div>
+    </article>
   );
 }

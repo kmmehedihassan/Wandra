@@ -1,109 +1,98 @@
-.dash-main-container{
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;   
+.dash-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
 }
 
-.dash-side-tab{
-    /* margin: 50px; */
-
-    padding: 50px;
-    /* min-width: 20%; */
-    height: fit-content;    
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.dash-side-btn-con{
-    width: 200px;
+.dash-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-#profile-drop-icn{
-    margin-right: 10px;
+.dash-avatar-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.4rem;
 }
 
-
-
-.dash-side-btn{
-    border: none;
-    border-radius: 0;
-    
-    /* margin-bottom: 15px; */
-    padding: 10px 25px;
-    /* background: #303030; */
-    /* border-radius: 5px; */
-    color: #303030;
-    font-weight: 600;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    /* transition: all 0.2s; */
+.dash-name,
+.dash-email {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.dash-side-btn:hover{
-    /* background: #eee; */
-    /* border-right: 2px solid teal; */
-    color: #ff681a;
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
 }
 
-/* .dash-profile-pic{
-    margin: 50px 50px 20px 50px;
-} */
-
-.dash-right-sidebar{
-    padding: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.dash-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-2);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
 }
 
-.dash-logout-btn{
-    border: 1px solid #C62828;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: white;
-    border-radius: 5px;
-    color: #303030;
-    font-weight: 600;
-    width: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.dash-logout-btn:hover{
-    color: #C62828;
+.dash-nav-item:hover {
+  background: var(--bg);
 }
 
-.dash-upload-btn{
-    border: 1px solid teal;
-    padding: 10px 20px;
-    background: #fff;
-    border-radius: 5px;
-    color: #303030;
-    font-weight: 600;
-    width: 180px;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.dash-upload-btn:hover{
-    color: teal;
+.dash-nav-item.is-active {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
 }
 
-.dash-username{
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-top: 10px;
+.dash-logout {
+  color: var(--danger);
 }
 
-.hello-label{
-    font-size: 1.1rem;
-    font-weight: 400;
+.booking-list {
+  display: grid;
+  gap: 14px;
+}
+
+.booking-item {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.booking-item.is-cancelled {
+  opacity: 0.65;
+}
+
+@media (max-width: 860px) {
+  .dash-layout {
+    grid-template-columns: 1fr;
+  }
+  .dash-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }

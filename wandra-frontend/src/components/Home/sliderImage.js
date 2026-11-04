@@ -1,38 +1,38 @@
 export const sliderImage = [
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "The journey of a thousand miles begins with a single step",
-    urls: "images/one.jpg",
+    urls: "/images/one.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "Not all those who wander are lost",
-    urls: "images/two.jpg",
+    urls: "/images/two.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "Travel is an investment in yourself",
-    urls: "images/three.jpg",
+    urls: "/images/three.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "The goal is to die with memories not dreams",
-    urls: "images/four.jpg",
+    urls: "/images/four.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description:
       "Some beautiful paths can’t be discovered without getting lost",
-    urls: "images/five.jpg",
+    urls: "/images/five.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "Live life with no excuses, travel with no regret",
-    urls: "images/six.jpg",
+    urls: "/images/six.jpg",
   },
   {
-    title: "TREKKER",
+    title: "WANDRA",
     description: "We don’t need objects; we need adventures",
-    urls: "images/seven.jpg",
+    urls: "/images/seven.jpg",
   },
 ];

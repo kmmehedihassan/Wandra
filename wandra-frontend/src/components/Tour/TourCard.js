@@ -1,49 +1,41 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./tourCard.css";
-import Rating from "@mui/material/Rating";
+import { MdOutlinePlace } from "react-icons/md";
+import { BiTimeFive } from "react-icons/bi";
+import { Stars } from "../Layout/Shared";
+import { formatBDT } from "../../store";
 
-const TourCard = ({
-    id,
-    img,
-    title,
-    name,
-    location,
-    rating,
-    description,
-    price,
-    category,
-}) => {
-    return (
-        <div className="tour-card-container">
-            <Link to={{ pathname: `/tours/${id}`, state: { stateParam: true } }}>
-                <div className="tour-card-img">
-                    <img src={img} alt="tour" />
-                </div>
-            </Link>
-            <div className="tour-card-section">
-                <div className="tour-card-title">
-                    {title}
-                    <Rating
-                        className="tour-rating"
-                        name="half-rating-read"
-                        value={rating}
-                        precision={0.5}
-                        readOnly
-                    />
-                </div>
-                <div className="tour-card-location">
-                    {name}, {location}
-                </div>
-
-                <div className="tour-card-desc">{description}</div>
-                <div className="tour-card-price-content">
-                    <span className="tour-card-price">{price} BDT </span>
-                    <span clasName="tour-misc-label">/ per person</span>
-                </div>
-            </div>
-        </div>
-    );
-};
+const TourCard = ({ tour }) => (
+  <article className="list-card">
+    <Link to={`/tours/${tour.id}`} className="list-card-img" aria-label={tour.title}>
+      <img src={tour.img} alt="" loading="lazy" />
+    </Link>
+    <div className="list-card-body">
+      <div className="row-between" style={{ alignItems: "flex-start" }}>
+        <h3 className="list-card-title">
+          <Link to={`/tours/${tour.id}`}>{tour.title}</Link>
+        </h3>
+        <span className="badge">{tour.category}</span>
+      </div>
+      <div className="media-card-meta">
+        <MdOutlinePlace /> {tour.name}, {tour.location}
+        <span aria-hidden="true">·</span>
+        <BiTimeFive /> {tour.dur} night{tour.dur === 1 ? "" : "s"}
+        <span aria-hidden="true">·</span>
+        {tour.month}
+      </div>
+      <Stars value={tour.rating} />
+      <p className="media-card-desc">{tour.description}</p>
+      <div className="list-card-foot">
+        <span className="price">
+          {formatBDT(tour.price)} <small>/ person</small>
+        </span>
+        <Link to={`/tours/${tour.id}`} className="btn btn-primary btn-sm">
+          View &amp; book
+        </Link>
+      </div>
+    </div>
+  </article>
+);
 
 export default TourCard;

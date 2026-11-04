@@ -1,230 +1,140 @@
-import "./list.css";
-import { API_BASE } from "../../../api";
-import Header from "../header/Header";
-import { useState,useEffect } from "react";
-import { format } from "date-fns";
-import { DateRange } from "react-date-range";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { BiSearch } from "react-icons/bi";
 import SearchItem from "../searchItem/SearchItem";
-import { hotel_list } from "../../Database/data";
-// import format from "date-fns/format";
-import axios from "axios";
-import {
-  HotelRoomData,
-  SingleHotel,
-  HotelRoomState,
-} from "../../Database/SingleHotel";
-import { parse } from "date-fns/esm";
+import { PageHero, EmptyState } from "../../Layout/Shared";
+import { getDestinations, getHotels } from "../../Database/catalog";
+import "../hotel.css";
+
+const SORTS = {
+  recommended: { label: "Top rated", fn: (a, b) => b.ratings - a.ratings },
+  priceAsc: { label: "Price: low to high", fn: (a, b) => a.price - b.price },
+  priceDesc: { label: "Price: high to low", fn: (a, b) => b.price - a.price },
+  stars: { label: "Stars: high to low", fn: (a, b) => b.star - a.star || b.ratings - a.ratings },
+};
+
+const EMPTY = { search: "", destination: "", min: "", max: "", stars: 0 };
+
 const List = () => {
-  const {hotels,setHotels}=HotelRoomState()
-  const [destination, setDestination] = useState("");
-  const [openDate, setOpenDate] = useState(false);
-  const [date, setDate] = useState([
-    {
-      startDate: new Date(),
-      endDate: new Date(),
-      key: "selection",
-    },
-  ]);
-  const [options, setOptions] = useState({
-    adult: 1,
-    children: 0,
-    room: 1,
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const [filters, setFilters] = useState({
+    ...EMPTY,
+    search: params.get("q") || "",
+    destination: params.get("destination") || "",
   });
-  const[minprice,setMinprice]=useState();
-  const[maxprice,setMaxprice]=useState();
-  const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [sort, setSort] = useState("recommended");
+  const [showFilters, setShowFilters] = useState(false);
 
-   const  handleSearchHotel= ()=>{
-    // let total_adult=options.adult
-    // let total_children=options.children
-    // let intend_room=options.adult
-    let total_room=options.room
-    let price =minprice
-    let pricem =maxprice
-    console.log("total all",total_room)
-    console.log("total price",price,pricem)
-    let date="2-11-2022"
-    console.log(format(new Date(date),"yyyy-mmmm-dd"))
-    let temp=new Date(date)
-    let finaldate=temp.getFullYear()+"-0"+temp.getMonth()+"-"+temp.getDay()
-    console.log(finaldate)
-    const newBook ={
-      hotel_id : 2,
-      room : 1,
-      guest :"Fahim",
-      roomquantity:1,
-      check_in : finaldate,
-      check_out : finaldate,
-      price :4,
-      cardata:234
+  const hotels = useMemo(getHotels, []);
+  const destinations = useMemo(
+    () => getDestinations().filter((d) => hotels.some((h) => h.destinationId === d.id)),
+    [hotels]
+  );
 
-    }
-    let b = JSON.stringify(newBook)
-    console.log(b)
-    axios.get(`${API_BASE}/reserve/10?`+ new URLSearchParams({
-        
-      hotel_id : 2,
-      room : 1,
-      guest :"Fahim",
-      roomquantity:1,
-      check_in : finaldate,
-      check_out : finaldate,
-      price :4,
-      cardata:234
+  const set = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
+  const reset = () => setFilters(EMPTY);
 
-    
-  }), {
-      method: 'GET',
-      
-       
+  const min = filters.min === "" ? 0 : Number(filters.min);
+  const max = filters.max === "" ? Infinity : Number(filters.max);
+  const priceError = filters.min !== "" && filters.max !== "" && min > max;
+
+  const results = hotels
+    .filter((h) => {
+      const q = filters.search.trim().toLowerCase();
+      if (q && !`${h.name} ${h.category} ${h.location}`.toLowerCase().includes(q)) return false;
+      if (filters.destination && h.destinationId !== Number(filters.destination)) return false;
+      if (!priceError && (h.price < min || h.price > max)) return false;
+      if (filters.stars && h.star < filters.stars) return false;
+      return true;
     })
-    .then(res => {console.log(res.json())})
-    .then((result) => {
-      alert(result);
-    },
-    (error) => {
-      alert('posts Failed');
-    })
-    const filteredResults =hotel_list.filter(
-      (grid)=>{
-        // let SinglehotelObj=hotels.
-      if(search!=""){
-        // console.log("Working  ")
-        return ( 
-          grid.location.toLowerCase().includes(search.toLowerCase())
-          && (grid.price>=price && grid.price<=pricem)
-        )
-      } 
-      else {
-        return ( 
-          
-           (grid.price>=price && grid.price<=pricem)
-        )
+    .sort(SORTS[sort].fn);
 
-      }
-      } 
-      
-    );
-      console.log(filteredResults)
-      if(filteredResults.length===0)
-        setSearchResults(hotel_list)
-      else
-        setSearchResults(filteredResults)
-  }
-  const [inputValue, setInputValue] = useState(0);
-  // useEffect(() => {
-  //   const filteredResults = hotel_list.filter(
-  //     (grid) =>
-  //       grid.name.toLowerCase().includes(search.toLowerCase())
-  //   );
-  //   console.log(searchResults);      
-  //   setSearchResults(filteredResults);
-  // }, [search]);
+  const activeCount = Object.keys(EMPTY).filter((k) => filters[k] !== EMPTY[k]).length;
+
   return (
-    <div>
-      <Header type="list" />
-      <div className="listContainer">
-        <div className="listWrapper">
-          <div className="listSearch">
-            <h1 className="lsTitle">Search</h1>
-            <div className="lsItem">
-              <label>Destination</label>
-              <input placeholder={destination} type="text"
-              onChange={(e) => {
-                
-                setSearch(e.target.value);
-                console.log(search);
-              }} />
-            </div>
-            <div className="lsItem">
-              <label>Check-in Date</label>
-              <span onClick={() => setOpenDate(!openDate)}>{`${format(
-                date[0].startDate,
-                "MM/dd/yyyy"
-              )} to ${format(date[0].endDate, "MM/dd/yyyy")}`}</span>
-              {openDate && (
-                <DateRange
-                  onChange={(item) => setDate([item.selection])}
-                  minDate={new Date()}
-                  ranges={date}
-                />
+    <>
+      <PageHero
+        eyebrow="Hotels"
+        title="Places to stay"
+        subtitle="Beach resorts, hill cottages and city hotels — compare rooms and book in a few clicks."
+        image="/images/sayeman.jpg"
+      />
+      <div className="container-w section">
+        <div className="layout-sidebar">
+          <aside className={`card card-pad filters sticky-card${showFilters ? " is-open" : ""}`}>
+            <div className="row-between">
+              <h2 className="card-title mb-0">Filters</h2>
+              {activeCount > 0 && (
+                <button type="button" className="btn btn-ghost btn-sm" onClick={reset}>
+                  Reset
+                </button>
               )}
             </div>
-            <div className="lsItem">
-              <label>Options</label>
-              <div className="lsOptions">
-                <div className="lsOptionItem">
-                  <span className="lsOptionText">
-                    Min price <small>per night</small>
-                  </span>
-                  <input type="number" 
-                  min={0}
-                  onChange={(e)=>{setMinprice(e.target.value)}}
-                  className="lsOptionInput" />
-                </div>
-                <div className="lsOptionItem">
-                  <span className="lsOptionText">
-                    Max price <small>per night</small>
-                  </span>
-                  <input type="number"
-                  min={0}
-                  onChange={(e)=>{setMaxprice(e.target.value)}}
-                  className="lsOptionInput" />
-                </div>
-                {/* <div className="lsOptionItem">
-                  <span className="lsOptionText">Adult</span>
-                  <input
-                    type="number"
-                    min={0}
-                    className="lsOptionInput"
-                    onChange={(e)=>{setOptions({...options,adult:e.target.value})}}
-                    placeholder={options.adult}
-                  />
-                </div>
-                <div className="lsOptionItem">
-                  <span className="lsOptionText">Children</span>
-                  <input
-                    type="number"
-                    min={0}
-                    className="lsOptionInput"
-                    onChange={(e)=>{setOptions({...options,children:e.target.value})}}
-                    placeholder={options.children}
-                  />
-                </div> */}
-                <div className="lsOptionItem">
-                  <span className="lsOptionText">Room</span>
-                  <input
-                    type="number"
-                    min={0}
-                    className="lsOptionInput"
-                    onChange={(e)=>{setOptions({...options,room:e.target.value})}}
-                    placeholder={options.room}
-                  />
-                </div>
+            <div className="field mt-2">
+              <label className="field-label" htmlFor="hotel-q">Search</label>
+              <div className="input-icon">
+                <BiSearch />
+                <input id="hotel-q" className="input" placeholder="Hotel or city" value={filters.search} onChange={(e) => set("search", e.target.value)} />
               </div>
             </div>
-            <button onClick={handleSearchHotel}>Search</button>
-          </div>
-          <div className="listResult">
-            {searchResults.map((h) => (
-              <SearchItem
-                id={h.id}
-                src={h.src}
-                name={h.name}
-                dist={h.dist}
-                service={h.service}
-                highlights={h.highlights}
-                desc={h.desc}
-                category={h.category}
-                ratings={h.ratings}
-                price={h.price}
-              />
-            ))}
+            <div className="field">
+              <label className="field-label" htmlFor="hotel-dest">Destination</label>
+              <select id="hotel-dest" className="select" value={filters.destination} onChange={(e) => set("destination", e.target.value)}>
+                <option value="">Anywhere</option>
+                {destinations.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <span className="field-label">Price per night (৳)</span>
+              <div className="field-row">
+                <input className="input" type="number" min={0} placeholder="Min" aria-label="Minimum price" value={filters.min} onChange={(e) => set("min", e.target.value)} />
+                <input className="input" type="number" min={0} placeholder="Max" aria-label="Maximum price" value={filters.max} onChange={(e) => set("max", e.target.value)} />
+              </div>
+              {priceError && <span className="field-error">Minimum is higher than maximum</span>}
+            </div>
+            <div className="field">
+              <span className="field-label">Hotel class</span>
+              <div className="chip-row">
+                {[0, 3, 4, 5].map((s) => (
+                  <button key={s} type="button" className={`chip${filters.stars === s ? " is-active" : ""}`} onClick={() => set("stars", s)}>
+                    {s === 0 ? "Any" : `${s}★ +`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <div>
+            <div className="results-bar">
+              <span className="muted">
+                <strong className="results-count">{results.length}</strong> of {hotels.length} hotels
+              </span>
+              <div className="results-bar-actions">
+                <button type="button" className="btn btn-outline btn-sm filters-toggle" onClick={() => setShowFilters(!showFilters)}>
+                  {showFilters ? "Hide filters" : `Filters${activeCount ? ` (${activeCount})` : ""}`}
+                </button>
+                <label className="sort-select">
+                  <span className="visually-hidden">Sort by</span>
+                  <select className="select" value={sort} onChange={(e) => setSort(e.target.value)}>
+                    {Object.entries(SORTS).map(([key, s]) => (
+                      <option key={key} value={key}>{s.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
+            {results.length === 0 ? (
+              <EmptyState title="No hotels match your filters" text="Try another destination or a wider price range." onAction={reset} actionLabel="Reset filters" />
+            ) : (
+              results.map((hotel) => <SearchItem key={hotel.id} hotel={hotel} />)
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

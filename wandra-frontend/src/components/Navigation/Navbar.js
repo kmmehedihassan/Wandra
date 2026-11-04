@@ -1,126 +1,149 @@
 import "./navbar.css";
-import React, { useState } from "react";
-import Authenticate from "../Authentication/Authenticate";
-import NavDropdown from "./NavDropdown";
-import ProfileDropdown from "./ProfileDropdown";
-import { navItems } from "./NavItems";
-import { Link } from "react-router-dom";
-import { IconContext } from "react-icons/lib";
-import { HiOutlineLogin } from "react-icons/hi";
-import { RiMenu3Fill } from "react-icons/ri";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useHistory, useLocation } from "react-router-dom";
 import { AiOutlineShopping } from "react-icons/ai";
-import {
-  FaTwitter,
-  FaFacebookF,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
-import Avatar from "@mui/material/Avatar";
-import { Prevent } from "./Prevent"
-import { useHistory } from "react-router-dom";
+import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import { CgProfile } from "react-icons/cg";
+import { MdLogout, MdEditNote } from "react-icons/md";
+import { FaStackOverflow } from "react-icons/fa";
+import Authenticate from "../Authentication/Authenticate";
+import { navItems } from "./NavItems";
+import { useCart, useUser } from "../../store";
+import { logout } from "../../api";
 
 const Navbar = () => {
-  const [modal, setModal] = useState(false);
-  const toggleModal = () => {
-    console.log(modal);
-    setModal(!modal);
+  const user = useUser();
+  const cart = useCart();
+  const history = useHistory();
+  const location = useLocation();
+  const [authTab, setAuthTab] = useState(null); // "login" | "register" | null
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
+
+  // Close menus when navigating.
+  useEffect(() => {
+    setMenuOpen(false);
+    setUserMenu(false);
+  }, [location.pathname]);
+
+  // Other components can request the login modal.
+  useEffect(() => {
+    const open = (e) => setAuthTab(e.detail || "login");
+    window.addEventListener("wandra:auth", open);
+    return () => window.removeEventListener("wandra:auth", open);
+  }, []);
+
+  // Close the login modal once the user is signed in.
+  useEffect(() => {
+    if (user) setAuthTab(null);
+  }, [user]);
+
+  useEffect(() => {
+    if (!userMenu) return undefined;
+    const onClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenu(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [userMenu]);
+
+  const handleLogout = async () => {
+    await logout();
+    setUserMenu(false);
+    history.push("/");
   };
 
-  const [dropdown, setDropdown] = useState(false);
-  const [profileDropdown, setProfileDropdown] = useState(false);
-
-  const history = useHistory();
+  const goDashboard = (tab) => history.push(`/dashboard${tab ? `?tab=${tab}` : ""}`);
 
   return (
-    <IconContext.Provider value={{ color: "white", size: "1rem" }}>
-      <div class="navheader fixed-nav-bar">
-        <div>
-          <Link to="/" class="logo">
-            trekker
+    <>
+      <header className="site-nav">
+        <div className="container-w site-nav-inner">
+          <Link to="/" className="brand" aria-label="Wandra home">
+            <span className="brand-mark">W</span>
+            <span className="brand-name">Wandra</span>
           </Link>
-        </div>
 
-        <div class="section">
-          <div class="navtop">
-            <Link to={{ pathname: "https://twitter.com" }} target="_blank">
-              <FaTwitter class="icn" />
-            </Link>
-            <Link to={{ pathname: "https://fb.com" }} target="_blank">
-              <FaFacebookF class="icn" />
-            </Link>
-            <Link to={{ pathname: "https://instagram.com" }} target="_blank">
-              <FaInstagram class="icn" />
-            </Link>
-            <Link to={{ pathname: "https://linkedin.com" }} target="_blank">
-              <FaLinkedinIn class="icn" />
-            </Link>
-            {!window.localStorage.getItem("isAuthenticated") && (
-              <button onClick={toggleModal} className="top-buttons">
-                <HiOutlineLogin class="login-icn" />
-                LOGIN
+          <nav className={`nav-links${menuOpen ? " is-open" : ""}`} aria-label="Main">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.id}
+                exact={item.path === "/"}
+                to={item.path}
+                className="nav-link"
+                activeClassName="is-active"
+              >
+                {item.title}
+              </NavLink>
+            ))}
+            {!user && (
+              <button type="button" className="btn btn-primary nav-login-mobile" onClick={() => setAuthTab("login")}>
+                Log in
               </button>
             )}
-            {window.localStorage.getItem("isAuthenticated") && (
-              <Link
-                to="/dashboard"
-                className="top-buttons profile-link"
-                onMouseEnter={() => setProfileDropdown(true)}
-                onMouseLeave={() => setProfileDropdown(false)}
-              >
-                <Avatar
-                  alt="Remy Sharp"
-                  src="/images/avatar.jpg"
-                  sx={{ width: 18, height: 18 }}
-                />
-                <div className="profile-txt">
-                  {JSON.parse(window.localStorage.getItem("userdata")).username}
-                </div>
-                {profileDropdown && <ProfileDropdown />}
-              </Link>
-            )}
+          </nav>
 
-            {modal && (
-              <div className="auth-modal">
-                <div onClick={toggleModal} className="overlay"></div>
-                <Authenticate />
-              </div>
-            )}
-          </div>
+          <div className="nav-actions">
+            <Link to="/cart" className="icon-btn nav-cart" aria-label={`Cart, ${cart.length} items`}>
+              <AiOutlineShopping size={20} />
+              {cart.length > 0 && <span className="nav-cart-count">{cart.length}</span>}
+            </Link>
 
-          <div class="bottom">
-            <div className="row main-nav">
-              {navItems.map((item) => {
-                if (item.title === "Blog") {
-                  return (
-                    <Link
-                      to={item.path}
-                      className="col navbar-link"
-                      onMouseEnter={() => setDropdown(true)}
-                      onMouseLeave={() => setDropdown(false)}
-                    >
-                      {item.title}
-                      {dropdown && <NavDropdown />}
-                    </Link>
-                  );
-                }
-                return (
-                  <div
-                    className="col navbar-link"
-                    onClick={Prevent(() => history.push(item.path))}
-                  >
-                    {item.title}
+            {user ? (
+              <div className="user-menu" ref={userMenuRef}>
+                <button
+                  type="button"
+                  className="user-chip"
+                  aria-haspopup="menu"
+                  aria-expanded={userMenu}
+                  onClick={() => setUserMenu(!userMenu)}
+                >
+                  <span className="avatar">{user.username.charAt(0).toUpperCase()}</span>
+                  <span className="user-chip-name">{user.username}</span>
+                </button>
+                {userMenu && (
+                  <div className="menu" role="menu">
+                    <div className="menu-head">
+                      <strong>{user.username}</strong>
+                      <span className="muted small">{user.email}</span>
+                    </div>
+                    <button type="button" role="menuitem" onClick={() => goDashboard()}>
+                      <CgProfile /> My profile
+                    </button>
+                    <button type="button" role="menuitem" onClick={() => goDashboard("bookings")}>
+                      <FaStackOverflow /> My bookings
+                    </button>
+                    <button type="button" role="menuitem" onClick={() => history.push("/write")}>
+                      <MdEditNote /> Write a post
+                    </button>
+                    <button type="button" role="menuitem" className="menu-danger" onClick={handleLogout}>
+                      <MdLogout /> Log out
+                    </button>
                   </div>
-                );
-              })}
+                )}
+              </div>
+            ) : (
+              <button type="button" className="btn btn-primary nav-login" onClick={() => setAuthTab("login")}>
+                Log in
+              </button>
+            )}
 
-              <Link to="/cart" className="col-1 menu">
-                <AiOutlineShopping size="1.4rem" color="#303030" />
-              </Link>
-            </div>
+            <button
+              type="button"
+              className="icon-btn nav-toggle"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <HiOutlineX size={20} /> : <HiOutlineMenu size={20} />}
+            </button>
           </div>
         </div>
-      </div>
-    </IconContext.Provider>
+      </header>
+
+      {authTab && <Authenticate initialTab={authTab} onClose={() => setAuthTab(null)} />}
+    </>
   );
 };
 

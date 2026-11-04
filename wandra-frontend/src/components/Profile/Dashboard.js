@@ -1,167 +1,101 @@
-import React, { useState, useEffect } from "react";
-import { logout } from "../../api";
-import "./dashboard.css";
-import Avatar from "@mui/material/Avatar";
+import React from "react";
+import { useHistory, useLocation } from "react-router-dom";
+import { CgProfile } from "react-icons/cg";
+import { BiEdit } from "react-icons/bi";
+import { FaStackOverflow } from "react-icons/fa";
+import { MdLogout } from "react-icons/md";
 import ViewProfile from "./ViewProfile";
 import EditProfile from "./EditProfile";
 import MyBookings from "./MyBookings";
-import { useHistory } from "react-router-dom";
-import "../Navigation/profileDropdown.css";
-import { CgProfile } from "react-icons/cg";
-import { BiEdit } from "react-icons/bi";
-import { MdLogout } from "react-icons/md";
-import { HiUpload } from "react-icons/hi";
-import { FaStackOverflow } from "react-icons/fa";
-import { Prevent } from "../Navigation/Prevent";
+import { EmptyState } from "../Layout/Shared";
+import { openAuthModal, saveProfile, useProfile, useUser } from "../../store";
+import { logout } from "../../api";
+import "./dashboard.css";
+
+const TABS = [
+  { key: "profile", label: "My profile", Icon: CgProfile },
+  { key: "edit", label: "Edit profile", Icon: BiEdit },
+  { key: "bookings", label: "My bookings", Icon: FaStackOverflow },
+];
 
 export default function Dashboard() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [perviewFile, setpreviewFile] = useState(null);
-  const [file, setFile] = useState(null);
-  const [fileDataURL, setFileDataURL] = useState(null);
-  const changeHandler = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    setFile(file);
-  };
-  useEffect(() => {
-    let fileReader,
-      isCancel = false;
-    if (file) {
-      fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        const { result } = e.target;
-        if (result && !isCancel) {
-          setFileDataURL(result);
-        }
-      };
-      fileReader.readAsDataURL(file);
-    }
-    return () => {
-      isCancel = true;
-      if (fileReader && fileReader.readyState === 1) {
-        fileReader.abort();
-      }
-    };
-  }, [file]);
-
-  
-
-  const [isActive, setIsActive] = useState(1);
-
-  const options = ["My Profile", "Edit Profile", "My Booking", "Logout"];
+  const user = useUser();
+  const profile = useProfile();
   const history = useHistory();
+  const location = useLocation();
+  const tab = new URLSearchParams(location.search).get("tab") || "profile";
+  const active = TABS.some((t) => t.key === tab) ? tab : "profile";
 
-  const handleRouteView = () => {
-    setIsActive(1);
-    history.push("/dashboard");
+  if (!user) {
+    return (
+      <div className="container-w section">
+        <div className="card">
+          <EmptyState
+            title="Log in to see your dashboard"
+            text="Your profile and bookings are available once you're signed in."
+            onAction={() => openAuthModal("login")}
+            actionLabel="Log in"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const go = (key) => history.push(key === "profile" ? "/dashboard" : `/dashboard?tab=${key}`);
+
+  const handleAvatar = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return alert("Please choose an image file.");
+    if (file.size > 1024 * 1024) return alert("Please choose an image under 1 MB.");
+    const reader = new FileReader();
+    reader.onload = () => saveProfile({ ...profile, avatar: reader.result });
+    reader.readAsDataURL(file);
   };
 
-  const handleRouteEdit = () => {
-    setIsActive(2);
-    history.push("/dashboard");
-  };
-
-  const handleRouteBooking = () => {
-    setIsActive(3);
-    history.push("/dashboard");
-  };
-
-  const handleRouteLogout = async () => {
+  const handleLogout = async () => {
     await logout();
-    window.location.reload();
-    // history.push("/blog");
+    history.push("/");
   };
+
+  const displayName = [profile.firstname, profile.lastname].filter(Boolean).join(" ") || user.username;
 
   return (
-    <div className="dash-main-container">
-      <div className="dash-side-tab">
-        {options.map((option) => (
-          <div className="dash-side-btn-con">
-            {option === "My Profile" && (
-              <button
-                style={{
-                  borderRight: isActive === 1 ? "2px solid teal" : "",
-                  backgroundColor: isActive === 1 ? "#eee" : "",
-                }}
-                className="dash-side-btn"
-                onClick={Prevent(() => handleRouteView())}
-              >
-                <CgProfile size="1.4rem" color="#F57F17" id="nav-drop-icn" />
-                {option}
-              </button>
+    <div className="container-w section">
+      <div className="dash-layout">
+        <aside className="card card-pad dash-side">
+          <div className="dash-user">
+            {profile.avatar ? (
+              <img className="dash-avatar" src={profile.avatar} alt="" />
+            ) : (
+              <span className="dash-avatar dash-avatar-letter">{user.username.charAt(0).toUpperCase()}</span>
             )}
-            {option === "Edit Profile" && (
-              <button
-                style={{
-                  borderRight: isActive === 2 ? "2px solid teal" : "",
-                  backgroundColor: isActive === 2 ? "#eee" : "",
-                }}
-                className="dash-side-btn"
-                onClick={Prevent(() => handleRouteEdit())}
-              >
-                <BiEdit size="1.5rem" color="#4DD0E1" id="profile-drop-icn" />
-                {option}
-              </button>
-            )}
-            {option === "My Booking" && (
-              <button
-                style={{
-                  borderRight: isActive === 3 ? "2px solid teal" : "",
-                  backgroundColor: isActive === 3 ? "#eee" : "",
-                }}
-                className="dash-side-btn"
-                onClick={Prevent(() => handleRouteBooking())}
-              >
-                <FaStackOverflow
-                  size="1.5rem"
-                  color="#E91E63"
-                  id="profile-drop-icn"
-                />
-                {option}
-              </button>
-            )}
+            <div style={{ minWidth: 0 }}>
+              <strong className="dash-name">{displayName}</strong>
+              <span className="muted small dash-email">{user.email}</span>
+            </div>
           </div>
-        ))}
-      </div>
-
-      {isActive === 1 && <ViewProfile />}
-      {isActive === 2 && <EditProfile />}
-      {isActive === 3 && <MyBookings />}
-
-      <div className="dash-right-sidebar">
-        <Avatar
-          className="dash-profile-pic"
-          alt="Remy Sharp"
-          src={fileDataURL}
-          sx={{ width: 200, height: 200 }}
-        />
-        <label className="dash-username">
-          <span className="hello-label">Hello,&nbsp;</span>
-          {JSON.parse(window.localStorage.getItem("userdata")).username}!
-        </label>
-
-        <button className="dash-upload-btn">
-          <label htmlFor="fileInput">
-            <HiUpload size="1.5rem" color="teal" id="profile-drop-icn" />
-            Upload Picture
+          <label className="btn btn-outline btn-sm btn-block mt-2">
+            Change photo
+            <input type="file" accept="image/*" onChange={handleAvatar} className="visually-hidden" />
           </label>
-          <input
-            id="fileInput"
-            type="file"
-            required
-            onChange={changeHandler}
-            style={{ display: "none" }}
-          />
-        </button>
+          <nav className="dash-nav mt-2" aria-label="Dashboard">
+            {TABS.map(({ key, label, Icon }) => (
+              <button key={key} type="button" className={`dash-nav-item${active === key ? " is-active" : ""}`} onClick={() => go(key)}>
+                <Icon /> {label}
+              </button>
+            ))}
+            <button type="button" className="dash-nav-item dash-logout" onClick={handleLogout}>
+              <MdLogout /> Log out
+            </button>
+          </nav>
+        </aside>
 
-        <button
-          className="dash-logout-btn"
-          onClick={Prevent(() => handleRouteLogout())}
-        >
-          <MdLogout size="1.5rem" color="#C62828" id="profile-drop-icn" />
-          Logout
-        </button>
+        <section className="card card-pad dash-main">
+          {active === "profile" && <ViewProfile user={user} profile={profile} onEdit={() => go("edit")} />}
+          {active === "edit" && <EditProfile profile={profile} onSaved={() => go("profile")} />}
+          {active === "bookings" && <MyBookings />}
+        </section>
       </div>
     </div>
   );

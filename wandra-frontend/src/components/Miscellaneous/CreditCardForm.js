@@ -1,137 +1,103 @@
-import React from "react";
-import useForm from "../../useForm";
-import { Button, Form, Alert, Row, Col } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./CreditCardForm.css";
+import React, { useState } from "react";
 import Cards from "react-credit-cards-2";
 import "react-credit-cards-2/es/styles-compiled.css";
+import emailjs from "@emailjs/browser";
+import validateInfo from "../../validateInfo";
+import { addBookings, cartTotal, clearCart, formatBDT, getCart, getUser } from "../../store";
 
-const CreditCardForm = () => {
-  const { handleChange, handleFocus, handleSubmit, values, errors } = useForm();
-  
-  return (
-    <div>
-      <div className="credit-card-container">
-        {/* <div className="box justify-content-center align-items-center"> */}
-        <div className="formDiv">
-          <div className="creditCard">
-            <Cards
-              cvc={values.cardSecurityCode}
-              expiry={values.cardExpiration}
-              focused={values.focus}
-              name={values.cardName}
-              number={values.cardNumber}
-            />
-          </div>
-          <Form onSubmit={handleSubmit} className="credit-card-form">
-            <div className="credit-card-input-row">
-              <input
-                  type="text"
-                  id="cardName"
-                  data-testid="cardName"
-                  name="cardName"
-                  placeholder="Cardholder Name"
-                  value={values.cardName}
-                  onChange={handleChange}
-                  onFocus={handleFocus}
-                  isValid={errors.cname}
-                />
-            </div>
-            <div className="credit-card-input-row">
-              <input
-                  type="number"
-                  id="cardNumber"
-                  data-testid="cardNumber"
-                  name="cardNumber"
-                  placeholder="Card Number"
-                  value={values.cardNumber}
-                  onChange={handleChange}
-                  onFocus={handleFocus}
-                  isValid={errors.cnumber}
-                />
-            </div>
-            <div className="credit-card-input-row">
-              <Row>
-                {/* <Col>
-                <Form.Group>
-                  <Form.Control
-                    type="text"
-                    name="cardType"
-                    id="cardType"
-                    data-testid="cardType"
-                    placeholder="Card Type"
-                    value={values.cardType}
-                    onChange={handleChange}
-                    onFocus={handleFocus}
-                    isValid={errors.ctype}
-                  />
-                </Form.Group>
-              </Col> */}
-                <Col>
-                  <input
-                      type="text"
-                      id="cardExpiration"
-                      data-testid="cardExpiration"
-                      name="cardExpiration"
-                      placeholder="Expiration Date"
-                      value={values.cardExpiration}
-                      onChange={handleChange}
-                      onFocus={handleFocus}
-                      isValid={errors.cexp}
-                    />
-                </Col>
-                {/* </Row>
-            <Row> */}
-                <Col>
-                  <input
-                      type="number"
-                      id="cardSecurityCode"
-                      data-testid="cardSecurityCode"
-                      name="cardSecurityCode"
-                      placeholder="Security Code"
-                      value={values.cardSecurityCode}
-                      onChange={handleChange}
-                      onFocus={handleFocus}
-                      isValid={errors.ccvv}
-                    />
-                </Col>
-                {/* <Col>
-                <Form.Group>
-                  <Form.Control
-                    type="text"
-                    id="cardPostalCode"
-                    data-testid="cardPostalCode"
-                    name="cardPostalCode"
-                    placeholder="Postal Code"
-                    value={values.cardPostalCode}
-                    onChange={handleChange}
-                    onFocus={handleFocus}
-                    isValid={errors.cpostal}
-                  />
-                </Form.Group>
-              </Col> */}
-              </Row>
-            </div>
-            <Alert
-              id="alertMessage"
-              data-testid="alertMessage"
-              variant={errors.variant}
-              show={errors.show}
-            >
-              {errors.message}
-            </Alert>
-            <button
-              size={"block"}
-              data-testid="validateButton"
-              id="validateButton"
-              type="submit"
-            >
-              Check Out
-            </button>
-          </Form>
-        </div>
-      </div>
+// Optional booking-confirmation email. Configure these in .env to enable it.
+const EMAILJS = {
+  service: process.env.REACT_APP_EMAILJS_SERVICE_ID,
+  template: process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+  publicKey: process.env.REACT_APP_EMAILJS_PUBLIC_KEY,
+};
+
+const formatCardNumber = (value) =>
+  value.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
+
+const formatExpiry = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+};
+
+const CreditCardForm = ({ onPaid }) => {
+  const [values, setValues] = useState({ cardName: "", cardNumber: "", cardExpiration: "", cardSecurityCode: "" });
+  const [focus, setFocus] = useState("");
+  const [errors, setErrors] = useState({});
+  const [paying, setPaying] = useState(false);
+
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+    if (name === "cardNumber") value = formatCardNumber(value);
+    if (name === "cardExpiration") value = formatExpiry(value);
+    if (name === "cardSecurityCode") value = value.replace(/\D/g, "").slice(0, 4);
+    setValues({ ...values, [name]: value });
+    setErrors({ ...errors, [name]: "" });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const nextErrors = validateInfo(values);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
+
+    const cart = getCart();
+    if (cart.length === 0) return;
+    setPaying(true);
+    const user = getUser();
+    const total = cartTotal(cart);
+    addBookings(cart.map((item) => ({ ...item, status: "confirmed" })));
+    clearCart();
+
+    if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey && user) {
+      emailjs
+        .send(EMAILJS.service, EMAILJS.template, { user_name: user.username, res_email: user.email }, EMAILJS.publicKey)
+        .catch(() => {});
+    }
+    setPaying(false);
+    onPaid(total);
+  };
+
+  const field = (name, label, props = {}) => (
+    <div className="field">
+      <label className="field-label" htmlFor={name}>{label}</label>
+      <input
+        id={name}
+        name={name}
+        className={`input${errors[name] ? " is-invalid" : ""}`}
+        value={values[name]}
+        onChange={handleChange}
+        onFocus={() => setFocus(name === "cardSecurityCode" ? "cvc" : name === "cardExpiration" ? "expiry" : name === "cardName" ? "name" : "number")}
+        {...props}
+      />
+      {errors[name] && <span className="field-error">{errors[name]}</span>}
     </div>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="card-preview">
+        <Cards
+          cvc={values.cardSecurityCode}
+          expiry={values.cardExpiration.replace("/", "")}
+          focused={focus}
+          name={values.cardName}
+          number={values.cardNumber}
+        />
+      </div>
+      {field("cardName", "Name on card", { autoComplete: "cc-name" })}
+      {field("cardNumber", "Card number", { inputMode: "numeric", autoComplete: "cc-number", placeholder: "1234 5678 9012 3456" })}
+      <div className="field-row mt-2">
+        {field("cardExpiration", "Expiry", { inputMode: "numeric", autoComplete: "cc-exp", placeholder: "MM/YY" })}
+        {field("cardSecurityCode", "CVC", { inputMode: "numeric", autoComplete: "cc-csc", placeholder: "123" })}
+      </div>
+      <button type="submit" className="btn btn-primary btn-block mt-3" disabled={paying}>
+        {paying ? "Processing…" : `Pay ${formatBDT(cartTotal(getCart()))}`}
+      </button>
+      <p className="muted small mt-1 mb-0" style={{ textAlign: "center" }}>
+        Demo checkout — no real payment is taken.
+      </p>
+    </form>
   );
 };
 
