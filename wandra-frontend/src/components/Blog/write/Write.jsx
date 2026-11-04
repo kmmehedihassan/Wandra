@@ -1,4 +1,5 @@
 import "./write.css";
+import { API_BASE, authHeaders } from "../../../api";
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { GrAddCircle } from "react-icons/gr";
@@ -51,9 +52,9 @@ export default function Write({ posts, setPosts }) {
 
         formData.append("cover", selectedFile);
 
-        fetch(`http://127.0.0.1:8000/upload/`, {
+        fetch(`${API_BASE}/upload/`, {
           method: 'POST',
-          
+          headers: authHeaders(),
         
           body: formData
       })

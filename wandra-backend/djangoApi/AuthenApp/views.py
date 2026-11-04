@@ -1,156 +1,107 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
-from django.http.response import JsonResponse
-
-from AuthenApp.models import LogIN,RegisterTable,UploadProfileFile
-from AuthenApp.serializers import LogInSerializer,RegisterSerializer,UploadProfileFileSerializer
-from rest_framework.decorators import api_view
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
+from django.contrib.auth import authenticate
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.views import APIView
 
-# Create your views here.
-@api_view(['GET','POST','PUT','DELETE'])
-@csrf_exempt
-def LogInApi(request,id=0):
-    if request.method=='GET':
-        login_data=LogIN.objects.all()
-        # userName=LogIN.objects.filter(UserName__icontains=Name)
-        
-        username=request.query_params.get('username',None)
-        userpass=request.query_params.get('userpass',None)
-        # if username is not None:
-            # login_data=login_data.filter(UserName__icontains=username)
-        lcheck=userpass
-        if username is not None and userpass is not None:
-            login_data=login_data.raw('select * from AuthenApp_login where UserPass=%s and UserName=%s',[lcheck,username])
-        
-        login_serializer=LogInSerializer(login_data,many=True)
-        return JsonResponse(login_serializer.data,safe=False)
-    elif   request.method=='POST':
-        login_data=JSONParser().parse(request)
-        
-        print(login_data['UserName'])
-        login_serializer=LogInSerializer(data=login_data)
-        if login_serializer.is_valid():
-            login_serializer.save()
-            return JsonResponse('Added Successfull',safe=False)
-        return JsonResponse('failed to add',safe=False)
-    elif request.method=='PUT':
-        login_data=JSONParser().parse(request)
-        login_specific_data=LogIN.objects.get( UserName=login_data['UserName'])
-        login_serializer=LogInSerializer(login_specific_data,data=login_data)
-        if login_serializer.is_valid():
-            login_serializer.save()
-            return JsonResponse('Update Successfull',safe=False)
-        return JsonResponse('failed to Update',safe=False)
-    elif request.method=='DELETE':
-        login_data=LogIN.objects.get(UserId=id)
-        login_data.delete()
-        return JsonResponse('Deleted Successfull',safe=False)
+from AuthenApp.models import UploadProfileFile
+from AuthenApp.serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    UploadProfileFileSerializer,
+    UserSerializer,
+)
 
 
-@api_view(['GET','POST','PUT','DELETE'])
-@csrf_exempt
-def RegisterApi(request,id=0):
-    if request.method=='GET':
-        register_data=RegisterTable.objects.all()
-        reg=RegisterTable.UserPass
-        temp=register_data.raw('select * from AuthenApp_registertable')
-        # userName=LogIN.objects.filter(UserName__icontains=Name)
-        # print(register_data.__dict__)
-        
-        username=request.query_params.get('username',None)
-        userpass=request.query_params.get('userpass',None)
-        # print(username+" "+userpass)
-        # if username is not None:
-            # login_data=login_data.filter(UserName__icontains=username)
-        lcheck=userpass
-        if username is not None and userpass is not None:
-            print("Register is called")
-            register_data=register_data.raw('select * from AuthenApp_registertable where UserPass=%s and UserName=%s',[lcheck,username])
-                
-        
-        register_serializer=RegisterSerializer(register_data,many=True)
-        # temp=register_serializer.data.__dict__['serializer']
-        # print(temp[])
-        # for x in temp:
-        #     print (x)
-        print(reg)
-        return JsonResponse(register_serializer.data,safe=False)
-    elif   request.method=='POST':
-        register_data=JSONParser().parse(request)
-        register_serializer=RegisterSerializer(data=register_data)
-        if register_serializer.is_valid():
-            register_serializer.save()
-            return JsonResponse('Added Successfull',safe=False)
-        return JsonResponse('failed to add',safe=False)
-    elif request.method=='PUT':
-        register_data=JSONParser().parse(request)
-        register_specific_data=RegisterTable.objects.get(UserId=register_data['UserId'])
-        register_serializer=RegisterSerializer(register_specific_data,data=register_data)
-        if register_serializer.is_valid():
-            register_serializer.save()
-            return JsonResponse('Update Successfull',safe=False)
-        return JsonResponse('failed to Update',safe=False)
-    elif request.method=='DELETE':
-        register_data=RegisterTable.objects.get(UserId=id)
-        register_data.delete()
-        return JsonResponse('Deleted Successfull',safe=False)
+class AuthThrottle(SimpleRateThrottle):
+    """Per-IP limit on login/register attempts (rate set by AUTH_THROTTLE_RATE)."""
+
+    scope = 'auth'
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {'scope': self.scope, 'ident': self.get_ident(request)}
+
+
+def _session_payload(user):
+    token, _ = Token.objects.get_or_create(user=user)
+    return {'token': token.key, 'user': UserSerializer(user).data}
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([AuthThrottle])
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+    return Response(_session_payload(user), status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([AuthThrottle])
+def login(request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = authenticate(
+        request,
+        username=serializer.validated_data['username'],
+        password=serializer.validated_data['password'],
+    )
+    if user is None:
+        return Response({'detail': 'Invalid username or password.'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(_session_payload(user))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me(request):
+    return Response(UserSerializer(request.user).data)
 
 
 class ProfileFileView(APIView):
-  parser_classes = (MultiPartParser, FormParser)
-  def get(self,request):
-    username=request.query_params.get('username',None)
-    print(username)
-    if(username != None):
-        imgobj = UploadProfileFile.objects.filter(UserName__icontains=username)     
-    else:
-        imgobj = UploadProfileFile.objects.all()
-    
-    serializer = UploadProfileFileSerializer(imgobj, many=True, context= 
-        {'request': request})
+    """The authenticated user's own profile. Users can't read or change anyone else's."""
 
-    return JsonResponse(serializer.data ,safe=False)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    permission_classes = [IsAuthenticated]
 
-    # return Response({
-    #         'status' : True,
-    #         'message' : 'Image List',
-    #         'images' : serializer.data})
+    def _own_profiles(self, request):
+        return UploadProfileFile.objects.filter(UserName=request.user.username)
 
-  def post(self, request, *args, **kwargs):
-    profile_data=request.data
-    print(profile_data)
-    file_serializer = UploadProfileFileSerializer(data=request.data)
-    if file_serializer.is_valid():
-      print(file_serializer.error_messages)
-      file_serializer.save()
-      return JsonResponse(file_serializer.data, status=status.HTTP_201_CREATED)
-    else:
-      return JsonResponse(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-   
-   
-  def patch(self, request, *args, **kwargs):
-    profile_data=request.data
-    profile_specific_data=UploadProfileFile.objects.get(UserName=profile_data['UserName'])
-    profile_serializer=UploadProfileFileSerializer(profile_specific_data,data=profile_data)
-    if profile_serializer.is_valid():
-        profile_serializer.save()
-        return JsonResponse('Update Sucess',safe=False)
-    return JsonResponse('Fail',safe=False)   
+    def get(self, request):
+        serializer = UploadProfileFileSerializer(
+            self._own_profiles(request), many=True, context={'request': request})
+        return Response(serializer.data)
 
-  def delete(self, request, *args, **kwargs):
-    profile_data=request.data
-    profile_specific_data=UploadProfileFile.objects.filter(UserName=profile_data['UserName'])
-    for obj in profile_specific_data:
-        obj.delete()
-        return JsonResponse('Update Sucess',safe=False)
-    return JsonResponse('Fail',safe=False)   
+    def post(self, request, *args, **kwargs):
+        serializer = UploadProfileFileSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(UserName=request.user.username)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def patch(self, request, *args, **kwargs):
+        profile = self._own_profiles(request).first()
+        if profile is None:
+            return Response({'detail': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UploadProfileFileSerializer(
+            profile, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-
-
-
+    def delete(self, request, *args, **kwargs):
+        deleted, _ = self._own_profiles(request).delete()
+        if not deleted:
+            return Response({'detail': 'Profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)

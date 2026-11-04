@@ -28,7 +28,7 @@ class Categories(models.Model):
     # class_room = models.IntegerField()
 
     def __str__(self):
-        return self.module_name
+        return self.categoryName
 
 class AllPost(models.Model):
     id=models.AutoField(primary_key=True)
@@ -46,4 +46,4 @@ class AllPost(models.Model):
 
 
     def __str__(self):
-        return self.name
+        return self.title

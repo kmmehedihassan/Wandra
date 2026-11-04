@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { logout } from "../../api";
 import "./dashboard.css";
 import Avatar from "@mui/material/Avatar";
 import ViewProfile from "./ViewProfile";
@@ -66,8 +67,9 @@ export default function Dashboard() {
     history.push("/dashboard");
   };
 
-  const handleRouteLogout = () => {
-    window.localStorage.clear();
+  const handleRouteLogout = async () => {
+    await logout();
+    window.location.reload();
     // history.push("/blog");
   };
 

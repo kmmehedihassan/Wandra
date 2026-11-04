@@ -1,22 +1,20 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from PostsApp.models import Categories,AllPost,UploadPostFile
 from PostsApp.serializers import CategoriesSerializer,AllPostSerializer,UploadPostFileSerializer
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework import status,viewsets
-# Create your views here.
+from rest_framework import status
+
+from djangoApi.permissions import IsAdminOrReadOnly
 
 
 class AllPostViewSet(APIView):
     
     
     serializer_class = AllPostSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+    # Default permission: anyone can read, logged-in users can write.
 
     def get(self,request,Id=0):
         print(Id)
@@ -35,9 +33,9 @@ class AllPostViewSet(APIView):
         return JsonResponse(allpost_serializer.data,safe=False)
 
     def post(self, request):
-        post_data =JSONParser().parse(request)
+        post_data = request.data
         new_post = AllPost.objects.create(
-             Author=post_data['Author'], title=post_data['title'],
+             Author=request.user.username, title=post_data['title'],
             datetime=post_data["datetime"], date=post_data['date'], month=post_data["month"],
             likes=post_data["likes"], imgLink=post_data['imgLink'], imgOrVideoLink=post_data["imgOrVideoLink"],
             comments=post_data["comments"], body=post_data['body']
@@ -56,14 +54,20 @@ class AllPostViewSet(APIView):
         return Response(serializer.data)
 
     def delete(self,request,ID):
-        post_data=AllPost.objects.get(id=ID)
+        post_data=AllPost.objects.filter(id=ID).first()
+        if post_data is None:
+            return JsonResponse({'detail': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if post_data.Author != request.user.username and not request.user.is_staff:
+            return JsonResponse({'detail': 'You can only delete your own posts.'},
+                                status=status.HTTP_403_FORBIDDEN)
         post_data.delete()
         return JsonResponse("Deleted Succeffully!!", safe=False)
 
 
 class CategoriesViewSet(APIView):
     serializer_class = CategoriesSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self,request):
         categories= Categories.objects.all()
@@ -71,7 +75,7 @@ class CategoriesViewSet(APIView):
         return Response(categories_serializer.data)
 
     def post(self, request):
-        categories_data =JSONParser().parse(request)
+        categories_data = request.data
         new_category = Categories.objects.create(categoryName=categories_data["categoryName"])
         new_category.save()
         categories_serializer=CategoriesSerializer(categories_data)
@@ -103,12 +107,9 @@ class PostsFileView(APIView):
     # dataF=FormParser(request.data)
     # print(request.data['Author'])
     
-    file_serializer = UploadPostFileSerializer(data=request.data)
-    # file_obj=UploadPostFile.objects.create(Author=request.data['Author'],PostId=)
-    # file_obj.save()
-    print(file_serializer.is_valid())
+    file_serializer = UploadPostFileSerializer(data=request.data, context={'request': request})
     if file_serializer.is_valid():
-      file_serializer.save()
+      file_serializer.save(Author=request.user.username)
       return Response(file_serializer.data, status=status.HTTP_201_CREATED)
     else:
       return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -2,14 +2,23 @@ from pathlib import Path
 import os
 import dj_database_url
 from decouple import config, Csv
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-$!!8n*g@n#yo4rs@l^in9c5*uc_nwr6okod4xp_7w8kjs)lt1p')
 DEBUG = config('DEBUG', default=False, cast=bool)
+
+# SECRET_KEY must come from the environment in production. A throwaway key is
+# only allowed for local development (DEBUG=True).
+SECRET_KEY = config('SECRET_KEY', default='')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-local-development-only'
+    else:
+        raise ImproperlyConfigured('SECRET_KEY environment variable is required when DEBUG is False.')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 INSTALLED_APPS = [
@@ -24,7 +33,22 @@ INSTALLED_APPS = [
     'AuthenApp.apps.AuthenappConfig',
     'PostsApp.apps.PostsappConfig',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Anyone may read; writing requires a logged-in user. Views tighten this further.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'auth': config('AUTH_THROTTLE_RATE', default='10/min'),
+    },
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

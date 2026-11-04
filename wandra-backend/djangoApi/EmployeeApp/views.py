@@ -1,36 +1,39 @@
 
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from EmployeeApp.models import Departments, Employees,UploadFile,Students,Modules,MyReservation,MyHotelInfo,MyTourInfo,MyTour
 from EmployeeApp.serializers import DepartmentSerializer,EmployeeSerializer,BookSerializer,StudentsSerializer,ModulesSerializer,MyReservationSerializer,MyHotelInfoSerializer,MyTourInfoSerializer,MyTourSerializer
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework import status,viewsets
+from rest_framework import status
 from django.utils.dateparse import parse_date
 from django.core.files.storage import default_storage
-from django.forms.models import model_to_dict
-import json
-# Create your views here.
 
-@csrf_exempt
+from djangoApi.permissions import IsAdminOrReadOnly
+
+
+def _login_required_response():
+    return JsonResponse({'detail': 'Authentication credentials were not provided.'},
+                        status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@permission_classes([IsAdminOrReadOnly])
 def departmentApi(request,id=0):
     if request.method=='GET':
         departments=Departments.objects.all()
         departments_serializer=DepartmentSerializer(departments,many=True)
         return JsonResponse(departments_serializer.data,safe=False)
     elif   request.method=='POST':
-        department_data=JSONParser().parse(request)
+        department_data=request.data
         department_serializer=DepartmentSerializer(data=department_data)
         if department_serializer.is_valid():
             department_serializer.save()
             return JsonResponse('Added Successfull',safe=False)
         return JsonResponse('failed to add',safe=False)
     elif request.method=='PUT':
-        department_data=JSONParser().parse(request)
+        department_data=request.data
         department=Departments.objects.get(DepartmentId=department_data['DepartmentId'])
         department_serializer=DepartmentSerializer(department,data=department_data)
         if department_serializer.is_valid():
@@ -42,7 +45,8 @@ def departmentApi(request,id=0):
         department.delete()
         return JsonResponse('Deleted Successfull',safe=False)
 
-@csrf_exempt
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@permission_classes([IsAdminOrReadOnly])
 def employeeApi(request,id=0):
     if request.method=='GET':
         employees = Employees.objects.all()
@@ -50,7 +54,7 @@ def employeeApi(request,id=0):
         return JsonResponse(employees_serializer.data, safe=False)
 
     elif request.method=='POST':
-        employee_data=JSONParser().parse(request)
+        employee_data=request.data
         employee_serializer = EmployeeSerializer(data=employee_data)
         if employee_serializer.is_valid():
             employee_serializer.save()
@@ -58,7 +62,7 @@ def employeeApi(request,id=0):
         return JsonResponse("Failed to Add.",safe=False)
     
     elif request.method=='PUT':
-        employee_data = JSONParser().parse(request)
+        employee_data = request.data
         employee=Employees.objects.get(EmployeeId=employee_data['EmployeeId'])
         employee_serializer=EmployeeSerializer(employee,data=employee_data)
         if employee_serializer.is_valid():
@@ -73,7 +77,8 @@ def employeeApi(request,id=0):
 
 
 
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def SaveFile(request):
     file=request.FILES['myFile']
     file_name = default_storage.save(file.name,file)
@@ -115,7 +120,8 @@ class StudentsViewSet(APIView):
     
     
     serializer_class = StudentsSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self,request,Id=0):
         print(Id)
@@ -131,7 +137,7 @@ class StudentsViewSet(APIView):
         return JsonResponse(student_serializer.data,safe=False)
 
     def post(self, request):
-        student_data =JSONParser().parse(request)
+        student_data = request.data
 
         new_student = Students.objects.create(
             name=student_data["name"], age=student_data['age'], grade=student_data["grade"])
@@ -156,27 +162,26 @@ class StudentsViewSet(APIView):
 
 class ModulesViewSet(APIView):
     serializer_class = ModulesSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self,request):
         module = Modules.objects.all()
         module_serializer=ModulesSerializer(module,many=True)
         return Response(module_serializer.data)
 
-@csrf_exempt
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([AllowAny])
 def confirm(request, pk = None):
-    
-    if request.method == 'GET':
-        print(type(pk))
-        if pk == str(5):
-            Booking_data=JSONParser().parse(request)
-            roomquantity= Booking_data['roomquantity']
-            check_in=Booking_data['check_in']
-            check_out=Booking_data['check_out']
-            new_obj=MyReservation.objects.all()
-            new_dict=MyReservationSerializer(new_obj,many=True)
-            print(type(new_dict))
+    # Public: tour availability (GET 6) and room availability check (GET 10).
+    # Everything else (listing, creating, cancelling bookings) needs a logged-in
+    # user, and bookings are always tied to that user's username as `guest`.
+    public = request.method == 'GET' and pk in (str(6), str(10))
+    if not public and not request.user.is_authenticated:
+        return _login_required_response()
+    own_guest = None if request.user.is_staff else request.user.username
 
+    if request.method == 'GET':
         if pk == str(6):
                 
             employees = MyTourInfo.objects.all()
@@ -184,19 +189,19 @@ def confirm(request, pk = None):
             return JsonResponse(employees_serializer.data, safe=False)
         if pk == str(7):
             booking = MyTour.objects.all()
+            if own_guest is not None:
+                booking = booking.filter(guest=own_guest)
             Booking_serializer = MyTourSerializer(booking, many=True)
             return JsonResponse(Booking_serializer.data, safe=False)
         if pk == str(8):
-            Booking_data=JSONParser().parse(request)
-            guest=Booking_data['guest']
-            booking = MyReservation.objects.filter(guest=Booking_data['guest'])
+            booking = MyReservation.objects.filter(guest=own_guest or request.query_params.get('guest', ''))
             Booking_serializer = MyReservationSerializer(booking, many=True)
             return JsonResponse(Booking_serializer.data, safe=False)
             # pass
         if pk == str(9):
-            Booking_data=JSONParser().parse(request)
-            guest=Booking_data['guest']
             booking = MyTour.objects.all()
+            if own_guest is not None:
+                booking = booking.filter(guest=own_guest)
             Booking_serializer = MyTourSerializer(booking, many=True)
             return JsonResponse(Booking_serializer.data, safe=False)
             pass
@@ -257,45 +262,47 @@ def confirm(request, pk = None):
 
         else:  
             booking = MyReservation.objects.all()
+            if own_guest is not None:
+                booking = booking.filter(guest=own_guest)
             Booking_serializer = MyReservationSerializer(booking, many=True)
             return JsonResponse(Booking_serializer.data, safe=False)
 
     elif request.method=='DELETE':
         if pk==str(9):
-            Booking_data=JSONParser().parse(request)
-            booking=MyTour.objects.get(
+            Booking_data=request.data
+            booking=MyTour.objects.filter(
                 tour_id=Booking_data['tour_id'],
                 ticket= Booking_data['ticket'],
-                guest=Booking_data['guest'],
+                guest=own_guest or Booking_data['guest'],
                 price=Booking_data['price'],
                 cardata=Booking_data['cardata']                
-            )
+            ).first()
+            if booking is None:
+                return JsonResponse({'detail': 'Booking not found.'}, status=status.HTTP_404_NOT_FOUND)
             booking.delete()
             return JsonResponse("Deleted Succeffully!!", safe=False)
 
             # pass
         if pk==str(8):
-            Booking_data=JSONParser().parse(request)
-            booking=MyReservation.objects.get(
+            Booking_data=request.data
+            booking=MyReservation.objects.filter(
                 hotel_id=Booking_data['hotel_id'],
                 roomquantity= Booking_data['roomquantity'],
                 room=Booking_data['room'],
-                guest=Booking_data['guest'],
+                guest=own_guest or Booking_data['guest'],
                 check_in=Booking_data['check_in'],
                 check_out=Booking_data['check_out'],
                 price=Booking_data['price'],
                 cardata=Booking_data['cardata']
 
-            )
+            ).first()
+            if booking is None:
+                return JsonResponse({'detail': 'Booking not found.'}, status=status.HTTP_404_NOT_FOUND)
             booking.delete()
             return JsonResponse("Deleted Succeffully!!", safe=False)
 
-            # pass
-        
-        else:
-            booking=MyReservation.objects.all()
-            booking.delete()
-            return JsonResponse("Deleted Succeffully!!", safe=False)
+        # Bulk deletion of every reservation is intentionally not supported.
+        return JsonResponse({'detail': 'Unknown delete target.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
     if request.method == 'POST':
@@ -306,10 +313,10 @@ def confirm(request, pk = None):
         # cardata=models.IntegerField(default=0)
         
         if pk ==str(6):
-            Booking_data=JSONParser().parse(request)
+            Booking_data=request.data
             tour_id=Booking_data['tour_id']
             ticket= Booking_data['ticket']
-            guest=Booking_data['guest']
+            guest=request.user.username
             price=Booking_data['price']
             cardata=Booking_data['cardata']
             total_ticket=0
@@ -339,12 +346,11 @@ def confirm(request, pk = None):
             
         elif pk:
             invalid_dates= False
-            Booking_data=JSONParser().parse(request)
-            print(Booking_data) 
+            Booking_data=request.data
             hotel_id=Booking_data['hotel_id']
             roomquantity= Booking_data['roomquantity']
             room=Booking_data['room']
-            guest=Booking_data['guest']
+            guest=request.user.username
             check_in=Booking_data['check_in']
             check_out=Booking_data['check_out']
             price=Booking_data['price']
@@ -401,11 +407,14 @@ def confirm(request, pk = None):
 
                 return JsonResponse('Room quantity no available',safe=False)
 
+    return JsonResponse({'detail': 'Unsupported request.'}, status=status.HTTP_400_BAD_REQUEST)
+
             
 
 
 
-@csrf_exempt
+@api_view(['GET', 'POST', 'PATCH'])
+@permission_classes([IsAdminOrReadOnly])
 def MyHotelApi(request,id=0):
     if request.method=='GET':
         Hotels=MyHotelInfo.objects.all()
@@ -414,14 +423,14 @@ def MyHotelApi(request,id=0):
     elif   request.method=='POST':
         if id==str(6): 
             print("inside")    
-            Hotel_data=JSONParser().parse(request)
+            Hotel_data=request.data
             Hotel_serializer=MyTourInfoSerializer(data=Hotel_data)
             if Hotel_serializer.is_valid():
                 Hotel_serializer.save()
                 return JsonResponse('Added Successfull',safe=False)
             return JsonResponse('failed to add',safe=False)
         else:    
-            Hotel_data=JSONParser().parse(request)
+            Hotel_data=request.data
             Hotel_serializer=MyHotelInfoSerializer(data=Hotel_data)
             if Hotel_serializer.is_valid():
                 Hotel_serializer.save()
@@ -429,7 +438,7 @@ def MyHotelApi(request,id=0):
             return JsonResponse('failed to add',safe=False)
 
     elif request.method=='PATCH':
-        Hotel_data=JSONParser().parse(request)
+        Hotel_data=request.data
         Hotel_Obj=MyHotelInfo.objects.get(room_id=Hotel_data['room_id'],hotel_id=Hotel_data['hotel_id'])
         print(Hotel_Obj.roomquantity)
         print(Hotel_Obj.remaining)

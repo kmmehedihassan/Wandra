@@ -1,4 +1,5 @@
 import "./list.css";
+import { API_BASE } from "../../../api";
 import Header from "../header/Header";
 import { useState,useEffect } from "react";
 import { format } from "date-fns";
@@ -61,7 +62,7 @@ const List = () => {
     }
     let b = JSON.stringify(newBook)
     console.log(b)
-    axios.get("http://127.0.0.1:8000/reserve/10?"+ new URLSearchParams({
+    axios.get(`${API_BASE}/reserve/10?`+ new URLSearchParams({
         
       hotel_id : 2,
       room : 1,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./register.css";
 import { BsEye, BsRainbow } from "react-icons/bs";
-import axios from "axios";
+import { API_BASE, errorMessage, saveSession } from "../../api";
 
 const emailValidator =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -16,15 +16,6 @@ const Signup = () => {
     password: "",
     repeatPassword: "",
   });
-
-  async function addData(user) {
-    console.log("userdata", user);
-    const { data } = await axios
-      .post("http://localhost:8000/log_info", JSON.stringify(user))
-      .then(function (response) {
-        console.log(response);
-      });
-  }
 
   const [visibility, setVisibility] = useState({
     password: false,
@@ -70,31 +61,35 @@ const Signup = () => {
     });
 
     if (isValid) {
-      let a = userData.username;
-      let b = userData.password;
-      let c = userData.email;
-      fetch(`http://127.0.0.1:8000/register`, {
-          method: 'POST',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-              UserName: a,
-              UserPass: b,
-              UserEmail: c
-          })
+      fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+        }),
       })
-          .then(res => res.json())
-          .then((result) => {
-              alert(result);
-          },
-              (error) => {
-                  alert('Failed');
-              })
-      setFormSubmission(true);
+        .then(async (res) => {
+          const data = await res.json().catch(() => null);
+          if (!res.ok) {
+            setFormSubmission(false);
+            alert(errorMessage(data, "Registration failed"));
+            return;
+          }
+          saveSession(data);
+          setFormSubmission(true);
+          // Reload shortly so the navbar picks up the new session.
+          setTimeout(() => window.location.reload(), 1500);
+        })
+        .catch(() => {
+          setFormSubmission(false);
+          alert("Could not reach the server. Try again later.");
+        });
+    } else {
+      setFormSubmission(false);
+      alert("Failed");
     }
-    else {setFormSubmission(false);alert("Failed")};
     console.log(isValid);
 
 

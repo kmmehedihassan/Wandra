@@ -6,6 +6,7 @@ import { MdLogout } from "react-icons/md";
 import {FaStackOverflow} from "react-icons/fa"
 import { Prevent } from "./Prevent";
 import axios from "axios";
+import { API_BASE, authHeaders, logout } from "../../api";
 
 function ProfileDropdown() {
   const options = ["View Profile", "Edit Profile", "My Booking", "Logout"];
@@ -13,15 +14,11 @@ function ProfileDropdown() {
 
 
   async function fetchdata(){
-    let a = JSON.parse(window.localStorage.getItem("userdata")).username;
-
-    let isEmpty = false;
     await axios
-    .get(`http://127.0.0.1:8000/uploadprofile?username=${a}` )
+    .get(`${API_BASE}/uploadprofile/`, { headers: authHeaders() })
     .then((resp) => {
-      let data = [];
-      data = resp.data;
-      console.log(data[0].first_name)
+      const data = resp.data || [];
+      if (!data.length) return;
       let obj = JSON.stringify({
         firstname: data[0].first_name,
         lastname: data[0].last_name,
@@ -34,7 +31,8 @@ function ProfileDropdown() {
       });
       window.localStorage.setItem("formData", obj);
      
-    });
+    })
+    .catch(() => {});
   };
 
   const handleRouteView = () => {
@@ -50,8 +48,9 @@ function ProfileDropdown() {
     history.push("/dashboard");
   };
 
-  const handleRouteLogout = () => {
-    window.localStorage.clear();
+  const handleRouteLogout = async () => {
+    await logout();
+    window.location.reload();
     // history.push("/blog");
   };
 

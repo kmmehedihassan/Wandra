@@ -1,11 +1,13 @@
-from django.urls import re_path as url
-from django.urls import re_path as url
-from AuthenApp import views
-from django.conf.urls.static import static
 from django.conf import settings
-urlpatterns=[
-    url(r'^login$',views.LogInApi),
-    # url(r'^login$',views.LogInApi.as_view())
-    url(r'^register$',views.RegisterApi),
-    url(r'^uploadprofile/$', views.ProfileFileView.as_view(), name='file-upload')
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+from django.conf.urls.static import static
+from django.urls import path, re_path
+
+from AuthenApp import views
+
+urlpatterns = [
+    path('auth/register', views.register, name='auth-register'),
+    path('auth/login', views.login, name='auth-login'),
+    path('auth/logout', views.logout, name='auth-logout'),
+    path('auth/me', views.me, name='auth-me'),
+    re_path(r'^uploadprofile/?$', views.ProfileFileView.as_view(), name='profile-upload'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

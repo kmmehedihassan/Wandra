@@ -23,5 +23,6 @@ class UploadPostFileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UploadPostFile
         fields = ['PostId','Author','title', 'cover']
+        read_only_fields = ['Author']
     
     # def get_queryset(self):
