@@ -18,7 +18,19 @@
   --success-soft: #e8f6ee;
   --danger: #c62828;
   --danger-soft: #fdecec;
+  --danger-line: #f3c4c4;
   --star: #f5a623;
+  --nav-bg: rgba(255, 255, 255, 0.96);
+  --neutral-soft: #eef0f3;
+  --skeleton-a: #eef0f3;
+  --skeleton-b: #f7f8fa;
+  --heart: #e11d48;
+  --heart-line: #fda4af;
+  --heart-soft: #fff1f3;
+  --overlay-btn: rgba(255, 255, 255, 0.92);
+  --toast-bg: #1d2127;
+  --hero-fallback: #1d2127;
+  color-scheme: light;
 
   --radius-sm: 8px;
   --radius: 14px;
@@ -31,6 +43,69 @@
   --container: 1200px;
   --gutter: 16px;
   --font: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Dark theme: follows the system setting unless the user picked one (data-theme). */
+:root[data-theme="dark"] {
+  --brand-dark: #ff8a4c;
+  --brand-soft: #3a2417;
+  --ink: #e8eaed;
+  --ink-2: #c3c8cf;
+  --muted: #9aa1ab;
+  --line: #2c313a;
+  --bg: #0f1216;
+  --surface: #171b21;
+  --success: #4ade80;
+  --success-soft: #12301e;
+  --danger: #f87171;
+  --danger-soft: #3a1717;
+  --danger-line: #7f1d1d;
+  --star: #f5b942;
+  --nav-bg: rgba(15, 18, 22, 0.92);
+  --neutral-soft: #232830;
+  --skeleton-a: #1d2229;
+  --skeleton-b: #262c35;
+  --heart: #fb7185;
+  --heart-line: #7f1d2d;
+  --heart-soft: #3a1520;
+  --overlay-btn: rgba(23, 27, 33, 0.9);
+  --toast-bg: #2a2f37;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-dark: #ff8a4c;
+    --brand-soft: #3a2417;
+    --ink: #e8eaed;
+    --ink-2: #c3c8cf;
+    --muted: #9aa1ab;
+    --line: #2c313a;
+    --bg: #0f1216;
+    --surface: #171b21;
+    --success: #4ade80;
+    --success-soft: #12301e;
+    --danger: #f87171;
+    --danger-soft: #3a1717;
+    --danger-line: #7f1d1d;
+    --star: #f5b942;
+    --nav-bg: rgba(15, 18, 22, 0.92);
+    --neutral-soft: #232830;
+    --skeleton-a: #1d2229;
+    --skeleton-b: #262c35;
+    --heart: #fb7185;
+    --heart-line: #7f1d2d;
+    --heart-soft: #3a1520;
+    --overlay-btn: rgba(23, 27, 33, 0.9);
+    --toast-bg: #2a2f37;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
 }
 
 *,
@@ -205,7 +280,7 @@ textarea {
   display: flex;
   align-items: flex-end;
   color: #fff;
-  background: var(--ink) center / cover no-repeat;
+  background: var(--hero-fallback) center / cover no-repeat;
   isolation: isolate;
 }
 
@@ -305,7 +380,7 @@ textarea {
 }
 
 .btn-danger {
-  border-color: #f3c4c4;
+  border-color: var(--danger-line);
   background: var(--surface);
   color: var(--danger);
 }
@@ -537,7 +612,7 @@ textarea {
 }
 
 .badge-neutral {
-  background: #eef0f3;
+  background: var(--neutral-soft);
   color: var(--ink-2);
 }
 
@@ -1036,7 +1111,7 @@ textarea {
   width: min(560px, calc(100% - 32px));
   padding: 14px 16px;
   border-radius: var(--radius);
-  background: var(--ink);
+  background: var(--toast-bg);
   color: #fff;
   box-shadow: var(--shadow-lg);
   animation: toast-in 0.25s ease;
@@ -1071,7 +1146,7 @@ textarea {
 .skeleton {
   height: 96px;
   border-radius: var(--radius);
-  background: linear-gradient(90deg, #eef0f3 0%, #f7f8fa 50%, #eef0f3 100%);
+  background: linear-gradient(90deg, var(--skeleton-a) 0%, var(--skeleton-b) 50%, var(--skeleton-a) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
@@ -1126,8 +1201,8 @@ img.avatar {
 }
 
 .save-btn:hover {
-  color: #e11d48;
-  border-color: #fda4af;
+  color: var(--heart);
+  border-color: var(--heart-line);
 }
 
 .save-btn:active {
@@ -1135,9 +1210,9 @@ img.avatar {
 }
 
 .save-btn.is-saved {
-  color: #e11d48;
-  border-color: #fda4af;
-  background: #fff1f3;
+  color: var(--heart);
+  border-color: var(--heart-line);
+  background: var(--heart-soft);
 }
 
 .save-btn-overlay {
@@ -1146,7 +1221,7 @@ img.avatar {
   right: 12px;
   z-index: 2;
   border-color: transparent;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--overlay-btn);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1206,4 +1281,14 @@ img.avatar {
 
 .gallery-item:hover img {
   transform: scale(1.04);
+}
+
+
+/* MUI widgets follow the theme */
+.MuiRating-iconEmpty {
+  color: var(--muted);
+}
+
+.theme-toggle svg {
+  display: block;
 }

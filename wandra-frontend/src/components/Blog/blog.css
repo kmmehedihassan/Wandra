@@ -39,14 +39,14 @@
 }
 
 .like-btn:hover {
-  border-color: #f2a1b4;
-  color: #d6336c;
+  border-color: var(--heart-line);
+  color: var(--heart);
 }
 
 .like-btn.is-liked {
-  border-color: #f2a1b4;
-  background: #fff0f4;
-  color: #d6336c;
+  border-color: var(--heart-line);
+  background: var(--heart-soft);
+  color: var(--heart);
 }
 
 .single-post {

@@ -2,7 +2,8 @@ import "./navbar.css";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useHistory, useLocation } from "react-router-dom";
 import { AiOutlineHeart, AiOutlineShopping } from "react-icons/ai";
-import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import { HiOutlineMenu, HiOutlineMoon, HiOutlineSun, HiOutlineX } from "react-icons/hi";
+import { useColorTheme } from "../../colorTheme";
 import { CgProfile } from "react-icons/cg";
 import { MdLogout, MdEditNote } from "react-icons/md";
 import { FaStackOverflow } from "react-icons/fa";
@@ -15,6 +16,7 @@ const Navbar = () => {
   const user = useUser();
   const cart = useCart();
   const profile = useProfile();
+  const { theme, toggle: toggleTheme } = useColorTheme();
   const history = useHistory();
   const location = useLocation();
   const [authTab, setAuthTab] = useState(null); // "login" | "register" | null
@@ -86,6 +88,15 @@ const Navbar = () => {
           </nav>
 
           <div className="nav-actions">
+            <button
+              type="button"
+              className="icon-btn theme-toggle"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              title={theme === "dark" ? "Light theme" : "Dark theme"}
+            >
+              {theme === "dark" ? <HiOutlineSun size={19} /> : <HiOutlineMoon size={19} />}
+            </button>
             <Link to="/cart" className="icon-btn nav-cart" aria-label={`Cart, ${cart.length} items`}>
               <AiOutlineShopping size={20} />
               {cart.length > 0 && <span className="nav-cart-count">{cart.length}</span>}

@@ -5,7 +5,7 @@
   align-items: center;
   color: #fff;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--hero-fallback);
   isolation: isolate;
 }
 
@@ -69,7 +69,7 @@
   max-width: 720px;
   margin: 0 auto;
   padding: 8px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 999px;
   box-shadow: var(--shadow-lg);
 }
@@ -188,7 +188,7 @@
 }
 
 .home-cta .btn-primary:hover {
-  background: var(--ink);
+  background: var(--hero-fallback);
   color: #fff;
 }
 
