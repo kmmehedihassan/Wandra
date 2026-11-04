@@ -1,6 +1,6 @@
 from django.urls import path
 
-from TripsApp import views
+from TripsApp import reviews, views
 
 urlpatterns = [
     path('cart/', views.cart, name='cart'),
@@ -10,4 +10,7 @@ urlpatterns = [
     path('bookings/<int:pk>/cancel/', views.cancel_booking, name='booking-cancel'),
     path('availability/hotels/<int:pk>/', views.hotel_availability, name='hotel-availability'),
     path('availability/tours/<int:pk>/', views.tour_availability, name='tour-availability'),
+    path('reviews/', reviews.reviews, name='reviews'),
+    path('reviews/summary/', reviews.review_summary, name='review-summary'),
+    path('reviews/<int:pk>/', reviews.review_detail, name='review-detail'),
 ]

@@ -216,3 +216,78 @@ class BookingEmailTests(TripsTestCase):
         self.add_hotel(rooms=1)
         self.assertEqual(self.client.post('/api/checkout/').status_code, 201)
 
+
+
+class ReviewTests(TripsTestCase):
+    def finished_booking(self, user=None, kind='hotel'):
+        """Create a confirmed booking that ended yesterday."""
+        user = user or self.alice
+        start, end = timezone.localdate() - timedelta(days=3), timezone.localdate() - timedelta(days=1)
+        if kind == 'tour':
+            return Booking.objects.create(user=user, kind='tour', tour=self.tour, quantity=1, checkin=start,
+                                          unit_price_paid=self.tour.price, total=self.tour.price)
+        return Booking.objects.create(user=user, kind='hotel', room=self.room, quantity=1, checkin=start,
+                                      checkout=end, unit_price_paid=self.room.price, total=self.room.price * 2)
+
+    def review(self, **payload):
+        body = {'hotel': 1, 'rating': 5, 'text': 'Lovely stay right by the beach.'}
+        body.update(payload)
+        body = {k: v for k, v in body.items() if v is not None}
+        return self.client.post('/api/reviews/', body, format='json')
+
+    def test_reviews_are_public_and_need_a_target(self):
+        self.client.credentials()
+        resp = self.client.get('/api/reviews/?hotel=1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual((resp.data['count'], resp.data['average'], resp.data['canReview']), (0, None, False))
+        self.assertEqual(self.client.get('/api/reviews/').status_code, 400)
+        self.assertEqual(self.client.post('/api/reviews/', {}, format='json').status_code, 401)
+
+    def test_only_after_a_finished_trip(self):
+        self.assertEqual(self.review().status_code, 403)  # no booking
+        upcoming = self.add_hotel(rooms=1)
+        self.assertEqual(upcoming.status_code, 201)
+        self.client.post('/api/checkout/')
+        self.assertEqual(self.review().status_code, 403)  # trip hasn't happened yet
+        self.finished_booking()
+        self.assertTrue(self.client.get('/api/reviews/?hotel=1').data['canReview'])
+        self.assertEqual(self.review().status_code, 201)
+
+    def test_cancelled_booking_does_not_count(self):
+        booking = self.finished_booking()
+        booking.status = Booking.Status.CANCELLED
+        booking.save()
+        self.assertEqual(self.review().status_code, 403)
+
+    def test_one_review_per_user_updates_in_place(self):
+        self.finished_booking()
+        self.review(rating=5)
+        resp = self.review(rating=3, text='Good, but the pool was closed.')
+        self.assertEqual(resp.status_code, 200)
+        data = self.client.get('/api/reviews/?hotel=1').data
+        self.assertEqual((data['count'], data['average']), (1, 3.0))
+        self.assertEqual(data['myReview']['rating'], 3)
+
+    def test_average_summary_and_validation(self):
+        self.finished_booking()
+        self.finished_booking(kind='tour')
+        self.review(rating=4)
+        self.review(hotel=None, tour=self.tour.id, rating=5, text='Best tour of the year, highly recommended.')
+        bob = self.make_user('bob')
+        self.finished_booking(user=bob)
+        self.login(bob)
+        self.review(rating=2, text='Rooms were noisy at night.')
+        summary = self.client.get('/api/reviews/summary/').data
+        self.assertEqual(summary['hotels'][1], {'average': 3.0, 'count': 2})
+        self.assertEqual(summary['tours'][self.tour.id], {'average': 5.0, 'count': 1})
+        self.assertEqual(self.review(rating=6).status_code, 400)
+        self.assertEqual(self.review(text='ok').status_code, 400)
+        self.assertEqual(self.review(tour=self.tour.id).status_code, 400)  # both targets
+
+    def test_delete_own_review_only(self):
+        self.finished_booking()
+        review_id = self.review().data['id']
+        self.login(self.make_user('bob'))
+        self.assertEqual(self.client.delete(f'/api/reviews/{review_id}/').status_code, 403)
+        self.login(self.alice)
+        self.assertEqual(self.client.delete(f'/api/reviews/{review_id}/').status_code, 204)

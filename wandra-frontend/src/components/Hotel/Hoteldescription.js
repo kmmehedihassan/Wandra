@@ -7,7 +7,8 @@ import Error from "../../pages/Error";
 import { PageHero, Gallery, Stars, Stepper } from "../Layout/Shared";
 import { getDestination, getHotel, hotelGallery, roomsForHotel } from "../Database/catalog";
 import { HOTEL_INVENTORY } from "../Database/SingleHotel";
-import { addToCart, fetchHotelAvailability, formatBDT, localISODate } from "../../store";
+import Reviews, { ReviewBadge } from "../Reviews/Reviews";
+import { addToCart, fetchHotelAvailability, formatBDT, localISODate, useReviewSummary } from "../../store";
 import "./hotel.css";
 
 const isoDay = (offset = 0) => localISODate(offset);
@@ -27,6 +28,7 @@ const Hoteldescription = () => {
   const [dates, setDates] = useState({ checkin: isoDay(1), checkout: isoDay(2) });
   const [qty, setQty] = useState({});
   const [error, setError] = useState("");
+  const summary = useReviewSummary();
   const [submitting, setSubmitting] = useState(false);
   const [live, setLive] = useState(null); // { roomId: roomsLeft } for the chosen dates
   const hotelId = hotel ? hotel.id : null;
@@ -118,6 +120,7 @@ const Hoteldescription = () => {
             <MdOutlinePlace /> {hotel.category} · {hotel.dist}
           </span>
           <span className="score">{hotel.ratings}</span>
+          <ReviewBadge summary={summary.hotels[hotel.id]} className="on-dark" />
         </div>
       </PageHero>
       <div className="container-w section">
@@ -203,6 +206,7 @@ const Hoteldescription = () => {
             </section>
 
             <Gallery images={hotelGallery(hotel)} title="Photos" />
+            <Reviews kind="hotel" id={hotel.id} name={hotel.name} />
           </div>
 
           <aside className="sticky-card">

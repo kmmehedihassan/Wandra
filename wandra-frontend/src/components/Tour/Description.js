@@ -5,9 +5,12 @@ import BookTour from "./BookTour";
 import Error from "../../pages/Error";
 import { PageHero, Gallery, Stars } from "../Layout/Shared";
 import { galleryFor, getDestination, getTour } from "../Database/catalog";
+import Reviews, { ReviewBadge } from "../Reviews/Reviews";
+import { useReviewSummary } from "../../store";
 
 const Description = () => {
   const { id } = useParams();
+  const summary = useReviewSummary();
   const tour = getTour(id);
   if (!tour) return <Error />;
   const destination = tour.destinationId ? getDestination(tour.destinationId) : null;
@@ -17,6 +20,7 @@ const Description = () => {
       <PageHero eyebrow={tour.category} title={tour.title} image={tour.img} tall>
         <div className="hero-meta">
           <Stars value={tour.rating} />
+          <ReviewBadge summary={summary.tours[tour.id]} className="on-dark" />
           <span>
             <MdOutlinePlace /> {tour.name}, {tour.location}
           </span>
@@ -52,6 +56,7 @@ const Description = () => {
               </p>
             )}
             <Gallery images={tour.destinationId ? galleryFor(tour.destinationId) : []} title="Photos" />
+            <Reviews kind="tour" id={tour.id} name={tour.title} />
           </div>
           <aside className="sticky-card">
             <BookTour tour={tour} />

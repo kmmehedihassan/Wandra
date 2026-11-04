@@ -98,3 +98,29 @@ class Booking(TripLine):
     class Meta(TripLine.Meta):
         ordering = ['-created_at']
         indexes = [models.Index(fields=['room', 'status', 'checkin', 'checkout']), models.Index(fields=['tour', 'status', 'checkin'])]
+
+
+class Review(models.Model):
+    """A traveller's rating of a tour or hotel they have completed a booking for."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    tour = models.ForeignKey(Tour, null=True, blank=True, on_delete=models.CASCADE, related_name='reviews')
+    hotel = models.ForeignKey(Hotel, null=True, blank=True, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveSmallIntegerField()
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'tour'], condition=models.Q(tour__isnull=False),
+                                    name='one_review_per_user_tour'),
+            models.UniqueConstraint(fields=['user', 'hotel'], condition=models.Q(hotel__isnull=False),
+                                    name='one_review_per_user_hotel'),
+            models.CheckConstraint(condition=models.Q(rating__gte=1, rating__lte=5), name='rating_1_to_5'),
+        ]
+
+    def __str__(self):
+        return f'{self.rating}★ by {self.user} for {self.tour or self.hotel}'

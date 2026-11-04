@@ -322,3 +322,31 @@ export function localISODate(offsetDays = 0, from = new Date()) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
+/* ---------- Review summaries (average rating per tour/hotel) ---------- */
+let reviewSummary = { tours: {}, hotels: {} };
+let reviewSummaryRequested = false;
+
+function getReviewSummary() {
+  return reviewSummary;
+}
+
+export async function refreshReviewSummary() {
+  try {
+    reviewSummary = await apiFetch("/api/reviews/summary/");
+    notifyStoreChanged();
+  } catch (e) {
+    // Ratings are a nice-to-have on list pages; ignore failures.
+  }
+}
+
+// { tours: { [id]: {average, count} }, hotels: {...} }, loaded once per page load.
+export function useReviewSummary() {
+  useEffect(() => {
+    if (!reviewSummaryRequested) {
+      reviewSummaryRequested = true;
+      refreshReviewSummary();
+    }
+  }, []);
+  return useStoreValue(getReviewSummary);
+}

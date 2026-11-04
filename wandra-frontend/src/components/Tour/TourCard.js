@@ -3,9 +3,12 @@ import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { BiTimeFive } from "react-icons/bi";
 import { Stars } from "../Layout/Shared";
-import { formatBDT } from "../../store";
+import { formatBDT, useReviewSummary } from "../../store";
+import { ReviewBadge } from "../Reviews/Reviews";
 
-const TourCard = ({ tour }) => (
+const TourCard = ({ tour }) => {
+  const summary = useReviewSummary();
+  return (
   <article className="list-card">
     <Link to={`/tours/${tour.id}`} className="list-card-img" aria-label={tour.title}>
       <img src={tour.img} alt="" loading="lazy" />
@@ -24,7 +27,10 @@ const TourCard = ({ tour }) => (
         <span aria-hidden="true">·</span>
         {tour.month}
       </div>
-      <Stars value={tour.rating} />
+      <div className="chip-row" style={{ alignItems: "center" }}>
+        <Stars value={tour.rating} />
+        <ReviewBadge summary={summary.tours[tour.id]} />
+      </div>
       <p className="media-card-desc">{tour.description}</p>
       <div className="list-card-foot">
         <span className="price">
@@ -36,6 +42,7 @@ const TourCard = ({ tour }) => (
       </div>
     </div>
   </article>
-);
+  );
+};
 
 export default TourCard;

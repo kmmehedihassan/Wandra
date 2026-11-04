@@ -2,9 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { Stars } from "../../Layout/Shared";
-import { formatBDT } from "../../../store";
+import { formatBDT, useReviewSummary } from "../../../store";
+import { ReviewBadge } from "../../Reviews/Reviews";
 
-const SearchItem = ({ hotel }) => (
+const SearchItem = ({ hotel }) => {
+  const summary = useReviewSummary();
+  return (
   <article className="list-card">
     <Link to={`/hotels/${hotel.id}`} className="list-card-img" aria-label={hotel.name}>
       <img src={hotel.src} alt="" loading="lazy" />
@@ -15,7 +18,10 @@ const SearchItem = ({ hotel }) => (
           <h3 className="list-card-title">
             <Link to={`/hotels/${hotel.id}`}>{hotel.name}</Link>
           </h3>
-          <Stars value={hotel.star} size={14} />
+          <div className="chip-row" style={{ alignItems: "center" }}>
+            <Stars value={hotel.star} size={14} />
+            <ReviewBadge summary={summary.hotels[hotel.id]} />
+          </div>
         </div>
         <span className="score" title="Guest rating">{hotel.ratings}</span>
       </div>
@@ -43,6 +49,7 @@ const SearchItem = ({ hotel }) => (
       </div>
     </div>
   </article>
-);
+  );
+};
 
 export default SearchItem;
