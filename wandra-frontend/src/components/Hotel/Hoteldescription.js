@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { BiUser } from "react-icons/bi";
-import { MdChildCare } from "react-icons/md";
+import { MdCheck, MdChildCare } from "react-icons/md";
 import Error from "../../pages/Error";
 import { PageHero, Gallery, Stars, Stepper } from "../Layout/Shared";
 import { getDestination, getHotel, hotelGallery, roomsForHotel } from "../Database/catalog";
@@ -58,6 +58,7 @@ const Hoteldescription = () => {
   if (!hotel) return <Error />;
 
   const destination = hotel.destinationId ? getDestination(hotel.destinationId) : null;
+  const amenities = (hotel.amenities || []).flatMap((group) => Object.values(group)).filter(Boolean);
   const rooms = roomsForHotel(hotel.id).map((room) => {
     const stock = HOTEL_INVENTORY.find((i) => i.roomid === room.id && i.hotelid === hotel.id);
     const total = stock ? stock.roomquantity : 10;
@@ -132,10 +133,16 @@ const Hoteldescription = () => {
               <dd>{hotel.star}-star</dd>
               <dt>Location</dt>
               <dd>
-                {hotel.category}
-                {destination && (
+                {destination && destination.name === hotel.category ? (
+                  <Link to={`/destinations/${destination.id}`}>{destination.name}</Link>
+                ) : (
                   <>
-                    {" "}· near <Link to={`/destinations/${destination.id}`}>{destination.name}</Link>
+                    {hotel.category}
+                    {destination && (
+                      <>
+                        {" "}· near <Link to={`/destinations/${destination.id}`}>{destination.name}</Link>
+                      </>
+                    )}
                   </>
                 )}
               </dd>
@@ -146,6 +153,18 @@ const Hoteldescription = () => {
               <dt>Services</dt>
               <dd>{hotel.service}</dd>
             </dl>
+            {amenities.length > 0 && (
+              <section className="mt-4">
+                <h2 className="section-title">Amenities</h2>
+                <ul className="amenity-list mt-2">
+                  {amenities.map((a) => (
+                    <li key={a}>
+                      <MdCheck aria-hidden="true" /> {a}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <section className="mt-4">
               <h2 className="section-title">Choose your rooms</h2>

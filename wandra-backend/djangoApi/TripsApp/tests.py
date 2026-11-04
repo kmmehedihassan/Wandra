@@ -18,7 +18,7 @@ class TripsTestCase(APITestCase):
     def setUp(self):
         self.alice = self.make_user('alice')
         self.login(self.alice)
-        self.room = RoomType.objects.get(pk=1)  # Seyeman Beach resort, Normal, seeded by migration
+        self.room = RoomType.objects.get(pk=1)  # Sayeman Beach Resort, Normal, seeded by migration
         self.room.quantity = 3
         self.room.save()
         self.tour = Tour.objects.get(pk=1)
@@ -64,7 +64,7 @@ class CartTests(TripsTestCase):
         self.assertEqual(item['days'], 3)
         self.assertEqual(item['total'], 8000 * 2 * 3)
         self.assertEqual(resp.data['total'], 48000)
-        self.assertEqual(item['name'], 'Seyeman Beach resort')
+        self.assertEqual(item['name'], 'Sayeman Beach Resort')
         self.assertEqual(item['roomtype'], 'Normal')
 
     def test_add_tour(self):

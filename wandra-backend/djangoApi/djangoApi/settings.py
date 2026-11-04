@@ -1,13 +1,9 @@
 from pathlib import Path
-import os
 import dj_database_url
 from decouple import config, Csv
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
@@ -21,6 +17,14 @@ if not SECRET_KEY:
         raise ImproperlyConfigured('SECRET_KEY environment variable is required when DEBUG is False.')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
+# Origins allowed to POST forms (the Django admin) over HTTPS. Defaults to the
+# non-local ALLOWED_HOSTS, e.g. https://wandra.up.railway.app.
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default=','.join(f'https://{h.lstrip(".")}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1', '*')),
+    cast=Csv(),
+)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,7 +33,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'EmployeeApp.apps.EmployeeappConfig',
     'AuthenApp.apps.AuthenappConfig',
     'PostsApp.apps.PostsappConfig',
     'TripsApp.apps.TripsappConfig',
@@ -65,8 +68,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS
-CORS_ORIGIN_ALLOW_ALL = config('CORS_ORIGIN_ALLOW_ALL', default=False, cast=bool)
+# CORS: the React frontend is served from a different origin.
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000', cast=Csv())
 
 ROOT_URLCONF = 'djangoApi.urls'
@@ -109,15 +112,36 @@ TIME_ZONE = config('TIME_ZONE', default='Asia/Dhaka')
 USE_I18N = True
 USE_TZ = True
 
-# Static files — WhiteNoise serves them in production
+# Static files (the Django admin's CSS/JS) — WhiteNoise serves them in production.
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+        else 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Behind Railway's proxy, so absolute URLs (e.g. uploaded image links) use https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# HTTPS hardening in production. Railway's edge already redirects HTTP to
+# HTTPS, so Django's own redirect is opt-in (it would break plain-HTTP health checks).
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=3600, cast=int)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    # HSTS is limited to this host: on a shared domain like *.up.railway.app we
+    # don't control the other subdomains, so includeSubDomains/preload stay off.
+    SILENCED_SYSTEM_CHECKS = ['security.W005', 'security.W021']
+    if not SECURE_SSL_REDIRECT:
+        SILENCED_SYSTEM_CHECKS.append('security.W008')
 
 # Image uploads are sent as multipart form data.
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024

@@ -1,131 +1,3 @@
-// export const gridData = [
-//   {
-//     id: 1,
-//     link: "/images/saintmartin.jpg",
-//     name: "St. Martin's Island",
-//   },
-//   {
-//     id: 2,
-//     link: "/images/sundarban.jpg",
-//     name: "Sundarban",
-//   },
-//   {
-//     id: 3,
-//     link: "/images/coxsbazar.gif",
-//     name: "Cox's Bazar",
-//   },
-//   {
-//     id: 4,
-//     link: "/images/guthiamosque.jpg",
-//     name: "Guthia Mosque",
-//   },
-//   {
-//     id: 5,
-//     link: "/images/srimangal.jpg",
-//     name: "Srimangal",
-//   },
-//   {
-//     id: 6,
-//     link: "/images/tanguar.jpg",
-//     name: "Tanguar Haor",
-//   },
-//   {
-//     id: 7,
-//     link: "/images/kuakata.jpg",
-//     name: "Kuakata",
-//   },
-//   {
-//     id: 8,
-//     link: "/images/sajek.jpg",
-//     name: "Sajek Valley",
-//   },
-//   {
-//     id: 9,
-//     link: "/images/ahsan.jpg",
-//     name: "Ahsan Manzil",
-//   },
-//   {
-//     id: 10,
-//     link: "/images/amiakhum.jpg",
-//     name: "Amiakhum",
-//   },
-//   {
-//     id: 11,
-//     link: "/images/ratargul.jpg",
-//     name: "Ratargul",
-//   },
-//   {
-//     id: 12,
-//     link: "/images/nilgiri.jpg",
-//     name: "Nilgiri",
-//   },
-// ];
-
-// export const destinationData = [
-//   {
-//     id: 1,
-//     link: "/images/st_intro.jpg",
-//     title: "St. Martin's Island",
-//     body: "Saint Martin is situated in the southeast part of Bangladesh and is the only coral island of the country. This tiny island is called Narikel Jinjira by the local people as abundant coconut grows here. It is one of the best places to visit in Bangladesh that harbors some of the most picturesque beaches in Bangladesh, where you can enjoy beach sports, a bonfire, and beach parties. You can also go scuba diving or hire a speed boat and take a tour around the island. There are many restaurants and beach shacks here where you can enjoy local fresh seafood.",
-//   },
-//   {
-//     id: 2,
-//     link: "/images/sundarban.jpg",
-//     title: "Sundarban",
-//     body: "The Sundarbans is one of the world's coastal mangrove forests with diverse wildlife. Tourists come from all over Bangladesh to enjoy the beauty of the Sundarbans. The presence of tourists from different countries of the world is not less either. Most of the Sundarbans tours start from Khulna. However, some tours are starting from Dhaka lately. The advantage of traveling from Dhaka is that you do not have to go to Khulna by bus separately, but you can start your journey by ship from Dhaka. This article will enlighten you about visiting Sundarbans from Dhaka, including things to do in Sundarbans.",
-//   },
-//   {
-//     id: 3,
-//     title: "Cox's Bazar",
-//     body: "Cox’s Bazar is a District under Chittagong Division, which is famous for its longest unbroken sandy sea beach. It is located 150 km south of the industrial port- Chittagong. Cox’s Bazar is considered as having the longest sea beach in the world, with a total of 121 kilometer long. The name Cox’s Bazar was derived from its founder, Captain Cox. He founded the very attractive beach in 1798. Then the Cox’s Bazar beach started only as a small port and health resort.Though the beach is considered to be the longest beach in the world, it has been the least crowded among the other beaches. Here, visitors can enjoy the relaxing breeze of the Bay of Bengal Sea and the peacefulness of the place. The Cox’s bazar beach certainly has the finest leisure it can offer to each of its visitors. People can take a timely stroll along the lengthened stretch of the beach and enjoy the view of the amazing seascape. Visitors can also enjoy water sport activities like scuba diving, surfing, and try some boat rides.There are also other wonderful places to see around the Cox’s beach bazar. One of these is the beautiful Himchari waterfall, located 18 kilometer south of Cox’s Bazar sea beach. This is the most visited place in the district, with its beautiful refreshing green hills and the wonderful water fall, where visitors can bathe and swim apart from the sea itself.Another attraction is the Moheshkhali Island near the Cox’s beach bazar coast. The island can be reached via speedboat. Here, visitors can view the breath-taking view of the island. With the bright green color of its mangrove forest that will surely amaze everyone who come to see the place. This is definitely the next best thing to explore after one’s beach trip.Cox’s Beach Bazar really is the place best recommended for people who seeks for serene, soberness and relaxing vacation. Every Cox’s Beach Bazar trip will surely please and satisfy everyone who visits here.",
-//   },
-//   {
-//     id: 4,
-//     title: "Guthia Mosque",
-//     body: "The Baitul Aman Jame Masjid Complex commonly known as Guthia Mosque of Barisal, is a mosque complex of Bangladesh having a land area of 14 acres, comparing to the 8.30 acres land area of the national mosque Baitul Mukarram of the country.[1][2] The Baitul Aman Jame Masjid Complex consists of a mosque, a large eidgah, a graveyard, three lakes, a madrasa and an orphanage.[2] Established on December 16, 2003, Guthia Mosque is also a tourist spot in Bangladesh.[3] ",
-//   },
-//   {
-//     id: 5,
-//     title: "Srimangal",
-//     body: "Sreemangal is situated in Moulvibazar district in sylhet division. Sreemangal is an Upazila. It is famous for tea garden. Rain all time occurs here. Nature has adorned sreemangal with green tress. Its natural scenery is very charming. It soothes one’s eyes. Birds are twittering always here. The first tea garden in Bangladesh which names “Malni chho ra tea garden” is here. Only one tea research institute in Bangladesh which name is BTRI (Bangladesh Tea Research Institute) is situated in Sreemangal. The terraced tea gardens, plantations and evergreen hills of sreemangal are wonderful treats for the tourists. On the way, of Sreemangal by bus you’ll see a statue “cha konna” which is stands for welcome you. But if you come in sreemangal by train you’ll miss this statue. When you’ll come near in the tea garden you find the smell of tea leaves. When you’ll reach sreemangal you get many sorts of hotels. Tea Resort & Rest House also available here. After taken rest you can visit tea gardens. After that you can go BTRI, there is Tea factory. You can go “Nilkantha” tea stall near BDR camp here you’ll get seven layers tea which is very uncommon tea in Bangladesh. Don’t forget to visit “Tea museum” in “British karighor” tea resort. Lawasara, Madhabpur Lake is nearest tourist spots near Sreemangal.",
-//   },
-//   {
-//     id: 6,
-//     title: "Tanguar Haor",
-//     body: "Taguar Haor  Description ... ",
-//   },
-//   {
-//     id: 7,
-//     title: "Kuakata",
-//     body: "Kuakata  Description ... ",
-//   },
-//   {
-//     id: 8,
-//     title: "Sajek Valley",
-//     body: "Sajek Valley  Description ... ",
-//   },
-//   {
-//     id: 9,
-//     title: "Ahsan Manzil",
-//     body: "Ahsan Manzil  Description ... ",
-//   },
-//   {
-//     id: 10,
-//     title: "Amiakhum",
-//     body: "Amiakhum  Description ... ",
-//   },
-//   {
-//     id: 11,
-//     title: "Ratargul",
-//     body: "Ratargul  Description ... ",
-//   },
-//   {
-//     id: 12,
-//     title: "Nilgiri",
-//     body: "Nilgiri Description ... ",
-//   },
-// ];
-
 export const gridData = [
   {
     id: 1,
@@ -273,7 +145,7 @@ export const tourCardData = [
     rating: 5,
     location: "Teknaf",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "St. Martin's is the only coral island in Bangladesh, about nine kilometres off the coast of Teknaf in the Bay of Bengal. Locals call it Narikel Jinjira for its coconut palms. Spend your days on quiet beaches and coral rocks, cycle around the island, take a boat to Chera Dwip at low tide and finish with fresh seafood by the shore.",
     price: 10000,
     category: "Exploration",
     month: "January",
@@ -286,7 +158,7 @@ export const tourCardData = [
     rating: 4.5,
     location: "Teknaf",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "St. Martin's is the only coral island in Bangladesh, about nine kilometres off the coast of Teknaf in the Bay of Bengal. Locals call it Narikel Jinjira for its coconut palms. Spend your days on quiet beaches and coral rocks, cycle around the island, take a boat to Chera Dwip at low tide and finish with fresh seafood by the shore.",
     price: 8000,
     category: "Exploration",
     month: "February",
@@ -299,7 +171,7 @@ export const tourCardData = [
     rating: 4,
     location: "Teknaf",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "St. Martin's is the only coral island in Bangladesh, about nine kilometres off the coast of Teknaf in the Bay of Bengal. Locals call it Narikel Jinjira for its coconut palms. Spend your days on quiet beaches and coral rocks, cycle around the island, take a boat to Chera Dwip at low tide and finish with fresh seafood by the shore.",
     price: 6000,
     category: "Exploration",
     month: "October",
@@ -312,7 +184,7 @@ export const tourCardData = [
     rating: 3.5,
     location: "Teknaf",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "St. Martin's is the only coral island in Bangladesh, about nine kilometres off the coast of Teknaf in the Bay of Bengal. Locals call it Narikel Jinjira for its coconut palms. Spend your days on quiet beaches and coral rocks, cycle around the island, take a boat to Chera Dwip at low tide and finish with fresh seafood by the shore.",
     price: 5000,
     category: "Exploration",
     month: "December",
@@ -325,7 +197,7 @@ export const tourCardData = [
     rating: 3,
     location: "Teknaf",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "St. Martin's is the only coral island in Bangladesh, about nine kilometres off the coast of Teknaf in the Bay of Bengal. Locals call it Narikel Jinjira for its coconut palms. Spend your days on quiet beaches and coral rocks, cycle around the island, take a boat to Chera Dwip at low tide and finish with fresh seafood by the shore.",
     price: 4500,
     category: "Exploration",
     month: "January",
@@ -339,7 +211,7 @@ export const tourCardData = [
     rating: 5,
     location: "Khulna",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Sundarbans is the largest mangrove forest in the world and a UNESCO World Heritage Site, home to the Royal Bengal tiger. This boat-based trip from Khulna winds through tidal rivers and narrow creeks, with stops at watchtowers and forest stations to look for spotted deer, crocodiles, monkeys and hundreds of bird species.",
     price: 18000,
     category: "Adventure",
     month: "October",
@@ -352,7 +224,7 @@ export const tourCardData = [
     rating: 4.5,
     location: "Khulna",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Sundarbans is the largest mangrove forest in the world and a UNESCO World Heritage Site, home to the Royal Bengal tiger. This boat-based trip from Khulna winds through tidal rivers and narrow creeks, with stops at watchtowers and forest stations to look for spotted deer, crocodiles, monkeys and hundreds of bird species.",
     price: 15000,
     category: "Adventure",
     month: "November",
@@ -365,7 +237,7 @@ export const tourCardData = [
     rating: 4,
     location: "Khulna",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Sundarbans is the largest mangrove forest in the world and a UNESCO World Heritage Site, home to the Royal Bengal tiger. This boat-based trip from Khulna winds through tidal rivers and narrow creeks, with stops at watchtowers and forest stations to look for spotted deer, crocodiles, monkeys and hundreds of bird species.",
     price: 12000,
     category: "Adventure",
     month: "December",
@@ -378,7 +250,7 @@ export const tourCardData = [
     rating: 3.5,
     location: "Khulna",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Sundarbans is the largest mangrove forest in the world and a UNESCO World Heritage Site, home to the Royal Bengal tiger. This boat-based trip from Khulna winds through tidal rivers and narrow creeks, with stops at watchtowers and forest stations to look for spotted deer, crocodiles, monkeys and hundreds of bird species.",
     price: 10000,
     category: "Adventure",
     month: "January",
@@ -391,7 +263,7 @@ export const tourCardData = [
     rating: 3,
     location: "Khulna",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Sundarbans is the largest mangrove forest in the world and a UNESCO World Heritage Site, home to the Royal Bengal tiger. This boat-based trip from Khulna winds through tidal rivers and narrow creeks, with stops at watchtowers and forest stations to look for spotted deer, crocodiles, monkeys and hundreds of bird species.",
     price: 7500,
     category: "Adventure",
     month: "February",
@@ -465,8 +337,8 @@ export const tourCardData = [
   {
     id: 16,
     img: "/images/coxsbazar.jpg",
-    title: "Cox'sbazar Premium Tour",
-    name: "Cox'sBazar",
+    title: "Cox's Bazar Premium Tour",
+    name: "Cox's Bazar",
     rating: 5,
     location: "Chittagong",
     description:
@@ -478,8 +350,8 @@ export const tourCardData = [
   {
     id: 17,
     img: "/images/coxsbazar.jpg",
-    title: "Cox'sbazar Elite Tour",
-    name: "Cox'sBazar",
+    title: "Cox's Bazar Elite Tour",
+    name: "Cox's Bazar",
     rating: 4.5,
     location: "Chittagong",
     description:
@@ -491,8 +363,8 @@ export const tourCardData = [
   {
     id: 18,
     img: "/images/coxsbazar.jpg",
-    title: "Cox'sbazar Excellent Tour",
-    name: "Cox'sBazar",
+    title: "Cox's Bazar Excellent Tour",
+    name: "Cox's Bazar",
     rating: 4,
     location: "Chittagong",
     description:
@@ -504,8 +376,8 @@ export const tourCardData = [
   {
     id: 19,
     img: "/images/coxsbazar.jpg",
-    title: "Cox'sbazar Quality Tour",
-    name: "Cox'sBazar",
+    title: "Cox's Bazar Quality Tour",
+    name: "Cox's Bazar",
     rating: 3.5,
     location: "Chittagong",
     description:
@@ -517,8 +389,8 @@ export const tourCardData = [
   {
     id: 20,
     img: "/images/coxsbazar.jpg",
-    title: "Cox'sbazar Economy Tour",
-    name: "Cox'sBazar",
+    title: "Cox's Bazar Economy Tour",
+    name: "Cox's Bazar",
     rating: 3,
     location: "Chittagong",
     description:
@@ -678,7 +550,7 @@ export const hotel_list = [
   {
     id: 1,
     src: "/images/sayeman.jpg",
-    name: "Seyeman Beach resort",
+    name: "Sayeman Beach Resort",
     dist: "500m from center",
     service: "Free airport taxi",
     highlights: "Studio room with Air conditioning",
@@ -686,10 +558,10 @@ export const hotel_list = [
     category: "Cox's Bazar",
     ratings: 9.5,
     price: 8000,
-    location: "Cox'sbazar",
+    location: "Cox's Bazar",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Sayeman Beach Resort is a 5-star stay in Cox's Bazar, 500m from center. Rooms start from a studio room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -719,10 +591,10 @@ export const hotel_list = [
     category: "Cox's Bazar",
     ratings: 9.0,
     price: 7500,
-    location: "Cox'sbazar",
+    location: "Cox's Bazar",
     star: 4.5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Hotel The Cox Today is a 4.5-star stay in Cox's Bazar, 500m from center. Rooms start from a studio room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -752,10 +624,10 @@ export const hotel_list = [
     category: "Cox's Bazar",
     ratings: 8.5,
     price: 9000,
-    location: "Cox'sbazar",
+    location: "Cox's Bazar",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Long Beach Hotel Cox's Bazar is a 4-star stay in Cox's Bazar, 500m from center. Rooms start from a studio room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -786,10 +658,10 @@ export const hotel_list = [
     category: "Dhaka",
     ratings: 6.5,
     price: 5000,
-    location: "AhsanManzil",
+    location: "Ahsan Manzil",
     star: 3,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Hotel Victorial Inn is a 3-star stay in Dhaka, 300m from center. Rooms start from a room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -819,10 +691,10 @@ export const hotel_list = [
     category: "Cox's Bazar",
     ratings: 9.1,
     price: 9000,
-    location: "Cox'sbazar",
+    location: "Cox's Bazar",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Royal Tulip Hotel and Spa is a 5-star stay in Cox's Bazar, 1000m from center. Rooms start from a studio Apartment with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -844,7 +716,7 @@ export const hotel_list = [
   {
     id: 6,
     src: "/images/palace.jpg",
-    name: "Grand Sultan tea Garden",
+    name: "Grand Sultan Tea Garden",
     dist: "1000m from center",
     service: "Free airport taxi",
     highlights: "Studio Apartment with Air conditioning",
@@ -855,7 +727,7 @@ export const hotel_list = [
     location: "Sylhet",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Grand Sultan Tea Garden is a 5-star stay in Sylhet, 1000m from center. Rooms start from a studio Apartment with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -889,7 +761,7 @@ export const hotel_list = [
     location: "Sylhet",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Dusai Resort is a 5-star stay in Sylhet, 1500m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -922,7 +794,7 @@ export const hotel_list = [
     location: "Sylhet",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "The Palace Resort is a 5-star stay in Sylhet, 1500m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -955,7 +827,7 @@ export const hotel_list = [
     location: "Guthia Mosque",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Hotel Grand Park Barisal is a 5-star stay in Barisal, 1500m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -989,7 +861,7 @@ export const hotel_list = [
     location: "Kuakata",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Ocean View Hotel and Convention is a 4-star stay in Kuakata, 500m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1022,7 +894,7 @@ export const hotel_list = [
     location: "St. Martin's Island",
     star: 5,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Hotel Saint Martin is a 5-star stay in St. Martin's Island, 400m from jetty. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1056,7 +928,7 @@ export const hotel_list = [
     location: "Sajek Valley",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Runmoy Resort is a 4-star stay in Sajek, 400m from center. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1089,7 +961,7 @@ export const hotel_list = [
     location: "Sajek Valley",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Meghomala Resort is a 4-star stay in Sajek, 400m from center. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1123,7 +995,7 @@ export const hotel_list = [
     location: "Nilgiri",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Hotel Obokash is a 4-star stay in Bandarban, 2000m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1156,7 +1028,7 @@ export const hotel_list = [
     location: "Nilgiri",
     star: 4,
     description:
-      "ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium",
+      "Nilgiri Hill Resort is a 4-star stay in Nilgiri, 2000m from city. Rooms start from a studio Room with air conditioning, and guests have pool, parking, Wi-Fi and gym, plus a free airport taxi, wifi. Choose your dates and rooms below to see live availability.",
     features: "Pool, Parking, Wifi, Gym",
     amenities: [
       {
@@ -1912,82 +1784,5 @@ export const accordiondata = [
         hospitals and emergencies. `,
       },
     ],
-  },
-];
-
-
-export const popularDestination = [
-  {
-    image: "/images/saintmartin.jpg",
-    title: "St. Martin's Island",
-    description: "Chittagong",
-  },
-  {
-    image: "/images/sundarban.jpg",
-    title: "Sundarbans",
-    description: "Khulna",
-  },
-  {
-    image: "/images/coxsbazar.gif",
-    title: "Cox's Bazar",
-    description: "Chittagong",
-  },
-  {
-    image: "/images/guthiamosque.jpg",
-    title: "Guthia Mosque",
-    description: "Barisal",
-  },
-  {
-    image: "/images/srimangal.jpg",
-    title: "Sreemangal",
-    description: "Sylhet",
-  },
-  {
-    image: "/images/tanguar.jpg",
-    title: "Tanguar Haor",
-    description: "Sylhet",
-  },
-  {
-    image: "/images/kuakata.jpg",
-    title: "Kuakata",
-    description: "Barisal",
-  },
-];
-
-export const popularTour = [
-  {
-    image: "/images/sajek.jpg",
-    title: "Sajek Vally",
-    description: "This is a description",
-  },
-  {
-    image: "/images/coxsbazar.gif",
-    title: "Cox's Bazar",
-    description: "This is a second description",
-  },
-  {
-    image: "/images/srimangal.jpg",
-    title: "Sreemangal",
-    description: "This is a third description",
-  },
-  {
-    image: "/images/nilgiri.jpg",
-    title: "Chittagong Hill Tracks",
-    description: "This is a fourth description",
-  },
-  {
-    image: "/images/ratargul.jpg",
-    title: "Ratargul",
-    description: "This is a fifth description",
-  },
-  {
-    image: "/images/nilgiri.jpg",
-    title: "Nilgiri",
-    description: "This is a sixth description",
-  },
-  {
-    image: "/images/amiakhum.jpg",
-    title: "Amiakhum",
-    description: "This is a seventh description",
   },
 ];

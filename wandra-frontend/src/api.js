@@ -66,6 +66,7 @@ export class ApiError extends Error {
 // Pass a FormData `body` to upload files.
 export async function apiFetch(path, { method = "GET", body } = {}) {
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  const sentToken = getToken();
   let resp;
   try {
     resp = await fetch(`${API_BASE}${path}`, {
@@ -80,11 +81,16 @@ export async function apiFetch(path, { method = "GET", body } = {}) {
     throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
   }
   const data = resp.status === 204 ? null : await resp.json().catch(() => null);
-  if (resp.status === 401 && getToken()) {
-    // The token was revoked or expired: end the local session.
-    SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
-    window.dispatchEvent(new Event("wandra:store"));
-    throw new ApiError("Your session has expired. Please log in again.", 401);
+  if (resp.status === 401 && sentToken) {
+    // The token was revoked or expired: end the local session (once, even if
+    // several requests fail together) and tell the user why.
+    const message = "Your session has expired. Please log in again.";
+    if (getToken() === sentToken) {
+      SESSION_KEYS.forEach((key) => window.localStorage.removeItem(key));
+      window.dispatchEvent(new Event("wandra:store"));
+      window.dispatchEvent(new CustomEvent("wandra:notice", { detail: { message, tone: "error" } }));
+    }
+    throw new ApiError(message, 401);
   }
   if (!resp.ok) throw new ApiError(errorMessage(data), resp.status);
   return data;

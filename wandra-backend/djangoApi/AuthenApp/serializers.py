@@ -40,6 +40,22 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(trim_whitespace=False, write_only=True)
 
 
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(trim_whitespace=False, write_only=True)
+    new_password = serializers.CharField(trim_whitespace=False, write_only=True)
+
+    def validate_current_password(self, value):
+        if not self.context['request'].user.check_password(value):
+            raise serializers.ValidationError('Your current password is incorrect.')
+        return value
+
+    def validate(self, attrs):
+        if attrs['current_password'] == attrs['new_password']:
+            raise serializers.ValidationError({'new_password': 'Choose a password you haven\'t used here before.'})
+        validate_password(attrs['new_password'], user=self.context['request'].user)
+        return attrs
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     """The signed-in user's profile. Names are stored on the User model."""
 

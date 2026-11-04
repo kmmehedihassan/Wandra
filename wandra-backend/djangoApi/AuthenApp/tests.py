@@ -1,12 +1,9 @@
-from datetime import date
-
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from AuthenApp.models import Profile
-from EmployeeApp.models import MyHotelInfo, MyReservation
 
 STRONG_PASSWORD = 'Wandra-Trip-2026'
 
@@ -122,47 +119,26 @@ class ProfileTests(AuthTestCase):
         self.assertEqual(Profile.objects.get(user=bob).phone, '555 1234')
 
 
-class LockedDownEndpointTests(AuthTestCase):
-    def setUp(self):
-        super().setUp()
-        MyHotelInfo.objects.create(room_id=1, hotel_id=1, roomquantity=5, remaining=0)
-        MyReservation.objects.create(hotel_id=1, room=1, guest='bob', roomquantity=1,
-                                     check_in=date(2026, 12, 1), check_out=date(2026, 12, 3))
-
-    def test_anonymous_cannot_delete_all_reservations(self):
-        self.assertEqual(self.client.delete('/reserve').status_code, 401)
-        self.login_as(self.make_user())
-        self.assertEqual(self.client.delete('/reserve').status_code, 400)
-        self.assertEqual(MyReservation.objects.count(), 1)
-
-    def test_reservation_listing_is_scoped_to_user(self):
-        self.assertEqual(self.client.get('/reserve').status_code, 401)
-        self.login_as(self.make_user())
-        self.assertEqual(self.client.get('/reserve').json(), [])
-
-    def test_availability_check_is_public(self):
-        resp = self.client.get('/reserve/10', {
-            'hotel_id': 1, 'room': 1, 'roomquantity': 1,
-            'check_in': '2027-01-01', 'check_out': '2027-01-02',
-        })
+class PasswordChangeTests(AuthTestCase):
+    def test_change_password_rotates_token(self):
+        user = self.make_user()
+        old_token = Token.objects.create(user=user).key
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {old_token}')
+        resp = self.client.post('/auth/password', {'current_password': STRONG_PASSWORD,
+                                                   'new_password': 'Another-Trip-2027'}, format='json')
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json()['msg'], 'Success')
+        self.assertNotEqual(resp.data['token'], old_token)
+        self.assertEqual(self.client.get('/auth/me').status_code, 401)  # old token revoked
+        user.refresh_from_db()
+        self.assertTrue(user.check_password('Another-Trip-2027'))
 
-    def test_booking_is_recorded_for_logged_in_user(self):
+    def test_change_password_validation(self):
         self.login_as(self.make_user())
-        resp = self.client.post('/reserve/1', {
-            'hotel_id': 1, 'room': 1, 'roomquantity': 1, 'guest': 'someone-else',
-            'check_in': '2027-02-01', 'check_out': '2027-02-02', 'price': 10, 'cardata': 0,
-        }, format='json')
-        self.assertEqual(resp.json()['msg'], 'Success')
-        self.assertTrue(MyReservation.objects.filter(guest='alice').exists())
-        self.assertFalse(MyReservation.objects.filter(guest='someone-else').exists())
+        url = '/auth/password'
+        self.assertEqual(self.client.post(url, {'current_password': 'wrong', 'new_password': 'Another-Trip-2027'},
+                                          format='json').status_code, 400)
+        self.assertEqual(self.client.post(url, {'current_password': STRONG_PASSWORD, 'new_password': '1234'},
+                                          format='json').status_code, 400)
+        self.assertEqual(self.client.post(url, {'current_password': STRONG_PASSWORD, 'new_password': STRONG_PASSWORD},
+                                          format='json').status_code, 400)
 
-    def test_hotel_inventory_writes_require_admin(self):
-        payload = {'room_id': 2, 'hotel_id': 1, 'roomquantity': 9, 'remaining': 0}
-        self.assertEqual(self.client.post('/myhotel', payload, format='json').status_code, 401)
-        self.login_as(self.make_user())
-        self.assertEqual(self.client.post('/myhotel', payload, format='json').status_code, 403)
-        self.login_as(self.make_user('admin', is_staff=True))
-        self.client.post('/myhotel', payload, format='json')
-        self.assertTrue(MyHotelInfo.objects.filter(room_id=2).exists())

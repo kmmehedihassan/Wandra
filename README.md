@@ -31,6 +31,19 @@ cp .env.example .env          # REACT_APP_API_URL points at the backend
 npm start                     # http://localhost:3000
 ```
 
+## Deploying (Railway)
+
+The backend's `Procfile` runs `migrate` and `collectstatic` before starting gunicorn, so a deploy
+applies database changes automatically. Python is pinned in `wandra-backend/djangoApi/.python-version`.
+
+Set these variables on the backend service: `DEBUG=False`, `SECRET_KEY`, `ALLOWED_HOSTS`
+(your Railway domain), `CORS_ALLOWED_ORIGINS` (your frontend's URL) and `DATABASE_URL`
+(added automatically when you attach a Railway Postgres database). On the frontend, set
+`REACT_APP_API_URL` to the backend URL before building.
+
+Create an admin account once with `python manage.py createsuperuser` (Railway shell) and sign in at
+`/admin/`.
+
 ## Configuration
 
 Backend (environment variables, see `wandra-backend/djangoApi/.env.example`):
@@ -40,6 +53,8 @@ Backend (environment variables, see `wandra-backend/djangoApi/.env.example`):
 - `AUTH_THROTTLE_RATE` — login/register rate limit per IP (default `10/min`)
 - `UPLOAD_THROTTLE_RATE` — image uploads per user (default `30/hour`)
 - `TIME_ZONE` — defaults to `Asia/Dhaka`
+- `CSRF_TRUSTED_ORIGINS` — defaults to `https://` + each non-local `ALLOWED_HOSTS` entry (needed for the admin login)
+- `SECURE_HSTS_SECONDS` (default `3600`), `SECURE_SSL_REDIRECT` (default `False`; Railway already redirects to HTTPS)
 
 Frontend (see `wandra-frontend/.env.example`):
 
@@ -58,6 +73,7 @@ Send `Authorization: Token <token>` on authenticated requests.
 | POST | `/auth/login` | `{username, password}` → `{token, user}` |
 | POST | `/auth/logout` | revokes the token |
 | GET | `/auth/me` | current user |
+| POST | `/auth/password` | `{current_password, new_password}` → new `{token, user}`; signs out other devices |
 | GET / PATCH | `/auth/profile` | own profile: `firstname, lastname, gender, birthday, phone, address, avatar_id` |
 
 **Images** (profile photos and post covers)

@@ -9,6 +9,7 @@ from rest_framework.throttling import SimpleRateThrottle
 from AuthenApp.models import Profile
 from AuthenApp.serializers import (
     LoginSerializer,
+    PasswordChangeSerializer,
     RegisterSerializer,
     ProfileSerializer,
     UserSerializer,
@@ -60,6 +61,19 @@ def login(request):
 def logout(request):
     Token.objects.filter(user=request.user).delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@throttle_classes([AuthThrottle])
+def change_password(request):
+    """Change the password and sign out every other device by issuing a new token."""
+    serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    request.user.set_password(serializer.validated_data['new_password'])
+    request.user.save(update_fields=['password'])
+    Token.objects.filter(user=request.user).delete()
+    return Response(_session_payload(request.user))
 
 
 @api_view(['GET'])

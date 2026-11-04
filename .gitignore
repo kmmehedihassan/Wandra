@@ -29,3 +29,6 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Gunicorn control socket
+gunicorn.ctl

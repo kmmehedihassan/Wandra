@@ -92,31 +92,31 @@
   },
   {
    "id": 16,
-   "title": "Cox'sbazar Premium Tour",
+   "title": "Cox's Bazar Premium Tour",
    "price": 12000,
    "image": "/images/coxsbazar.jpg"
   },
   {
    "id": 17,
-   "title": "Cox'sbazar Elite Tour",
+   "title": "Cox's Bazar Elite Tour",
    "price": 10000,
    "image": "/images/coxsbazar.jpg"
   },
   {
    "id": 18,
-   "title": "Cox'sbazar Excellent Tour",
+   "title": "Cox's Bazar Excellent Tour",
    "price": 9000,
    "image": "/images/coxsbazar.jpg"
   },
   {
    "id": 19,
-   "title": "Cox'sbazar Quality Tour",
+   "title": "Cox's Bazar Quality Tour",
    "price": 7500,
    "image": "/images/coxsbazar.jpg"
   },
   {
    "id": 20,
-   "title": "Cox'sbazar Economy Tour",
+   "title": "Cox's Bazar Economy Tour",
    "price": 5000,
    "image": "/images/coxsbazar.jpg"
   },
@@ -190,7 +190,7 @@
  "hotels": [
   {
    "id": 1,
-   "name": "Seyeman Beach resort",
+   "name": "Sayeman Beach Resort",
    "price": 8000,
    "image": "/images/sayeman.jpg"
   },
@@ -220,7 +220,7 @@
   },
   {
    "id": 6,
-   "name": "Grand Sultan tea Garden",
+   "name": "Grand Sultan Tea Garden",
    "price": 9000,
    "image": "/images/palace.jpg"
   },

@@ -7,6 +7,8 @@ import { MdLogout } from "react-icons/md";
 import ViewProfile from "./ViewProfile";
 import EditProfile from "./EditProfile";
 import MyBookings from "./MyBookings";
+import ChangePassword from "./ChangePassword";
+import { RiLockPasswordLine } from "react-icons/ri";
 import { EmptyState } from "../Layout/Shared";
 import { notify, openAuthModal, saveProfile, uploadImage, useProfile, useProfileLoaded, useUser } from "../../store";
 import { logout } from "../../api";
@@ -16,6 +18,7 @@ const TABS = [
   { key: "profile", label: "My profile", Icon: CgProfile },
   { key: "edit", label: "Edit profile", Icon: BiEdit },
   { key: "bookings", label: "My bookings", Icon: FaStackOverflow },
+  { key: "password", label: "Password", Icon: RiLockPasswordLine },
 ];
 
 export default function Dashboard() {
@@ -100,7 +103,7 @@ export default function Dashboard() {
         </aside>
 
         <section className="card card-pad dash-main">
-          {!profileLoaded && active !== "bookings" ? (
+          {!profileLoaded && (active === "profile" || active === "edit") ? (
             <>
               <div className="skeleton" />
               <div className="skeleton" />
@@ -112,6 +115,7 @@ export default function Dashboard() {
             </>
           )}
           {active === "bookings" && <MyBookings />}
+          {active === "password" && <ChangePassword />}
         </section>
       </div>
     </div>

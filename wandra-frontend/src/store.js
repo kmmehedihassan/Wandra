@@ -214,7 +214,7 @@ export function useSessionSync() {
         await mergeGuestCart();
         if (active) await Promise.all([refreshCart(), refreshBookings(), refreshProfile()]);
       } catch (err) {
-        if (active) {
+        if (active && err.status !== 401) {
           remote.cart = remote.cart || [];
           remote.bookings = remote.bookings || [];
           remote.profile = remote.profile || {};
