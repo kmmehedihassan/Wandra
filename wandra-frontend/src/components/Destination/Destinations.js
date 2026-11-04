@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import { MdOutlinePlace } from "react-icons/md";
-import { PageHero, EmptyState } from "../Layout/Shared";
+import { PageHero, EmptyState, SaveButton } from "../Layout/Shared";
 import { getDestinations, toursForDestination } from "../Database/catalog";
 import "./destination.css";
 
@@ -59,23 +59,26 @@ const Destinations = () => {
             {results.map((d) => {
               const tours = toursForDestination(d.id).length;
               return (
-                <Link key={d.id} to={`/destinations/${d.id}`} className="media-card dest-card">
-                  <div className="media-card-img">
-                    <img src={d.image} alt="" loading="lazy" />
-                  </div>
-                  <div className="media-card-body">
-                    <h3 className="media-card-title">{d.name}</h3>
-                    <span className="media-card-meta">
-                      <MdOutlinePlace /> {d.region}
-                    </span>
-                    <div className="media-card-foot">
-                      <span className="badge badge-neutral">
-                        {tours > 0 ? `${tours} tour${tours > 1 ? "s" : ""}` : "Self-guided"}
-                      </span>
-                      <span className="link-arrow">Explore →</span>
+                <div key={d.id} className="card-wrap">
+                  <Link to={`/destinations/${d.id}`} className="media-card dest-card">
+                    <div className="media-card-img">
+                      <img src={d.image} alt="" loading="lazy" />
                     </div>
-                  </div>
-                </Link>
+                    <div className="media-card-body">
+                      <h3 className="media-card-title">{d.name}</h3>
+                      <span className="media-card-meta">
+                        <MdOutlinePlace /> {d.region}
+                      </span>
+                      <div className="media-card-foot">
+                        <span className="badge badge-neutral">
+                          {tours > 0 ? `${tours} tour${tours > 1 ? "s" : ""}` : "Self-guided"}
+                        </span>
+                        <span className="link-arrow">Explore →</span>
+                      </div>
+                    </div>
+                  </Link>
+                  <SaveButton kind="destination" id={d.id} name={d.name} overlay />
+                </div>
               );
             })}
           </div>

@@ -291,3 +291,31 @@ class ReviewTests(TripsTestCase):
         self.assertEqual(self.client.delete(f'/api/reviews/{review_id}/').status_code, 403)
         self.login(self.alice)
         self.assertEqual(self.client.delete(f'/api/reviews/{review_id}/').status_code, 204)
+
+
+class WishlistTests(TripsTestCase):
+    def test_save_list_and_remove(self):
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'destination', 'refId': 3}, format='json').status_code, 201)
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'tour', 'refId': 1}, format='json').status_code, 201)
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'hotel', 'refId': 2}, format='json').status_code, 201)
+        again = self.client.post('/api/wishlist/', {'kind': 'tour', 'refId': 1}, format='json')
+        self.assertEqual(again.status_code, 200)  # saving twice is harmless
+        items = self.client.get('/api/wishlist/').data
+        self.assertEqual({(i['kind'], i['refId']) for i in items}, {('destination', 3), ('tour', 1), ('hotel', 2)})
+        self.assertEqual(self.client.delete('/api/wishlist/tour/1/').status_code, 204)
+        self.assertEqual(len(self.client.get('/api/wishlist/').data), 2)
+
+    def test_rejects_unknown_items_and_guests(self):
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'tour', 'refId': 999}, format='json').status_code, 400)
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'planet', 'refId': 1}, format='json').status_code, 400)
+        self.assertEqual(self.client.post('/api/wishlist/', {'kind': 'hotel', 'refId': 'x'}, format='json').status_code, 400)
+        self.client.credentials()
+        self.assertEqual(self.client.get('/api/wishlist/').status_code, 401)
+
+    def test_wishlists_are_private(self):
+        self.client.post('/api/wishlist/', {'kind': 'hotel', 'refId': 2}, format='json')
+        self.login(self.make_user('bob'))
+        self.assertEqual(self.client.get('/api/wishlist/').data, [])
+        self.client.delete('/api/wishlist/hotel/2/')  # bob can't remove alice's entry
+        self.login(self.alice)
+        self.assertEqual(len(self.client.get('/api/wishlist/').data), 1)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AiFillStar, AiOutlineStar } from "react-icons/ai";
+import { AiFillHeart, AiFillStar, AiOutlineHeart, AiOutlineStar } from "react-icons/ai";
+import { isSaved, toggleWishlist, useWishlist } from "../../store";
 import { BsStarHalf } from "react-icons/bs";
 
 export function PageHero({ title, subtitle, eyebrow, image, tall = false, children }) {
@@ -100,4 +101,26 @@ export function useScrollTop(dep) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [dep]);
+}
+
+// Heart toggle for saving a destination, tour or hotel to the wishlist.
+export function SaveButton({ kind, id, name, overlay = false }) {
+  const wishlist = useWishlist();
+  const saved = isSaved(wishlist, kind, id);
+  return (
+    <button
+      type="button"
+      className={`save-btn${saved ? " is-saved" : ""}${overlay ? " save-btn-overlay" : ""}`}
+      aria-pressed={saved}
+      aria-label={saved ? `Remove ${name} from saved` : `Save ${name}`}
+      title={saved ? "Saved" : "Save"}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWishlist(kind, id);
+      }}
+    >
+      {saved ? <AiFillHeart size={18} /> : <AiOutlineHeart size={18} />}
+    </button>
+  );
 }

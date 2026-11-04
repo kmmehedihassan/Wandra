@@ -4,6 +4,17 @@ from django.conf import settings
 from django.db import models
 
 
+class Destination(models.Model):
+    """Destination ids match the frontend catalog; used to validate wishlist entries."""
+
+    id = models.PositiveIntegerField(primary_key=True)
+    name = models.CharField(max_length=120)
+    image = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Tour(models.Model):
     """Bookable tour. Ids match the frontend catalog (src/components/Database/data.js)."""
 
@@ -124,3 +135,22 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.rating}★ by {self.user} for {self.tour or self.hotel}'
+
+
+class WishlistItem(models.Model):
+    class Kind(models.TextChoices):
+        DESTINATION = 'destination', 'Destination'
+        TOUR = 'tour', 'Tour'
+        HOTEL = 'hotel', 'Hotel'
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist')
+    kind = models.CharField(max_length=12, choices=Kind.choices)
+    ref_id = models.PositiveIntegerField(help_text='Destination, tour or hotel id')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [models.UniqueConstraint(fields=['user', 'kind', 'ref_id'], name='one_wishlist_entry')]
+
+    def __str__(self):
+        return f'{self.user} saved {self.kind} {self.ref_id}'

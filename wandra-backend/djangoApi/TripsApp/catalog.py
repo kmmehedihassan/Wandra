@@ -5,8 +5,11 @@ from pathlib import Path
 CATALOG_PATH = Path(__file__).with_name('catalog.json')
 
 
-def sync_catalog(Tour, Hotel, RoomType):
+def sync_catalog(Tour, Hotel, RoomType, Destination=None):
     data = json.loads(CATALOG_PATH.read_text())
+    if Destination is not None:
+        for d in data.get('destinations', []):
+            Destination.objects.update_or_create(id=d['id'], defaults={'name': d['name'], 'image': d['image']})
     for t in data['tours']:
         Tour.objects.update_or_create(id=t['id'], defaults={'title': t['title'], 'price': t['price'], 'image': t['image']})
     for h in data['hotels']:

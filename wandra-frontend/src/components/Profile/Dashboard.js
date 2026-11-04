@@ -8,6 +8,8 @@ import ViewProfile from "./ViewProfile";
 import EditProfile from "./EditProfile";
 import MyBookings from "./MyBookings";
 import ChangePassword from "./ChangePassword";
+import SavedItems from "./SavedItems";
+import { AiOutlineHeart } from "react-icons/ai";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { EmptyState } from "../Layout/Shared";
 import { notify, openAuthModal, saveProfile, uploadImage, useProfile, useProfileLoaded, useUser } from "../../store";
@@ -18,6 +20,7 @@ const TABS = [
   { key: "profile", label: "My profile", Icon: CgProfile },
   { key: "edit", label: "Edit profile", Icon: BiEdit },
   { key: "bookings", label: "My bookings", Icon: FaStackOverflow },
+  { key: "saved", label: "Saved", Icon: AiOutlineHeart },
   { key: "password", label: "Password", Icon: RiLockPasswordLine },
 ];
 
@@ -115,6 +118,7 @@ export default function Dashboard() {
             </>
           )}
           {active === "bookings" && <MyBookings />}
+          {active === "saved" && <SavedItems />}
           {active === "password" && <ChangePassword />}
         </section>
       </div>

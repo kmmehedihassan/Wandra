@@ -67,7 +67,7 @@ export function notify(message, tone = "info") {
  * Guests: the cart is kept in localStorage and moved into the account at login.
  */
 const GUEST_CART = "Cart";
-const remote = { cart: null, bookings: null, profile: null };
+const remote = { cart: null, bookings: null, profile: null, wishlist: null };
 
 export function lineTotal(item) {
   if (item.total !== undefined && item.total !== null) return Number(item.total);
@@ -206,18 +206,20 @@ export function useSessionSync() {
     remote.cart = null;
     remote.bookings = null;
     remote.profile = null;
+    remote.wishlist = null;
     notifyStoreChanged();
     if (!username) return;
     let active = true;
     (async () => {
       try {
         await mergeGuestCart();
-        if (active) await Promise.all([refreshCart(), refreshBookings(), refreshProfile()]);
+        if (active) await Promise.all([refreshCart(), refreshBookings(), refreshProfile(), refreshWishlist()]);
       } catch (err) {
         if (active && err.status !== 401) {
           remote.cart = remote.cart || [];
           remote.bookings = remote.bookings || [];
           remote.profile = remote.profile || {};
+          remote.wishlist = remote.wishlist || [];
           notifyStoreChanged();
           notify(err.message, "error");
         }
@@ -349,4 +351,59 @@ export function useReviewSummary() {
     }
   }, []);
   return useStoreValue(getReviewSummary);
+}
+
+/* ---------- Wishlist (saved destinations, tours and hotels) ---------- */
+function getWishlist() {
+  return getUser() ? remote.wishlist || [] : [];
+}
+
+export function useWishlist() {
+  return useStoreValue(getWishlist);
+}
+
+function isWishlistLoaded() {
+  return !getUser() || remote.wishlist !== null;
+}
+
+export function useWishlistLoaded() {
+  return useStoreValue(isWishlistLoaded);
+}
+
+export async function refreshWishlist() {
+  if (!getUser()) return;
+  remote.wishlist = await apiFetch("/api/wishlist/");
+  notifyStoreChanged();
+}
+
+export function isSaved(wishlist, kind, refId) {
+  return wishlist.some((w) => w.kind === kind && w.refId === Number(refId));
+}
+
+// Save or unsave; updates immediately and rolls back if the server refuses.
+export async function toggleWishlist(kind, refId) {
+  if (!getUser()) {
+    openAuthModal("login");
+    return;
+  }
+  const id = Number(refId);
+  const before = remote.wishlist || [];
+  const saved = isSaved(before, kind, id);
+  remote.wishlist = saved
+    ? before.filter((w) => !(w.kind === kind && w.refId === id))
+    : [{ id: `pending-${kind}-${id}`, kind, refId: id, createdAt: new Date().toISOString() }, ...before];
+  notifyStoreChanged();
+  try {
+    if (saved) {
+      await apiFetch(`/api/wishlist/${kind}/${id}/`, { method: "DELETE" });
+    } else {
+      const item = await apiFetch("/api/wishlist/", { method: "POST", body: { kind, refId: id } });
+      remote.wishlist = (remote.wishlist || []).map((w) => (w.id === `pending-${kind}-${id}` ? item : w));
+      notifyStoreChanged();
+    }
+  } catch (err) {
+    remote.wishlist = before;
+    notifyStoreChanged();
+    notify(err.message, "error");
+  }
 }

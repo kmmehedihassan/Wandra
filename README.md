@@ -134,6 +134,8 @@ Uploads are stored in the database rather than on disk because hosts like Railwa
 | POST | `/api/reviews/` | `{tour or hotel, rating 1–5, text}`; only after a completed, non-cancelled trip; one per user (re-posting edits it) |
 | DELETE | `/api/reviews/<id>/` | own review (or staff) |
 | GET | `/api/reviews/summary/` | public — average and count for every reviewed tour and hotel |
+| GET / POST | `/api/wishlist/` | your saved items; POST `{kind: destination\|tour\|hotel, refId}` |
+| DELETE | `/api/wishlist/<kind>/<refId>/` | unsave |
 
 Checkout is a demo: card details are validated in the browser and never sent to the server.
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
-import { Stars } from "../../Layout/Shared";
+import { SaveButton, Stars } from "../../Layout/Shared";
 import { formatBDT, useReviewSummary } from "../../../store";
 import { ReviewBadge } from "../../Reviews/Reviews";
 
@@ -23,7 +23,10 @@ const SearchItem = ({ hotel }) => {
             <ReviewBadge summary={summary.hotels[hotel.id]} />
           </div>
         </div>
-        <span className="score" title="Guest rating">{hotel.ratings}</span>
+        <div className="chip-row" style={{ alignItems: "center", flexWrap: "nowrap" }}>
+          <span className="score" title="Guest rating">{hotel.ratings}</span>
+          <SaveButton kind="hotel" id={hotel.id} name={hotel.name} />
+        </div>
       </div>
       <div className="media-card-meta">
         <MdOutlinePlace /> {hotel.category} · {hotel.dist}

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import { BiTimeFive } from "react-icons/bi";
-import { Stars } from "../Layout/Shared";
+import { SaveButton, Stars } from "../Layout/Shared";
 import { formatBDT, useReviewSummary } from "../../store";
 import { ReviewBadge } from "../Reviews/Reviews";
 
@@ -18,7 +18,10 @@ const TourCard = ({ tour }) => {
         <h3 className="list-card-title">
           <Link to={`/tours/${tour.id}`}>{tour.title}</Link>
         </h3>
-        <span className="badge">{tour.category}</span>
+        <div className="chip-row" style={{ alignItems: "center", flexWrap: "nowrap" }}>
+          <span className="badge">{tour.category}</span>
+          <SaveButton kind="tour" id={tour.id} name={tour.title} />
+        </div>
       </div>
       <div className="media-card-meta">
         <MdOutlinePlace /> {tour.name}, {tour.location}

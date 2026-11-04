@@ -1,6 +1,6 @@
 from django.urls import path
 
-from TripsApp import reviews, views
+from TripsApp import reviews, views, wishlist
 
 urlpatterns = [
     path('cart/', views.cart, name='cart'),
@@ -13,4 +13,6 @@ urlpatterns = [
     path('reviews/', reviews.reviews, name='reviews'),
     path('reviews/summary/', reviews.review_summary, name='review-summary'),
     path('reviews/<int:pk>/', reviews.review_detail, name='review-detail'),
+    path('wishlist/', wishlist.wishlist, name='wishlist'),
+    path('wishlist/<str:kind>/<int:ref_id>/', wishlist.wishlist_item, name='wishlist-item'),
 ]

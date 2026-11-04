@@ -4,7 +4,7 @@ import { MdOutlinePlace } from "react-icons/md";
 import { BiUser } from "react-icons/bi";
 import { MdCheck, MdChildCare } from "react-icons/md";
 import Error from "../../pages/Error";
-import { PageHero, Gallery, Stars, Stepper } from "../Layout/Shared";
+import { PageHero, Gallery, SaveButton, Stars, Stepper } from "../Layout/Shared";
 import { getDestination, getHotel, hotelGallery, roomsForHotel } from "../Database/catalog";
 import { HOTEL_INVENTORY } from "../Database/SingleHotel";
 import Reviews, { ReviewBadge } from "../Reviews/Reviews";
@@ -121,6 +121,7 @@ const Hoteldescription = () => {
           </span>
           <span className="score">{hotel.ratings}</span>
           <ReviewBadge summary={summary.hotels[hotel.id]} className="on-dark" />
+          <SaveButton kind="hotel" id={hotel.id} name={hotel.name} />
         </div>
       </PageHero>
       <div className="container-w section">

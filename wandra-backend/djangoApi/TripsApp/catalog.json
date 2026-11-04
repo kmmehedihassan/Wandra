@@ -1,4 +1,66 @@
 {
+ "destinations": [
+  {
+   "id": 1,
+   "name": "St. Martin's Island",
+   "image": "/images/saintmartin.jpg"
+  },
+  {
+   "id": 2,
+   "name": "Sundarban",
+   "image": "/images/sundarban.jpg"
+  },
+  {
+   "id": 3,
+   "name": "Cox's Bazar",
+   "image": "/images/coxsbazar.jpg"
+  },
+  {
+   "id": 4,
+   "name": "Guthia Mosque",
+   "image": "/images/guthiamosque.jpg"
+  },
+  {
+   "id": 5,
+   "name": "Srimangal",
+   "image": "/images/srimangal.jpg"
+  },
+  {
+   "id": 6,
+   "name": "Tanguar Haor",
+   "image": "/images/tanguar.jpg"
+  },
+  {
+   "id": 7,
+   "name": "Kuakata",
+   "image": "/images/kuakata.jpg"
+  },
+  {
+   "id": 8,
+   "name": "Sajek Valley",
+   "image": "/images/sajek.jpg"
+  },
+  {
+   "id": 9,
+   "name": "Ahsan Manzil",
+   "image": "/images/ahsan.jpg"
+  },
+  {
+   "id": 10,
+   "name": "Amiakhum",
+   "image": "/images/amiakhum.jpg"
+  },
+  {
+   "id": 11,
+   "name": "Ratargul",
+   "image": "/images/ratargul.jpg"
+  },
+  {
+   "id": 12,
+   "name": "Nilgiri",
+   "image": "/images/nilgiri.jpg"
+  }
+ ],
  "tours": [
   {
    "id": 1,

@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import Accordion from "./Accordion";
 import Error from "../../pages/Error";
-import { PageHero, Gallery, Stars } from "../Layout/Shared";
+import { PageHero, Gallery, SaveButton, Stars } from "../Layout/Shared";
 import { faqFor, galleryFor, getDestination, hotelsForDestination, toursForDestination } from "../Database/catalog";
 import { formatBDT } from "../../store";
 import "./destination.css";
@@ -19,7 +19,12 @@ const DestinationDetail = () => {
 
   return (
     <>
-      <PageHero eyebrow={destination.region} title={destination.name} image={destination.heroImage} tall />
+      <PageHero eyebrow={destination.region} title={destination.name} image={destination.heroImage} tall>
+        <div className="hero-meta">
+          <SaveButton kind="destination" id={destination.id} name={destination.name} />
+          <span>Save this destination for later</span>
+        </div>
+      </PageHero>
       <div className="container-w section">
         <nav className="breadcrumb" aria-label="Breadcrumb">
           <Link to="/destinations">Destinations</Link> <span>/</span> {destination.name}

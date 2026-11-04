@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from TripsApp.models import Booking, CartItem, Hotel, Review, RoomType, Tour
+from TripsApp.models import Booking, CartItem, Destination, Hotel, Review, RoomType, Tour, WishlistItem
 
 
 @admin.register(Tour)
@@ -39,3 +39,12 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'kind', 'tour', 'hotel', 'rating', 'created_at')
     list_filter = ('kind', 'rating')
     search_fields = ('user__username', 'text')
+
+
+admin.site.register(Destination)
+
+
+@admin.register(WishlistItem)
+class WishlistItemAdmin(admin.ModelAdmin):
+    list_display = ('user', 'kind', 'ref_id', 'created_at')
+    list_filter = ('kind',)

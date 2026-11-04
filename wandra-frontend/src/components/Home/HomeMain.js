@@ -4,7 +4,7 @@ import { BiSearch } from "react-icons/bi";
 import { MdOutlinePlace, MdOutlineTour, MdOutlineHotel } from "react-icons/md";
 import { RiShieldCheckLine } from "react-icons/ri";
 import { sliderImage } from "./sliderImage";
-import { Stars } from "../Layout/Shared";
+import { SaveButton, Stars } from "../Layout/Shared";
 import { getDestinations, getTours } from "../Database/catalog";
 import { formatBDT } from "../../store";
 import "./home.css";
@@ -109,15 +109,18 @@ const Home = () => {
         </div>
         <div className="grid-cards">
           {destinations.map((d) => (
-            <Link key={d.id} to={`/destinations/${d.id}`} className="media-card">
-              <div className="media-card-img">
-                <img src={d.image} alt="" loading="lazy" />
-              </div>
-              <div className="media-card-body">
-                <h3 className="media-card-title">{d.name}</h3>
-                <span className="media-card-meta"><MdOutlinePlace /> {d.region}</span>
-              </div>
-            </Link>
+            <div key={d.id} className="card-wrap">
+              <Link to={`/destinations/${d.id}`} className="media-card">
+                <div className="media-card-img">
+                  <img src={d.image} alt="" loading="lazy" />
+                </div>
+                <div className="media-card-body">
+                  <h3 className="media-card-title">{d.name}</h3>
+                  <span className="media-card-meta"><MdOutlinePlace /> {d.region}</span>
+                </div>
+              </Link>
+              <SaveButton kind="destination" id={d.id} name={d.name} overlay />
+            </div>
           ))}
         </div>
       </section>
@@ -132,7 +135,8 @@ const Home = () => {
         </div>
         <div className="grid-cards">
           {tours.map((t) => (
-            <Link key={t.id} to={`/tours/${t.id}`} className="media-card">
+            <div key={t.id} className="card-wrap">
+            <Link to={`/tours/${t.id}`} className="media-card">
               <div className="media-card-img">
                 <img src={t.img} alt="" loading="lazy" />
               </div>
@@ -146,6 +150,8 @@ const Home = () => {
                 </div>
               </div>
             </Link>
+            <SaveButton kind="tour" id={t.id} name={t.title} overlay />
+            </div>
           ))}
         </div>
       </section>

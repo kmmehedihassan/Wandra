@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MdOutlinePlace } from "react-icons/md";
 import BookTour from "./BookTour";
 import Error from "../../pages/Error";
-import { PageHero, Gallery, Stars } from "../Layout/Shared";
+import { PageHero, Gallery, SaveButton, Stars } from "../Layout/Shared";
 import { galleryFor, getDestination, getTour } from "../Database/catalog";
 import Reviews, { ReviewBadge } from "../Reviews/Reviews";
 import { useReviewSummary } from "../../store";
@@ -24,6 +24,7 @@ const Description = () => {
           <span>
             <MdOutlinePlace /> {tour.name}, {tour.location}
           </span>
+          <SaveButton kind="tour" id={tour.id} name={tour.title} />
         </div>
       </PageHero>
       <div className="container-w section">

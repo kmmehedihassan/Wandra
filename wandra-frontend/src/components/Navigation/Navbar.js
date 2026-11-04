@@ -1,7 +1,7 @@
 import "./navbar.css";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useHistory, useLocation } from "react-router-dom";
-import { AiOutlineShopping } from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineShopping } from "react-icons/ai";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { CgProfile } from "react-icons/cg";
 import { MdLogout, MdEditNote } from "react-icons/md";
@@ -118,6 +118,9 @@ const Navbar = () => {
                     </button>
                     <button type="button" role="menuitem" onClick={() => goDashboard("bookings")}>
                       <FaStackOverflow /> My bookings
+                    </button>
+                    <button type="button" role="menuitem" onClick={() => goDashboard("saved")}>
+                      <AiOutlineHeart /> Saved
                     </button>
                     <button type="button" role="menuitem" onClick={() => history.push("/write")}>
                       <MdEditNote /> Write a post

@@ -27,6 +27,7 @@ const hotelOf = (roomId) => (roomId <= 3 ? 1 : Math.floor(roomId / 10));
 const titleCase = (s) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 const catalog = {
+  destinations: data.gridData.map((d) => ({ id: d.id, name: d.name, image: d.link })),
   tours: data.tourCardData.map((t) => ({ id: t.id, title: t.title, price: t.price, image: t.img })),
   hotels: data.hotel_list.map((h) => ({ id: h.id, name: h.name, price: h.price, image: h.src })),
   rooms: rooms.HotelRoomData.map((room) => {
@@ -45,4 +46,4 @@ const catalog = {
 };
 
 writeFileSync(out, JSON.stringify(catalog, null, 1) + "\n");
-console.log(`Wrote ${catalog.tours.length} tours, ${catalog.hotels.length} hotels, ${catalog.rooms.length} rooms to ${out}`);
+console.log(`Wrote ${catalog.destinations.length} destinations, ${catalog.tours.length} tours, ${catalog.hotels.length} hotels, ${catalog.rooms.length} rooms to ${out}`);
