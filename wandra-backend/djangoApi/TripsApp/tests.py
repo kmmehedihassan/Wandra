@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest import mock
 
 from django.contrib.auth.models import User
 from django.core import mail
@@ -7,7 +8,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from TripsApp.models import Booking, CartItem, RoomType, Tour
+from TripsApp.models import Booking, CartItem, Order, RoomType, Tour
 
 CONTACT = {'name': 'Alice', 'email': 'alice@example.com', 'phone': '+880 1711 000000'}
 
@@ -319,3 +320,139 @@ class WishlistTests(TripsTestCase):
         self.client.delete('/api/wishlist/hotel/2/')  # bob can't remove alice's entry
         self.login(self.alice)
         self.assertEqual(len(self.client.get('/api/wishlist/').data), 1)
+
+
+@override_settings(SSLCOMMERZ_STORE_ID='testbox', SSLCOMMERZ_STORE_PASSWORD='qwerty', SSLCOMMERZ_SANDBOX=True,
+                   FRONTEND_URL='https://wandra.example', EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class SSLCommerzTests(TripsTestCase):
+    BILLING = {'name': 'Alice Khan', 'phone': '+880 1711 000000', 'address': 'Road 5, Dhanmondi', 'city': 'Dhaka'}
+
+    def setUp(self):
+        super().setUp()
+        self.sessions = []
+        session_patch = mock.patch('TripsApp.payments._post_form', side_effect=self.fake_session)
+        self.validate = mock.patch('TripsApp.payments._get_json').start()
+        session_patch.start()
+        self.addCleanup(mock.patch.stopall)
+
+    def fake_session(self, url, data):
+        self.sessions.append((url, data))
+        return {'status': 'SUCCESS', 'GatewayPageURL': f"https://sandbox.sslcommerz.com/pay/{data['tran_id']}"}
+
+    def start(self):
+        self.add_hotel(rooms=2, checkin=1, checkout=3)
+        resp = self.client.post('/api/payments/start/', self.BILLING, format='json')
+        self.assertEqual(resp.status_code, 201, resp.data)
+        return Order.objects.get(reference=resp.data['order'])
+
+    def valid(self, order, **overrides):
+        data = {'status': 'VALID', 'tran_id': order.tran_id, 'val_id': 'VAL123', 'amount': f'{order.amount}.00',
+                'currency_type': 'BDT', 'bank_tran_id': 'BANK1', 'card_type': 'BKASH-BKash', 'risk_level': '0'}
+        data.update(overrides)
+        self.validate.return_value = data
+
+    def test_config_and_demo_checkout_blocked(self):
+        self.assertEqual(self.client.get('/api/payments/config/').data['provider'], 'sslcommerz')
+        self.add_hotel(rooms=1)
+        self.assertEqual(self.client.post('/api/checkout/').status_code, 403)  # can't skip paying
+
+    def test_start_creates_order_and_session(self):
+        order = self.start()
+        self.assertEqual(order.status, Order.Status.PENDING)
+        self.assertEqual(order.amount, 8000 * 2 * 2)
+        url, data = self.sessions[0]
+        self.assertEqual(url, 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php')
+        self.assertEqual((data['total_amount'], data['currency'], data['tran_id']), ('32000.00', 'BDT', order.tran_id))
+        self.assertTrue(data['success_url'].endswith('/api/payments/sslcommerz/success/'))
+        self.assertTrue(data['ipn_url'].endswith('/api/payments/sslcommerz/ipn/'))
+        self.assertEqual(CartItem.objects.filter(user=self.alice).count(), 1)  # cart kept until paid
+
+    def test_successful_payment_books_once(self):
+        order = self.start()
+        self.valid(order)
+        resp = self.client.post('/api/payments/sslcommerz/success/', {'tran_id': order.tran_id, 'val_id': 'VAL123'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp['Location'], f'https://wandra.example/cart?payment=success&order={order.reference}')
+        order.refresh_from_db()
+        self.assertEqual((order.status, order.card_type), (Order.Status.PAID, 'BKASH-BKash'))
+        self.assertEqual(Booking.objects.filter(order=order).count(), 1)
+        self.assertEqual(CartItem.objects.filter(user=self.alice).count(), 0)
+        self.assertEqual(len(mail.outbox), 1)
+        # IPN for the same payment arrives too: nothing is booked twice.
+        self.client.post('/api/payments/sslcommerz/ipn/', {'tran_id': order.tran_id, 'val_id': 'VAL123', 'status': 'VALID'})
+        self.assertEqual(Booking.objects.filter(order=order).count(), 1)
+        status_resp = self.client.get(f'/api/payments/orders/{order.reference}/')
+        self.assertEqual(status_resp.data['status'], 'paid')
+        self.assertEqual(len(status_resp.data['bookings']), 1)
+
+    def test_ipn_alone_books(self):
+        order = self.start()
+        self.valid(order)
+        self.client.credentials()  # SSLCOMMERZ calls without the user's token
+        resp = self.client.post('/api/payments/sslcommerz/ipn/', {'tran_id': order.tran_id, 'val_id': 'VAL123', 'status': 'VALID'})
+        self.assertEqual(resp.status_code, 200)
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.Status.PAID)
+
+    def test_forged_or_mismatched_payments_are_rejected(self):
+        for overrides in ({'status': 'INVALID_TRANSACTION'}, {'amount': '1.00'}, {'currency_type': 'USD'}, {'tran_id': 'OTHER'}):
+            order = self.start()
+            self.valid(order, **overrides)
+            resp = self.client.post('/api/payments/sslcommerz/success/', {'tran_id': order.tran_id, 'val_id': 'X'})
+            order.refresh_from_db()
+            self.assertEqual(order.status, Order.Status.FAILED, overrides)
+            self.assertIn('payment=failed', resp['Location'])
+            self.assertFalse(Booking.objects.filter(order=order).exists())
+            CartItem.objects.filter(user=self.alice).delete()
+
+    def test_validation_outage_keeps_order_pending(self):
+        import urllib.error
+        order = self.start()
+        self.validate.side_effect = urllib.error.URLError('down')
+        resp = self.client.post('/api/payments/sslcommerz/success/', {'tran_id': order.tran_id, 'val_id': 'VAL123'})
+        self.assertIn('payment=processing', resp['Location'])
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.Status.PENDING)
+
+    def test_sold_out_after_payment_needs_refund(self):
+        order = self.start()
+        self.room.quantity = 1  # someone else took the rooms meanwhile
+        self.room.save()
+        self.valid(order)
+        resp = self.client.post('/api/payments/sslcommerz/success/', {'tran_id': order.tran_id, 'val_id': 'VAL123'})
+        self.assertIn('payment=refund', resp['Location'])
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.Status.NEEDS_REFUND)
+        self.assertFalse(Booking.objects.filter(order=order).exists())
+
+    def test_fail_and_cancel(self):
+        order = self.start()
+        resp = self.client.post('/api/payments/sslcommerz/cancel/', {'tran_id': order.tran_id})
+        self.assertEqual(resp['Location'], 'https://wandra.example/cart?payment=cancelled')
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.Status.CANCELLED)
+        self.assertEqual(CartItem.objects.filter(user=self.alice).count(), 1)  # cart kept to try again
+        order2 = self.client.post('/api/payments/start/', self.BILLING, format='json').data['order']
+        self.client.post('/api/payments/sslcommerz/fail/', {'tran_id': Order.objects.get(reference=order2).tran_id})
+        self.assertEqual(Order.objects.get(reference=order2).status, Order.Status.FAILED)
+
+    def test_start_validation_and_gateway_errors(self):
+        self.assertEqual(self.client.post('/api/payments/start/', self.BILLING, format='json').status_code, 400)  # empty cart
+        self.add_hotel(rooms=1)
+        self.assertEqual(self.client.post('/api/payments/start/', {**self.BILLING, 'phone': 'x'}, format='json').status_code, 400)
+        with mock.patch('TripsApp.payments._post_form', return_value={'status': 'FAILED', 'failedreason': 'Store inactive'}):
+            resp = self.client.post('/api/payments/start/', self.BILLING, format='json')
+        self.assertEqual(resp.status_code, 502)
+        self.assertEqual(Order.objects.latest('created_at').status, Order.Status.FAILED)
+
+    def test_orders_are_private(self):
+        order = self.start()
+        self.login(self.make_user('bob'))
+        self.assertEqual(self.client.get(f'/api/payments/orders/{order.reference}/').status_code, 404)
+
+
+class DemoCheckoutTests(TripsTestCase):
+    def test_demo_checkout_used_without_credentials(self):
+        self.assertEqual(self.client.get('/api/payments/config/').data['provider'], 'demo')
+        self.add_hotel(rooms=1)
+        self.assertEqual(self.client.post('/api/checkout/').status_code, 201)

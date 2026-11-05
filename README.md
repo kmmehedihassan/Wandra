@@ -44,6 +44,37 @@ Set these variables on the backend service: `DEBUG=False`, `SECRET_KEY`, `ALLOWE
 Create an admin account once with `python manage.py createsuperuser` (Railway shell) and sign in at
 `/admin/`.
 
+## Payments (SSLCOMMERZ)
+
+Customers pay on SSLCOMMERZ's secure page with bKash, Nagad, Rocket or a card; card and wallet
+details never reach this server. Bookings are created only after the server re-checks the payment
+with SSLCOMMERZ's validation API (status, amount, currency, transaction id), and the IPN
+notification books the order even if the customer closes the tab.
+
+**Test for free (sandbox)**
+
+1. Register at https://developer.sslcommerz.com/registration/ — you get a sandbox store id and
+   password by email.
+2. Set on the backend: `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD` (leave
+   `SSLCOMMERZ_SANDBOX=True`). The cart now shows "Pay with SSLCOMMERZ" and a "Test mode" badge.
+3. Pay with SSLCOMMERZ's sandbox test cards or test mobile-banking numbers (listed in their
+   developer docs). No real money moves.
+
+**Go live:** apply for a live merchant account with SSLCOMMERZ (business documents required;
+they charge a percentage per transaction), then replace the two credentials with the live ones
+and set `SSLCOMMERZ_SANDBOX=False`. No code changes are needed.
+
+Without credentials the site uses the demo checkout (no real payment). Payments and their status
+(paid, failed, cancelled, or "needs refund" if something sold out while the customer was paying)
+are listed under **Trips → Orders** in the Django admin.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/payments/config/` | `{provider: sslcommerz\|demo, sandbox}` |
+| POST | `/api/payments/start/` | `{name, phone, address, city}` → `{url}` of the SSLCOMMERZ payment page |
+| GET | `/api/payments/orders/<reference>/` | your order's status and bookings |
+| POST | `/api/payments/sslcommerz/{success,fail,cancel,ipn}/` | called by SSLCOMMERZ |
+
 ## Email (password reset and booking confirmations)
 
 Password-reset, booking-confirmation and cancellation emails are sent with [Brevo](https://www.brevo.com) — free for 300 emails a day,

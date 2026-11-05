@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 
 from django.db import transaction
@@ -78,6 +79,39 @@ def cart_item(request, pk):
     return _cart_response(request.user)
 
 
+def book_cart_items(user, item_ids, order=None):
+    """Turn these cart lines into confirmed bookings, all or nothing.
+
+    Raises Unavailable if a line no longer exists or is sold out. Used by the
+    demo checkout and by SSLCOMMERZ once a payment is validated.
+    """
+    with transaction.atomic():
+        items = list(CartItem.objects.filter(user=user, id__in=item_ids).select_related(*LINE_RELATED))
+        if not items or len(items) != len(set(item_ids)):
+            raise Unavailable('Your cart changed during checkout.')
+        # Lock the rooms/tours being booked so two checkouts can't oversell them.
+        list(RoomType.objects.select_for_update().filter(id__in=[i.room_id for i in items if i.room_id]))
+        list(Tour.objects.select_for_update().filter(id__in=[i.tour_id for i in items if i.tour_id]))
+        # Validate every line, counting other lines of this cart for the same slot.
+        for item in items:
+            peers = sum(o.quantity for o in items if o.kind == item.kind and o.tour_id == item.tour_id
+                        and o.room_id == item.room_id and o.checkin == item.checkin and o.checkout == item.checkout)
+            validate_line(item.kind, tour=item.tour, room=item.room, quantity=peers,
+                          checkin=item.checkin, checkout=item.checkout)
+        reference = order.reference if order else uuid.uuid4()
+        Booking.objects.bulk_create([
+            Booking(
+                user=user, kind=item.kind, tour=item.tour, room=item.room, quantity=item.quantity,
+                checkin=item.checkin, checkout=item.checkout, contact_name=item.contact_name,
+                contact_email=item.contact_email, contact_phone=item.contact_phone,
+                unit_price_paid=item.unit_price, total=item.compute_total(), reference=reference, order=order,
+            )
+            for item in items
+        ])
+        CartItem.objects.filter(id__in=[i.id for i in items]).delete()
+    return list(Booking.objects.filter(user=user, reference=reference).select_related(*LINE_RELATED))
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def checkout(request):
@@ -85,41 +119,19 @@ def checkout(request):
 
     Payment is a demo: card details are validated in the browser and never sent here.
     """
-    with transaction.atomic():
-        items = list(CartItem.objects.filter(user=request.user).select_related(*LINE_RELATED))
-        if not items:
-            return Response({'detail': 'Your cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
-        # Lock the rooms/tours being booked so two checkouts can't oversell them.
-        list(RoomType.objects.select_for_update().filter(id__in=[i.room_id for i in items if i.room_id]))
-        list(Tour.objects.select_for_update().filter(id__in=[i.tour_id for i in items if i.tour_id]))
+    from TripsApp.payments import payments_enabled
 
-        # Validate every line, counting other lines of this cart for the same slot.
-        for item in items:
-            peers = sum(o.quantity for o in items if o.kind == item.kind and o.tour_id == item.tour_id
-                        and o.room_id == item.room_id and o.checkin == item.checkin and o.checkout == item.checkout)
-            try:
-                validate_line(item.kind, tour=item.tour, room=item.room, quantity=peers,
-                              checkin=item.checkin, checkout=item.checkout)
-            except Unavailable as exc:
-                return Response({'detail': str(exc), 'item': item.id}, status=status.HTTP_409_CONFLICT)
-
-        reference = None
-        bookings = []
-        for item in items:
-            booking = Booking(
-                user=request.user, kind=item.kind, tour=item.tour, room=item.room, quantity=item.quantity,
-                checkin=item.checkin, checkout=item.checkout, contact_name=item.contact_name,
-                contact_email=item.contact_email, contact_phone=item.contact_phone,
-                unit_price_paid=item.unit_price, total=item.compute_total(),
-            )
-            if reference is None:
-                reference = booking.reference
-            booking.reference = reference
-            bookings.append(booking)
-        Booking.objects.bulk_create(bookings)
-        CartItem.objects.filter(id__in=[i.id for i in items]).delete()
-
-    created = list(Booking.objects.filter(user=request.user, reference=reference).select_related(*LINE_RELATED))
+    if payments_enabled():
+        return Response({'detail': 'Please pay through SSLCOMMERZ to complete your booking.'},
+                        status=status.HTTP_403_FORBIDDEN)
+    items = list(CartItem.objects.filter(user=request.user).select_related(*LINE_RELATED))
+    if not items:
+        return Response({'detail': 'Your cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        created = book_cart_items(request.user, [i.id for i in items])
+    except Unavailable as exc:
+        return Response({'detail': str(exc)}, status=status.HTTP_409_CONFLICT)
+    reference = created[0].reference
     send_booking_confirmation(request.user, created)
     return Response({
         'reference': str(reference),

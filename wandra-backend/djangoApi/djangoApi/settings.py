@@ -149,6 +149,14 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Wandra <no-reply@exam
 FRONTEND_URL = config('FRONTEND_URL', default=CORS_ALLOWED_ORIGINS[0] if CORS_ALLOWED_ORIGINS else 'http://localhost:3000')
 PASSWORD_RESET_TIMEOUT = config('PASSWORD_RESET_TIMEOUT', default=3600, cast=int)  # seconds
 
+# Payments through SSLCOMMERZ (bKash, Nagad, cards). Free sandbox credentials:
+# https://developer.sslcommerz.com/registration/ . Without a store id the
+# demo checkout is used instead.
+SSLCOMMERZ_STORE_ID = config('SSLCOMMERZ_STORE_ID', default='')
+SSLCOMMERZ_STORE_PASSWORD = config('SSLCOMMERZ_STORE_PASSWORD', default='')
+SSLCOMMERZ_SANDBOX = config('SSLCOMMERZ_SANDBOX', default=True, cast=bool)
+SSLCOMMERZ_API_BASE = config('SSLCOMMERZ_API_BASE', default='')  # testing only; leave empty
+
 # Behind Railway's proxy, so absolute URLs (e.g. uploaded image links) use https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 

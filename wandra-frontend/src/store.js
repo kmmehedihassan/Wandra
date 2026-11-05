@@ -431,3 +431,29 @@ export async function toggleWishlist(kind, refId) {
     notify(err.message, "error");
   }
 }
+
+/* ---------- Payment provider ---------- */
+let paymentConfig = null;
+let paymentConfigRequested = false;
+
+function getPaymentConfig() {
+  return paymentConfig;
+}
+
+// { provider: "sslcommerz" | "demo", sandbox } once loaded, else null.
+export function usePaymentConfig() {
+  useEffect(() => {
+    if (paymentConfigRequested) return;
+    paymentConfigRequested = true;
+    apiFetch("/api/payments/config/")
+      .then((data) => {
+        paymentConfig = data;
+        notifyStoreChanged();
+      })
+      .catch(() => {
+        paymentConfig = { provider: "demo", sandbox: true };
+        notifyStoreChanged();
+      });
+  }, []);
+  return useStoreValue(getPaymentConfig);
+}

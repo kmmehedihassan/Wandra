@@ -95,12 +95,48 @@ class CartItem(TripLine):
     pass
 
 
+class Order(models.Model):
+    """One payment attempt for a cart (SSLCOMMERZ). Bookings are created only once it's paid."""
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Waiting for payment'
+        PAID = 'paid', 'Paid and booked'
+        FAILED = 'failed', 'Payment failed'
+        CANCELLED = 'cancelled', 'Payment cancelled'
+        NEEDS_REFUND = 'needs_refund', 'Paid but could not be booked (refund needed)'
+
+    reference = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    tran_id = models.CharField(max_length=40, unique=True, help_text='Transaction id sent to SSLCOMMERZ')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='orders')
+    amount = models.PositiveIntegerField(help_text='Total in BDT')
+    cart_item_ids = models.JSONField(default=list, help_text='Cart lines this payment covers')
+    status = models.CharField(max_length=14, choices=Status.choices, default=Status.PENDING)
+    billing_name = models.CharField(max_length=100)
+    billing_phone = models.CharField(max_length=20)
+    billing_address = models.CharField(max_length=200)
+    billing_city = models.CharField(max_length=60)
+    val_id = models.CharField(max_length=80, blank=True)
+    bank_tran_id = models.CharField(max_length=80, blank=True)
+    card_type = models.CharField(max_length=60, blank=True, help_text='e.g. BKASH-BKash, VISA-Dutch Bangla')
+    gateway_data = models.JSONField(default=dict, blank=True, help_text='Validated response from SSLCOMMERZ')
+    note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.tran_id} ({self.get_status_display()}, ৳{self.amount:,})'
+
+
 class Booking(TripLine):
     class Status(models.TextChoices):
         CONFIRMED = 'confirmed', 'Confirmed'
         CANCELLED = 'cancelled', 'Cancelled'
 
     reference = models.UUIDField(default=uuid.uuid4, editable=False, help_text='Groups the lines of one checkout')
+    order = models.ForeignKey(Order, null=True, blank=True, on_delete=models.SET_NULL, related_name='bookings')
     unit_price_paid = models.PositiveIntegerField()
     total = models.PositiveIntegerField()
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.CONFIRMED)

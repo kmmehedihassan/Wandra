@@ -1404,3 +1404,21 @@ dd a,
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+
+.alert-info {
+  background: var(--brand-soft);
+  color: var(--ink-2);
+}
+
+.checkout-title {
+  font-size: 1rem;
+  margin: 0 0 12px;
+}
+
+.pay-note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiCalendar, BiUser } from "react-icons/bi";
 import { MdOutlineHotel, MdOutlineTour } from "react-icons/md";
 import CreditCardForm from "./CreditCardForm";
+import SSLCommerzCheckout from "./SSLCommerzCheckout";
+import { apiFetch } from "../../api";
 import { EmptyState, Img } from "../Layout/Shared";
-import { cartTotal, formatBDT, formatDate, lineTotal, openAuthModal, removeFromCart, useCart, useCartLoaded, useUser } from "../../store";
+import { cartTotal, formatBDT, formatDate, lineTotal, openAuthModal, refreshBookings, refreshCart, removeFromCart, useCart, useCartLoaded, usePaymentConfig, useUser } from "../../store";
 import "./cart.css";
 
 export function BookingSummary({ item }) {
@@ -41,10 +43,62 @@ const Cart = () => {
   const cart = useCart();
   const user = useUser();
   const loaded = useCartLoaded();
+  const config = usePaymentConfig();
+  const location = useLocation();
+  const history = useHistory();
   const [paidTotal, setPaidTotal] = useState(null);
+  const [paidWith, setPaidWith] = useState("");
   const [removing, setRemoving] = useState(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(null); // { tone, text } after returning from SSLCOMMERZ
   const total = cartTotal(cart);
+
+  // Coming back from SSLCOMMERZ: /cart?payment=success|processing|failed|cancelled|refund|error&order=…
+  const params = new URLSearchParams(location.search);
+  const payment = params.get("payment");
+  const orderRef = params.get("order");
+  useEffect(() => {
+    if (!payment || !user) return undefined;
+    let active = true;
+    let timer;
+    const clearQuery = () => history.replace("/cart");
+    const MESSAGES = {
+      failed: { tone: "error", text: "The payment didn't go through and you weren't charged. Your cart is still here — please try again." },
+      cancelled: { tone: "info", text: "You cancelled the payment. Your cart is still here whenever you're ready." },
+      refund: { tone: "error", text: "We received your payment, but some items sold out in the meantime. We'll refund you in full — no action needed. Our team will contact you." },
+      error: { tone: "error", text: "Something went wrong with the payment. If you were charged, contact us with your phone number and we'll sort it out." },
+    };
+    const check = async (attempt = 0) => {
+      try {
+        const order = await apiFetch(`/api/payments/orders/${orderRef}/`);
+        if (!active) return;
+        if (order.status === "paid") {
+          await Promise.all([refreshCart(), refreshBookings()]);
+          setPaidWith(order.paymentMethod);
+          setPaidTotal(order.amount);
+          clearQuery();
+        } else if (order.status === "pending" && attempt < 10) {
+          setNotice({ tone: "info", text: "Confirming your payment with SSLCOMMERZ…" });
+          timer = setTimeout(() => check(attempt + 1), 3000);
+        } else {
+          setNotice(MESSAGES[order.status === "needs_refund" ? "refund" : order.status === "pending" ? "error" : "failed"]);
+          clearQuery();
+        }
+      } catch (err) {
+        if (active) setNotice(MESSAGES.error);
+      }
+    };
+    if ((payment === "success" || payment === "processing") && orderRef) check();
+    else {
+      setNotice(MESSAGES[payment] || MESSAGES.error);
+      refreshCart().catch(() => {});
+      clearQuery();
+    }
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [payment, orderRef, user, history]);
 
   const handleRemove = async (id) => {
     setRemoving(id);
@@ -65,7 +119,7 @@ const Cart = () => {
           <span className="eyebrow">Payment received</span>
           <h1>You're all set! 🎉</h1>
           <p className="muted">
-            We received {formatBDT(paidTotal)} and confirmed your booking. A confirmation email is on its way, and the details are in your dashboard.
+            We received {formatBDT(paidTotal)}{paidWith ? ` (${paidWith.split("-")[0]})` : ""} and confirmed your booking. A confirmation email is on its way, and the details are in your dashboard.
           </p>
           <div className="chip-row" style={{ justifyContent: "center" }}>
             <Link to="/dashboard?tab=bookings" className="btn btn-primary">View my bookings</Link>
@@ -83,6 +137,11 @@ const Cart = () => {
         {!loaded ? "Loading your cart…" : cart.length === 0 ? "Nothing here yet." : `${cart.length} item${cart.length > 1 ? "s" : ""} ready to book.`}
       </p>
       {error && <div className="alert alert-error mt-2" role="alert">{error}</div>}
+      {notice && (
+        <div className={`alert ${notice.tone === "error" ? "alert-error" : "alert-info"} mt-2`} role={notice.tone === "error" ? "alert" : "status"}>
+          {notice.text}
+        </div>
+      )}
 
       {!loaded ? (
         <div className="mt-3">
@@ -126,7 +185,13 @@ const Cart = () => {
               </div>
               <div className="mt-3">
                 {user ? (
-                  <CreditCardForm cart={cart} onPaid={setPaidTotal} />
+                  config === null ? (
+                    <div className="skeleton" />
+                  ) : config.provider === "sslcommerz" ? (
+                    <SSLCommerzCheckout cart={cart} sandbox={config.sandbox} />
+                  ) : (
+                    <CreditCardForm cart={cart} onPaid={setPaidTotal} />
+                  )
                 ) : (
                   <div className="alert alert-error" style={{ background: "var(--brand-soft)", color: "var(--ink-2)" }}>
                     <p className="mb-0">Log in to complete your booking. Your cart will be kept.</p>
