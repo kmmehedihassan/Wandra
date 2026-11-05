@@ -258,3 +258,32 @@ class BrevoBackendTests(AuthTestCase):
         self.assertEqual(captured['body']['sender'], {'email': 'hello@wandra.example', 'name': 'Wandra'})
         self.assertEqual(captured['body']['to'], [{'email': 'alice@example.com', 'name': 'Alice'}])
         self.assertEqual(captured['body']['htmlContent'], '<p>HTML</p>')
+
+
+class EnsureAdminTests(AuthTestCase):
+    def run_command(self, **env):
+        from io import StringIO
+        from django.core.management import call_command
+        with mock.patch.dict('os.environ', env, clear=False):
+            out = StringIO()
+            call_command('ensure_admin', stdout=out, stderr=out)
+            return out.getvalue()
+
+    def test_creates_once_and_never_overwrites(self):
+        env = {'DJANGO_SUPERUSER_USERNAME': 'boss', 'DJANGO_SUPERUSER_EMAIL': 'boss@example.com',
+               'DJANGO_SUPERUSER_PASSWORD': STRONG_PASSWORD}
+        self.assertIn('created', self.run_command(**env))
+        user = User.objects.get(username='boss')
+        self.assertTrue(user.is_superuser and user.is_staff and user.check_password(STRONG_PASSWORD))
+        self.assertIn('already exists', self.run_command(**{**env, 'DJANGO_SUPERUSER_PASSWORD': 'Other-Pass-2030'}))
+        user.refresh_from_db()
+        self.assertTrue(user.check_password(STRONG_PASSWORD))
+
+    def test_skips_without_variables_or_weak_password(self):
+        with mock.patch.dict('os.environ', {}, clear=True):
+            from io import StringIO
+            from django.core.management import call_command
+            out = StringIO(); call_command('ensure_admin', stdout=out)
+        self.assertIn('skipping', out.getvalue())
+        self.assertIn('rejected', self.run_command(DJANGO_SUPERUSER_USERNAME='boss', DJANGO_SUPERUSER_PASSWORD='123'))
+        self.assertFalse(User.objects.filter(username='boss').exists())

@@ -33,6 +33,8 @@ npm start                     # http://localhost:3000
 
 ## Deploying (Railway)
 
+**Step-by-step, browser-only guide: [DEPLOY.md](DEPLOY.md).**
+
 The backend's `Procfile` runs `migrate` and `collectstatic` before starting gunicorn, so a deploy
 applies database changes automatically. Python is pinned in `wandra-backend/djangoApi/.python-version`.
 
@@ -41,8 +43,8 @@ Set these variables on the backend service: `DEBUG=False`, `SECRET_KEY`, `ALLOWE
 (added automatically when you attach a Railway Postgres database). On the frontend, set
 `REACT_APP_API_URL` to the backend URL before building.
 
-Create an admin account once with `python manage.py createsuperuser` (Railway shell) and sign in at
-`/admin/`.
+Set `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` and the admin
+account is created on the next start (`ensure_admin`, never overwritten); sign in at `/admin/`.
 
 ## Payments (SSLCOMMERZ)
 
