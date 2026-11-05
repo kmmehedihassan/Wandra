@@ -16,6 +16,10 @@ if not SECRET_KEY:
     else:
         raise ImproperlyConfigured('SECRET_KEY environment variable is required when DEBUG is False.')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# Hosting platforms tell the app its public domain; allow it automatically.
+for _platform_host in (config('RENDER_EXTERNAL_HOSTNAME', default=''), config('RAILWAY_PUBLIC_DOMAIN', default='')):
+    if _platform_host and _platform_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_platform_host)
 
 # Origins allowed to POST forms (the Django admin) over HTTPS. Defaults to the
 # non-local ALLOWED_HOSTS, e.g. https://wandra.up.railway.app.

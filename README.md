@@ -33,7 +33,7 @@ npm start                     # http://localhost:3000
 
 ## Deploying (Railway)
 
-**Step-by-step, browser-only guide: [DEPLOY.md](DEPLOY.md).**
+**Step-by-step, browser-only guide: [DEPLOY.md](DEPLOY.md)** — free (Neon + Render + Cloudflare Pages) or Railway.
 
 The backend's `Procfile` runs `migrate` and `collectstatic` before starting gunicorn, so a deploy
 applies database changes automatically. Python is pinned in `wandra-backend/djangoApi/.python-version`.
